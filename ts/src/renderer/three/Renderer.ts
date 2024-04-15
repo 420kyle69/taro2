@@ -31,7 +31,6 @@ namespace Renderer {
 			private raycastIntervalSeconds = 0.1;
 			private timeSinceLastRaycast = 0;
 
-			//private regionTool = false;
 			private regionDrawStart: { x: number; y: number } = { x: 0, y: 0 };
 
 			private constructor() {

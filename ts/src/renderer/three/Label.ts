@@ -2,10 +2,10 @@ namespace Renderer {
 	export namespace Three {
 		export class Label extends Node {
 			offset = new THREE.Vector2();
+			size = new THREE.Vector2();
 
 			private sprite: THREE.Sprite;
 			private scaleScalar = 1;
-			public size = new THREE.Vector2();
 			private textSize = new THREE.Vector2();
 			private center = new THREE.Vector2(0.5, 0.5);
 			private upscaleFactor = 10; // Makes the text more crisp when zoomed in

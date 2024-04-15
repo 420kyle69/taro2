@@ -479,6 +479,7 @@ namespace Renderer {
 			}
 
 			private onMouseDown(event: MouseEvent) {
+				//A camera should not have knowledge of "tools", but rather outside code
 				if (taro.developerMode.regionTool) {
 					this.controls.enablePan = false;
 					this.controls.enableRotate = false;
