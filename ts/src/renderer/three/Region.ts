@@ -5,6 +5,7 @@ namespace Renderer {
 			mesh: THREE.Mesh;
 			stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number };
 			devModeOnly: boolean;
+			hud = new THREE.Group();
 			label = new Label({ renderOnTop: true });
 
 			constructor(
@@ -13,14 +14,17 @@ namespace Renderer {
 				public taroEntity?: TaroEntityPhysics
 			) {
 				super();
-				const stats = (this.stats = taroEntity._stats.default);
+
+				this.add(this.hud);
+
 				const label = this.label;
 				label.visible = false;
 				label.update({ text: taroEntity._stats.id });
-				this.add(label);
+				label.position.set(Utils.pixelToWorld(label.width) * 0.5, 0, Utils.pixelToWorld(label.height) * 0.5);
+				this.hud.add(label);
+
+				const stats = (this.stats = taroEntity._stats.default);
 				this.name = this.taroEntity._stats.id;
-				const renderer = Three.instance();
-				this.setGuiScale(1 / renderer.camera.zoom);
 
 				const color = stats.inside ? Number(`0x${stats.inside.substring(1)}`) : 0x000000;
 
@@ -29,7 +33,7 @@ namespace Renderer {
 				const width = Utils.pixelToWorld(stats.width);
 				const height = Utils.pixelToWorld(stats.height);
 
-				label.position.set(x + Utils.pixelToWorld(label.width) / 2, 3, y + Utils.pixelToWorld(label.height / 2));
+				this.hud.position.set(x, 3, y);
 				const geometry = new THREE.BoxGeometry(1, 3, 1);
 				let gameObject = this.gameObject;
 
@@ -83,7 +87,7 @@ namespace Renderer {
 							);
 							gameObject.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
 						}
-						label.position.set(x + Utils.pixelToWorld(label.width / 2), 3, y + Utils.pixelToWorld(label.height / 2));
+						this.hud.position.set(x, 3, y);
 					},
 					this
 				);
@@ -102,10 +106,6 @@ namespace Renderer {
 			updateLabel(name: string) {
 				const label = this.label;
 				label.update({ text: name });
-			}
-
-			setGuiScale(scale: number) {
-				this.label.setScale(scale);
 			}
 		}
 	}

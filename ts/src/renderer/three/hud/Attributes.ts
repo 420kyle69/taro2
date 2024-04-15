@@ -11,8 +11,10 @@ namespace Renderer {
 			}
 
 			clear() {
-				for (const child of this.children) {
-					(child as Node).destroy();
+				for (const child of this.children as Node[]) {
+					if (child.isNode) {
+						child.destroy();
+					}
 				}
 
 				super.clear();

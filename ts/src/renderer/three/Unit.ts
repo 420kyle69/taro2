@@ -3,20 +3,18 @@ namespace Renderer {
 		export class Unit extends AnimatedSprite {
 			// TODO: Create separate class for units and items/projectiles. Only
 			// units need labels.
-			label = new Label({ text: '', color: 'white', bold: false, renderOnTop: true });
 
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },
 				offset: { x: 0, y: 0, z: 0 },
 			};
-			hidden = false;
 
-			private hud = new THREE.Group();
+			hud = new THREE.Group();
+
+			private label = new Label({ text: '', color: 'white', bold: false, renderOnTop: true });
 			private attributes = new Attributes();
-			private guiScale = 1;
 			private chat: ChatBubble;
-			private labelVisible;
 
 			constructor(
 				public taroId: string,
@@ -27,7 +25,6 @@ namespace Renderer {
 				super(tex);
 
 				this.label.visible = false;
-				this.labelVisible = this.label.visible;
 
 				this.add(this.hud);
 				this.hud.add(this.label);
@@ -41,7 +38,7 @@ namespace Renderer {
 				let tex = textureRepository.get(taroEntity._stats.cellSheet.url);
 				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, tex.clone(), taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
-				entity.setGuiScale(1 / renderer.camera.zoom);
+				entity.hud.scale.setScalar(1 / renderer.camera.zoom);
 
 				if (taroEntity._stats.cameraPointerLock) {
 					entity.cameraConfig.pointerLock = taroEntity._stats.cameraPointerLock;
@@ -61,8 +58,8 @@ namespace Renderer {
 				taroEntity.on('scale', (data: { x: number; y: number }) => entity.scale.set(data.x, 1, data.y), this);
 				taroEntity.on('show', () => (entity.visible = true), this);
 				taroEntity.on('hide', () => (entity.visible = false), this);
-				taroEntity.on('show-label', () => (entity.labelVisible = entity.label.visible = true));
-				taroEntity.on('hide-label', () => (entity.labelVisible = entity.label.visible = false));
+				taroEntity.on('show-label', () => (entity.label.visible = true));
+				taroEntity.on('hide-label', () => (entity.label.visible = false));
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
 				taroEntity.on('update-attribute', (data) => (entity as Unit).attributes.update(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
@@ -94,7 +91,6 @@ namespace Renderer {
 
 				taroEntity.on('update-label', (data) => {
 					entity.label.visible = true;
-					entity.labelVisible = true;
 					entity.label.update({ text: data.text, color: data.color, bold: data.bold });
 				});
 
@@ -144,38 +140,6 @@ namespace Renderer {
 				}
 			}
 
-			hasVisibleLabel() {
-				return this.labelVisible && this.label.text.length > 0;
-			}
-
-			setHidden(hidden: boolean) {
-				if (this.hidden != hidden) {
-					const fadeAnimation = (from: number, to: number, onComplete = () => {}) => {
-						new TWEEN.Tween({ opacity: from })
-							.to({ opacity: to }, 100)
-							.onUpdate(({ opacity }) => {
-								this.label.setOpacity(opacity);
-								this.attributes.setOpacity(opacity);
-							})
-							.onComplete(onComplete)
-							.start();
-					};
-
-					if (hidden) {
-						fadeAnimation(1, 0, () => {
-							this.label.visible = false;
-							this.attributes.visible = false;
-						});
-					} else {
-						this.label.visible = this.labelVisible;
-						this.attributes.visible = true;
-						fadeAnimation(0, 1);
-					}
-				}
-
-				this.hidden = hidden;
-			}
-
 			renderChat(text: string): void {
 				if (this.chat) {
 					this.chat.update({ text });
@@ -209,9 +173,26 @@ namespace Renderer {
 				this.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 			}
 
-			setGuiScale(scale: number) {
-				this.guiScale = scale;
-				this.hud.scale.setScalar(this.guiScale);
+			showHud(visible: boolean) {
+				if (visible != this.hud.visible) {
+					const fadeAnimation = (from: number, to: number, onComplete = () => {}) => {
+						new TWEEN.Tween({ opacity: from })
+							.to({ opacity: to }, 100)
+							.onUpdate(({ opacity }) => {
+								this.label.setOpacity(opacity);
+								this.attributes.setOpacity(opacity);
+							})
+							.onComplete(onComplete)
+							.start();
+					};
+
+					if (visible) {
+						this.hud.visible = true;
+						fadeAnimation(0, 1);
+					} else {
+						fadeAnimation(1, 0, () => (this.hud.visible = false));
+					}
+				}
 			}
 		}
 	}
