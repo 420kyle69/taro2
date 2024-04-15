@@ -1,7 +1,10 @@
 namespace Renderer {
 	export namespace Three {
 		export class Unit extends AnimatedSprite {
-			label = new Label('', 'white', false, true);
+			// TODO: Create separate class for units and items/projectiles. Only
+			// units need labels.
+			label = new Label({ text: '', color: 'white', bold: false, renderOnTop: true });
+
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },
@@ -9,8 +12,9 @@ namespace Renderer {
 			};
 			hidden = false;
 
+			private hud = new THREE.Group();
+			private attributes = new Attributes();
 			private guiScale = 1;
-			private attributeBars = new THREE.Group();
 			private chat: ChatBubble;
 			private labelVisible;
 
@@ -24,9 +28,10 @@ namespace Renderer {
 
 				this.label.visible = false;
 				this.labelVisible = this.label.visible;
-				this.add(this.label);
 
-				this.add(this.attributeBars);
+				this.add(this.hud);
+				this.hud.add(this.label);
+				this.hud.add(this.attributes);
 			}
 
 			static create(taroEntity: TaroEntityPhysics) {
@@ -59,7 +64,7 @@ namespace Renderer {
 				taroEntity.on('show-label', () => (entity.labelVisible = entity.label.visible = true));
 				taroEntity.on('hide-label', () => (entity.labelVisible = entity.label.visible = false));
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
-				taroEntity.on('update-attribute', (data) => (entity as Unit).updateAttribute(data));
+				taroEntity.on('update-attribute', (data) => (entity as Unit).attributes.update(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
 				taroEntity.on('layer', (layer) => entity.setLayer(layer));
 				taroEntity.on('depth', (depth) => entity.setDepth(depth));
@@ -72,11 +77,6 @@ namespace Renderer {
 						entity.position.x = Utils.pixelToWorld(data.x);
 						entity.position.z = Utils.pixelToWorld(data.y);
 
-						// let angle = -data.rotation;
-						// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {
-						// 	// Might be able to delete this once units rotate with camera yaw.
-						// 	angle -= this.camera.controls.getAzimuthalAngle();
-						// }
 						entity.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;
 						entity.setFlip(flip % 2 === 1, flip > 1);
@@ -95,7 +95,7 @@ namespace Renderer {
 				taroEntity.on('update-label', (data) => {
 					entity.label.visible = true;
 					entity.labelVisible = true;
-					entity.label.update(data.text, data.color, data.bold);
+					entity.label.update({ text: data.text, color: data.color, bold: data.bold });
 				});
 
 				taroEntity.on('play-animation', (id) => {
@@ -155,9 +155,7 @@ namespace Renderer {
 							.to({ opacity: to }, 100)
 							.onUpdate(({ opacity }) => {
 								this.label.setOpacity(opacity);
-								for (const bar of this.attributeBars.children) {
-									(bar as AttributeBar).setOpacity(opacity);
-								}
+								this.attributes.setOpacity(opacity);
 							})
 							.onComplete(onComplete)
 							.start();
@@ -166,11 +164,11 @@ namespace Renderer {
 					if (hidden) {
 						fadeAnimation(1, 0, () => {
 							this.label.visible = false;
-							this.attributeBars.visible = false;
+							this.attributes.visible = false;
 						});
 					} else {
 						this.label.visible = this.labelVisible;
-						this.attributeBars.visible = true;
+						this.attributes.visible = true;
 						fadeAnimation(0, 1);
 					}
 				}
@@ -180,101 +178,40 @@ namespace Renderer {
 
 			renderChat(text: string): void {
 				if (this.chat) {
-					this.chat.update(text);
+					this.chat.update({ text });
 				} else {
-					this.chat = new ChatBubble(text);
-					this.chat.setScale(this.guiScale);
-					const textHeight = this.label.getTextSizeInPixels().height;
-					this.chat.setOffset(
-						new THREE.Vector2(0, this.getSizeInPixels().height * 0.5 + textHeight * 4),
-						new THREE.Vector2(0.5, 0)
-					);
-					this.add(this.chat);
+					this.chat = new ChatBubble({ text });
+					const labelCenter = this.label.getCenter();
+					const labelOffset = this.label.height * labelCenter.y;
+					const chatOffset = (labelOffset + this.label.height) / this.chat.height;
+					this.chat.setCenter(0.5, 1 + chatOffset);
+					this.hud.add(this.chat);
 				}
 			}
 
+			// NOTE: This whole function seems off to me. What should it being
+			// exactly? Clearly it's not a render function. Dive a little deeper
+			// into this when you have time.
 			renderAttributes(data) {
-				this.attributeBars.remove(...this.attributeBars.children);
-				data.attrs.forEach((attributeData) => this.attributeBars.add(this.createAttributeBar(attributeData)));
-			}
+				this.attributes.clear();
+				this.attributes.addAttributes(data);
 
-			updateAttribute(data: { attr: AttributeData; shouldRender: boolean }) {
-				let barToUpdate: AttributeBar;
-
-				// Refactor attributeBars into map (name -> bar)
-				for (const bar of this.attributeBars.children) {
-					if (bar.name === data.attr.type) {
-						barToUpdate = bar as AttributeBar;
-						break;
-					}
-				}
-
-				if (!data.shouldRender) {
-					if (barToUpdate) {
-						barToUpdate.visible = data.shouldRender;
-					}
-
-					return;
-				}
-
-				if (barToUpdate) {
-					barToUpdate.update(data.attr);
-				} else {
-					this.attributeBars.add(this.createAttributeBar(data.attr));
-				}
+				const size = this.getSizeInPixels();
+				const halfHeight = size.height * 0.5;
+				this.attributes.position.z = Utils.pixelToWorld(halfHeight);
 			}
 
 			setScale(sx: number, sy: number) {
 				super.setScale(sx, sy);
 
 				const size = this.getSizeInPixels();
-				const halfHeight = size.height * 0.5;
-
-				this.label.setOffset(new THREE.Vector2(0, halfHeight), new THREE.Vector2(0.5, -1));
-
-				for (const [idx, bar] of this.attributeBars.children.entries()) {
-					const height = (bar as AttributeBar).height;
-					const yOffset = idx * height * 1.1;
-					(bar as AttributeBar).setOffset(
-						new THREE.Vector2(
-							0,
-							// NOTE(nick): Mostly taken from the Phaser renderer and trial and error.
-							-(halfHeight + height * (1 / 1.1) + 16 * this.guiScale + yOffset)
-						)
-					),
-						new THREE.Vector2(0.5, 1);
-				}
+				const unitHeightInLabelHeightUnits = size.height / this.label.height;
+				this.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 			}
 
 			setGuiScale(scale: number) {
 				this.guiScale = scale;
-
-				this.label.setScale(scale);
-
-				for (const bar of this.attributeBars.children) {
-					(bar as AttributeBar).setScale(scale);
-				}
-
-				if (this.chat) {
-					this.chat.setScale(scale);
-				}
-			}
-
-			private createAttributeBar(data) {
-				const bar = new AttributeBar();
-				bar.update(data);
-				const yOffset = (data.index - 1) * bar.height * 1.1;
-
-				bar.setOffset(
-					new THREE.Vector2(
-						0,
-						-(Utils.worldToPixel(this.scaleUnflipped.y * 0.5) + bar.height * (1 / 1.1) + 16 * this.guiScale + yOffset)
-					)
-				),
-					new THREE.Vector2(0.5, 1);
-
-				bar.setScale(this.guiScale);
-				return bar;
+				this.hud.scale.setScalar(this.guiScale);
 			}
 		}
 	}

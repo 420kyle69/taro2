@@ -4,9 +4,7 @@ namespace Renderer {
 			gameObject: THREE.Object3D;
 			stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number };
 			devModeOnly: boolean;
-			label = new Label('', 'white', false, true);
-			private labelVisible;
-			private guiScale = 1;
+			label = new Label({ renderOnTop: true });
 
 			constructor(
 				public taroId: string,
@@ -17,8 +15,7 @@ namespace Renderer {
 				const stats = (this.stats = taroEntity._stats.default);
 				const label = this.label;
 				label.visible = false;
-				this.labelVisible = label.visible;
-				label.update(taroEntity._stats.id);
+				label.update({ text: taroEntity._stats.id });
 				this.add(label);
 				this.name = this.taroEntity._stats.id;
 				const renderer = Three.instance();
@@ -31,7 +28,7 @@ namespace Renderer {
 				const width = Utils.pixelToWorld(stats.width);
 				const height = Utils.pixelToWorld(stats.height);
 
-				label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
+				label.position.set(x + Utils.pixelToWorld(label.width) / 2, 3, y + Utils.pixelToWorld(label.height / 2));
 				const geometry = new THREE.BoxGeometry(1, 3, 1);
 				let gameObject = this.gameObject;
 
@@ -58,7 +55,6 @@ namespace Renderer {
 				if ((taro.developerMode.activeTab === 'map' && this.devModeOnly) || !this.devModeOnly) {
 					gameObject.visible = true;
 					label.visible = true;
-					this.labelVisible = true;
 				} else {
 					gameObject.visible = false;
 				}
@@ -72,7 +68,7 @@ namespace Renderer {
 							Utils.pixelToWorld(stats.y) + Utils.pixelToWorld(stats.height) / 2
 						);
 						gameObject.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
-						label.position.set(x + Utils.pixelToWorld(label.size.x) / 2, 3, y + Utils.pixelToWorld(label.size.y / 2));
+						label.position.set(x + Utils.pixelToWorld(label.width / 2), 3, y + Utils.pixelToWorld(label.height / 2));
 					},
 					this
 				);
@@ -80,34 +76,20 @@ namespace Renderer {
 
 			show() {
 				this.gameObject.visible = true;
-
-				/*const label = this.label;
-				const rt = this.rtLabel;
-		
-				label && (label.visible = true);
-				rt && (rt.visible = true);*/
 			}
 
 			hide() {
 				if (this.devModeOnly) {
 					this.gameObject.visible = false;
 				}
-				/*const label = this.label;
-				const rt = this.rtLabel;
-		
-				label && (label.visible = false);
-				rt && (rt.visible = false);*/
 			}
 
 			updateLabel(name: string) {
 				const label = this.label;
-				label.update(name);
+				label.update({ text: name });
 			}
 
-			transform() {}
-
 			setGuiScale(scale: number) {
-				this.guiScale = scale;
 				this.label.setScale(scale);
 			}
 		}

@@ -15,5 +15,16 @@ interface AttributeData {
 	value: number;
 	showWhen?: string[] | string;
 
+	anchorPosition?: string;
+	backgroundColor?: string;
+	cornerRounding?: number;
+	dimensions?: { width: number; height: number };
+	fontSize?: number;
+	letterSpacing?: number;
+	margin?: number;
+	origin?: { x: number; y: number };
+	padding?: number;
+	strokeColor?: string;
 	strokeThickness?: number;
+	trailingZeros?: boolean;
 }
