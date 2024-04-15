@@ -2,6 +2,7 @@ namespace Renderer {
 	export namespace Three {
 		export class Region extends Node {
 			gameObject: THREE.Object3D;
+			mesh: THREE.Mesh;
 			stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number };
 			devModeOnly: boolean;
 			label = new Label({ renderOnTop: true });
@@ -32,26 +33,29 @@ namespace Renderer {
 				const geometry = new THREE.BoxGeometry(1, 3, 1);
 				let gameObject = this.gameObject;
 
+				const material = new THREE.MeshBasicMaterial({
+					color: color,
+					opacity: stats.alpha,
+					transparent: true,
+				});
+				const mesh = (this.mesh = new THREE.Mesh(geometry, material));
+				mesh.position.set(x + width / 2, 1.5, y + height / 2);
+				mesh.scale.set(width, 1, height);
+				this.add(mesh);
 				if (stats.inside) {
 					this.devModeOnly = false;
-					const material = new THREE.MeshBasicMaterial({
-						color: color,
-						opacity: stats.alpha,
-						transparent: true,
-					});
-					const mesh = new THREE.Mesh(geometry, material);
 					mesh.renderOrder = 997;
 					gameObject = this.gameObject = mesh;
 				} else {
 					this.devModeOnly = true;
+					mesh.visible = false;
 					const edges = new THREE.EdgesGeometry(geometry);
 					const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x11fa05 }));
+					this.add(line);
 					gameObject = this.gameObject = line;
+					gameObject.position.set(x + width / 2, 1.5, y + height / 2);
+					gameObject.scale.set(width, 1, height);
 				}
-
-				gameObject.position.set(x + width / 2, 1.5, y + height / 2);
-				gameObject.scale.set(width, 1, height);
-				this.add(gameObject);
 
 				if (taro.developerMode.activeTab === 'map') {
 					label.visible = true;
@@ -65,12 +69,20 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					() => {
-						gameObject.position.set(
+						mesh.position.set(
 							Utils.pixelToWorld(stats.x) + Utils.pixelToWorld(stats.width) / 2,
 							1.5,
 							Utils.pixelToWorld(stats.y) + Utils.pixelToWorld(stats.height) / 2
 						);
-						gameObject.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
+						mesh.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
+						if (this.devModeOnly) {
+							gameObject.position.set(
+								Utils.pixelToWorld(stats.x) + Utils.pixelToWorld(stats.width) / 2,
+								1.5,
+								Utils.pixelToWorld(stats.y) + Utils.pixelToWorld(stats.height) / 2
+							);
+							gameObject.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
+						}
 						label.position.set(x + Utils.pixelToWorld(label.width / 2), 3, y + Utils.pixelToWorld(label.height / 2));
 					},
 					this

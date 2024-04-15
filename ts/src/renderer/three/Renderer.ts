@@ -119,7 +119,7 @@ namespace Renderer {
 						if (intersects?.length > 0) {
 							const closest = intersects[0].object as THREE.Mesh;
 							const region = this.entityManager.entities.find(
-								(e) => e instanceof Region && e.gameObject === closest
+								(e) => e instanceof Region && e.mesh === closest
 							) as Region;
 							if (region) {
 								/*const ownerPlayer = taro.$(unit.ownerId);
