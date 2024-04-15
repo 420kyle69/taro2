@@ -10,10 +10,10 @@ namespace Renderer {
 				offset: { x: 0, y: 0, z: 0 },
 			};
 
-			private hud = new THREE.Group();
+			hud = new THREE.Group();
+
 			private label = new Label({ text: '', color: 'white', bold: false, renderOnTop: true });
 			private attributes = new Attributes();
-			private guiScale = 1;
 			private chat: ChatBubble;
 
 			constructor(
@@ -38,7 +38,7 @@ namespace Renderer {
 				let tex = textureRepository.get(taroEntity._stats.cellSheet.url);
 				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, tex.clone(), taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
-				entity.setGuiScale(1 / renderer.camera.zoom);
+				entity.hud.scale.setScalar(1 / renderer.camera.zoom);
 
 				if (taroEntity._stats.cameraPointerLock) {
 					entity.cameraConfig.pointerLock = taroEntity._stats.cameraPointerLock;
@@ -171,11 +171,6 @@ namespace Renderer {
 				const size = this.getSizeInPixels();
 				const unitHeightInLabelHeightUnits = size.height / this.label.height;
 				this.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
-			}
-
-			setGuiScale(scale: number) {
-				this.guiScale = scale;
-				this.hud.scale.setScalar(this.guiScale);
 			}
 
 			showHud(visible: boolean) {

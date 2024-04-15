@@ -58,7 +58,7 @@ namespace Renderer {
 
 			scaleGui(scale: number) {
 				for (const entity of this.entities) {
-					entity.setGuiScale(scale);
+					entity.hud.scale.setScalar(scale);
 				}
 			}
 		}
