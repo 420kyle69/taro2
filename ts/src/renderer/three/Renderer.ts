@@ -116,14 +116,12 @@ namespace Renderer {
 						raycaster.setFromCamera(this.pointer, this.camera.instance);
 
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
-						console.log('intersects', intersects);
 						if (intersects?.length > 0) {
 							const closest = intersects[0].object as THREE.Mesh;
 							const region = this.entityManager.entities.find(
 								(e) => e instanceof Region && e.gameObject === closest
 							) as Region;
 							if (region) {
-								console.log('clicked region', region);
 								/*const ownerPlayer = taro.$(unit.ownerId);
 								if (ownerPlayer?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
