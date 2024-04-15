@@ -498,10 +498,12 @@ namespace Renderer {
 			private checkForHiddenEntities() {
 				for (const unit of this.entityManager.units) {
 					// TODO(nick): Need a way to to identify avatar units from NPC's
-					if (unit.hasVisibleLabel()) {
-						unit.setHidden(!this.camera.isVisible(unit, this.voxels));
-					}
+					unit.showHud(this.isEntityInLineOfSight(unit));
 				}
+			}
+
+			private isEntityInLineOfSight(unit: Unit) {
+				return this.camera.isVisible(unit, this.voxels);
 			}
 		}
 	}
