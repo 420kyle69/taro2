@@ -52,7 +52,7 @@ namespace Renderer {
 
 						tileId -= 1;
 
-						const pos = { x, y: height + yOffset * height, z };
+						const pos = { x: x + 0.5, y: height + yOffset * height, z: z + 0.5 };
 
 						voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
 							position: [pos.x, pos.y, pos.z],

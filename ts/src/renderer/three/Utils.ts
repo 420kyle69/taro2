@@ -221,6 +221,10 @@ namespace Renderer {
 				return depth * 0.001;
 			}
 
+			export function isLeftButton(buttons: number) {
+				return !!(buttons & 1);
+			}
+
 			export function isRightButton(buttons: number) {
 				return !!(buttons & 2);
 			}

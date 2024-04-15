@@ -31,6 +31,8 @@ namespace Renderer {
 			private raycastIntervalSeconds = 0.1;
 			private timeSinceLastRaycast = 0;
 
+			private regionDrawStart: { x: number; y: number } = { x: 0, y: 0 };
+
 			private constructor() {
 				// For JS interop; in case someone uses new Renderer.ThreeRenderer()
 				if (!Renderer._instance) {
@@ -72,11 +74,90 @@ namespace Renderer {
 					this.entityManager.scaleGui(1 / this.camera.zoom);
 				});
 
+				let line: THREE.LineSegments;
+				let width;
+				let height;
+
 				window.addEventListener('mousemove', (evt: MouseEvent) => {
 					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
+					if (!Utils.isLeftButton(evt.buttons)) return;
+					if (taro.developerMode.regionTool) {
+						const worldPoint = this.camera.getWorldPoint(this.pointer);
+						width = worldPoint.x - this.regionDrawStart.x;
+						height = worldPoint.z - this.regionDrawStart.y;
+						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
+						line.scale.set(width, 1, height);
+					}
 				});
 
 				window.addEventListener('mousedown', (event: MouseEvent) => {
+					const developerMode = taro.developerMode;
+					if (developerMode.regionTool) {
+						const worldPoint = this.camera.getWorldPoint(this.pointer);
+						this.regionDrawStart = {
+							x: worldPoint.x,
+							y: worldPoint.z,
+						};
+
+						const geometry = new THREE.BoxGeometry(1, 3, 1);
+						const edges = new THREE.EdgesGeometry(geometry);
+						line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x036ffc }));
+						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
+						line.scale.set(width, 1, height);
+						line.visible = true;
+						this.scene.add(line);
+					} else if (
+						developerMode.active &&
+						developerMode.activeTab === 'map' &&
+						developerMode.activeButton === 'cursor' &&
+						Utils.isLeftButton(event.buttons)
+					) {
+						const raycaster = new THREE.Raycaster();
+						raycaster.setFromCamera(this.pointer, this.camera.instance);
+
+						const intersects = raycaster.intersectObjects(this.entityManager.entities);
+						console.log('intersects', intersects);
+						if (intersects?.length > 0) {
+							const closest = intersects[0].object as THREE.Mesh;
+							const region = this.entityManager.entities.find(
+								(e) => e instanceof Region && e.gameObject === closest
+							) as Region;
+							if (region) {
+								console.log('clicked region', region);
+								/*const ownerPlayer = taro.$(unit.ownerId);
+								if (ownerPlayer?._stats?.controlledBy === 'human') {
+									if (typeof showUserDropdown !== 'undefined') {
+										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+									}
+								}*/
+								const regionData = {
+									name: region.taroEntity._stats.id,
+									x: region.stats.x,
+									y: region.stats.y,
+									width: region.stats.width,
+									height: region.stats.height,
+									alpha: region.stats.alpha,
+									inside: region.stats.inside,
+								};
+								inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+							}
+						}
+						/*gameObjects = gameObjects.filter((gameObject) => gameObject.phaserRegion);
+						gameObjects.forEach((gameObject) => {
+							this.devModeScene.regionEditor.addClickedList({
+								name: gameObject.phaserRegion.entity._stats.id,
+								x: gameObject.phaserRegion.stats.x,
+								y: gameObject.phaserRegion.stats.y,
+								width: gameObject.phaserRegion.stats.width,
+								height: gameObject.phaserRegion.stats.height,
+								alpha: gameObject.phaserRegion.stats.alpha,
+								inside: gameObject.phaserRegion.stats.inside,
+							});
+						});
+						if (gameObjects.length > 0) {
+							this.devModeScene.regionEditor.showClickedList();
+						}*/
+					}
 					if (Utils.isRightButton(event.buttons)) {
 						const raycaster = new THREE.Raycaster();
 						raycaster.setFromCamera(this.pointer, this.camera.instance);
@@ -84,7 +165,7 @@ namespace Renderer {
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
 						if (intersects.length > 0) {
 							const closest = intersects[0].object as THREE.Mesh;
-							const unit = this.entityManager.entities.find((e) => e.sprite === closest);
+							const unit = this.entityManager.entities.find((e) => e instanceof Unit && e.sprite === closest);
 
 							if (unit) {
 								const ownerPlayer = taro.$(unit.ownerId);
@@ -95,6 +176,41 @@ namespace Renderer {
 								}
 							}
 						}
+					}
+				});
+
+				window.addEventListener('mouseup', () => {
+					if (taro.developerMode.regionTool) {
+						taro.developerMode.regionTool = false;
+						this.camera.controls.enablePan = true;
+						this.camera.controls.enableRotate = true;
+						this.camera.controls.enableZoom = true;
+						line?.geometry.dispose();
+						this.scene.remove(line);
+						line = null;
+
+						taro.mapEditorUI.highlightToolsButton('cursor');
+						let x = this.regionDrawStart.x;
+						let y = this.regionDrawStart.y;
+						if (width < 0) {
+							x = this.regionDrawStart.x + width;
+							width *= -1;
+						}
+						if (height < 0) {
+							y = this.regionDrawStart.y + height;
+							height *= -1;
+						}
+
+						inGameEditor.addNewRegion &&
+							inGameEditor.addNewRegion({
+								name: '',
+								x: Math.trunc(Utils.worldToPixel(x)),
+								y: Math.trunc(Utils.worldToPixel(y)),
+								width: Math.trunc(Utils.worldToPixel(width)),
+								height: Math.trunc(Utils.worldToPixel(height)),
+							});
+
+						this.regionDrawStart = null;
 					}
 				});
 
@@ -119,6 +235,13 @@ namespace Renderer {
 					if (this.mode == Mode.Development) {
 						this.mode = Mode.Normal;
 						this.onNormalMode();
+					}
+				});
+				taro.client.on('update-region-name', (data: { name: string; newName: string }) => {
+					const region = this.entityManager.entities.find((e) => e instanceof Region && e.name === data.name) as Region;
+					if (region) {
+						region.name = data.newName;
+						region.updateLabel(data.newName);
 					}
 				});
 			}
@@ -154,7 +277,14 @@ namespace Renderer {
 			setVisible(visible: boolean) {
 				this.particles.visible = visible;
 				this.entityManager.entities.forEach((e) => {
-					e.visible = visible;
+					if (e instanceof Region) {
+						e.label.visible = !visible;
+						if (e.devModeOnly) {
+							e.gameObject.visible = !visible;
+						}
+					} else {
+						e.visible = visible;
+					}
 				});
 			}
 
@@ -234,7 +364,7 @@ namespace Renderer {
 				entitiesLayer.position.y = 0.51;
 				this.scene.add(entitiesLayer);
 
-				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile') => {
+				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') => {
 					const entity = this.entityManager.create(taroEntity, type);
 					entitiesLayer.add(entity);
 					taroEntity.on('destroy', () => {
@@ -260,6 +390,7 @@ namespace Renderer {
 				taro.client.on('create-unit', (u: TaroEntityPhysics) => createEntity(u, 'unit'), this);
 				taro.client.on('create-item', (i: TaroEntityPhysics) => createEntity(i, 'item'), this);
 				taro.client.on('create-projectile', (p: TaroEntityPhysics) => createEntity(p, 'projectile'), this);
+				taro.client.on('create-region', (r: TaroEntityPhysics) => createEntity(r, 'region'), this);
 
 				taro.client.on('zoom', (height: number) => {
 					if (this.camera.zoomHeight === height * 2.15) return;

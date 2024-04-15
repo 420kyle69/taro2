@@ -69,8 +69,8 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					(data: { x: number; y: number; rotation: number }) => {
-						entity.position.x = Utils.pixelToWorld(data.x) - 0.5;
-						entity.position.z = Utils.pixelToWorld(data.y) - 0.5;
+						entity.position.x = Utils.pixelToWorld(data.x);
+						entity.position.z = Utils.pixelToWorld(data.y);
 
 						// let angle = -data.rotation;
 						// if (ent.billboard && (entity instanceof Item || entity instanceof Projectile)) {

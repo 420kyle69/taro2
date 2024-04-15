@@ -486,7 +486,12 @@ namespace Renderer {
 			}
 
 			private onMouseDown(event: MouseEvent) {
-				if (!this.isLocked && (this.target as Unit)?.cameraConfig?.pointerLock) {
+				//A camera should not have knowledge of "tools", but rather outside code
+				if (taro.developerMode.regionTool) {
+					this.controls.enablePan = false;
+					this.controls.enableRotate = false;
+					this.controls.enableZoom = false;
+				} else if (!this.isLocked && (this.target as Unit)?.cameraConfig?.pointerLock) {
 					this.lock();
 				}
 			}
