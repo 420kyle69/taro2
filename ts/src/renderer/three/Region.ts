@@ -53,9 +53,11 @@ namespace Renderer {
 				gameObject.scale.set(width, 1, height);
 				this.add(gameObject);
 
+				if (taro.developerMode.activeTab === 'map') {
+					label.visible = true;
+				}
 				if ((taro.developerMode.activeTab === 'map' && this.devModeOnly) || !this.devModeOnly) {
 					gameObject.visible = true;
-					label.visible = true;
 				} else {
 					gameObject.visible = false;
 				}
