@@ -15,11 +15,12 @@ namespace Renderer {
 			strokeThickness: 2,
 			value: 0,
 			max: 1,
-			displayValue: true,
+			displayValue: false,
 			decimalPlaces: 0,
 			trailingZeros: false,
 			fontSize: 14,
 			letterSpacing: -0.8,
+			renderOnTop: true,
 		};
 
 		export type ProgressBarParams = Partial<typeof defaultConfig>;
@@ -39,6 +40,7 @@ namespace Renderer {
 			trailingZeros: boolean;
 			fontSize: number;
 			letterSpacing: number;
+			renderOnTop: boolean;
 
 			constructor(params: ProgressBarParams) {
 				const config = { ...defaultConfig, ...params };
@@ -60,6 +62,10 @@ namespace Renderer {
 				if (params.fgColor && Utils.isHexColorWithAlpha(this.fgColor)) {
 					this.fgAlpha = Utils.getHexAlpha(this.fgColor);
 					this.fgColor = this.fgColor.slice(0, 7);
+				}
+
+				if (this.renderOnTop) {
+					this.renderOnTopOfEverything();
 				}
 
 				this.refreshTexture();

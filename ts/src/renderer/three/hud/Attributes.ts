@@ -50,17 +50,26 @@ namespace Renderer {
 
 				const config = Mapper.ProgressBar(data.attr);
 
-				if (!barToUpdate) {
-					this.addAttribute(data.attr);
-					return;
-				}
-
 				if (!data.shouldRender) {
-					barToUpdate.visible = data.shouldRender;
+					if (barToUpdate) {
+						barToUpdate.visible = data.shouldRender;
+					}
+
 					return;
 				}
 
-				barToUpdate.update(config);
+				if (barToUpdate) {
+					barToUpdate.update(config);
+
+					if (
+						(data.attr.showWhen instanceof Array && data.attr.showWhen.indexOf('valueChanges') > -1) ||
+						data.attr.showWhen === 'valueChanges'
+					) {
+						barToUpdate.showAndHideAfterDelay(1000);
+					}
+				} else {
+					this.addAttribute(data.attr);
+				}
 			}
 
 			setOpacity(opacity: number) {

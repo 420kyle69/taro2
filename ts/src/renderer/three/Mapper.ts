@@ -27,7 +27,7 @@ namespace Renderer {
 					config.strokeThickness = attr.strokeThickness;
 				}
 
-				if (attr.value) {
+				if (typeof attr.value === 'number') {
 					config.value = attr.value;
 				}
 

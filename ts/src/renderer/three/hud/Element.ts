@@ -5,12 +5,12 @@ namespace Renderer {
 		export abstract class Element extends THREE.Object3D {
 			unscaledWidth: number;
 			unscaledHeight: number;
-			padding: THREE.Vector2;
-			margin: THREE.Vector2;
 
 			protected sprite: THREE.Sprite;
 			protected canvas = document.createElement('canvas');
 			protected ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+
+			private timeoutHandle: NodeJS.Timeout | null = null;
 
 			constructor(x: number, y: number, z: number, width = 0, height = 0) {
 				super();
@@ -122,7 +122,38 @@ namespace Renderer {
 				this.sprite.material.opacity = opacity;
 			}
 
+			showAndHideAfterDelay(delay: number) {
+				this.visible = true;
+
+				if (this.timeoutHandle) {
+					clearTimeout(this.timeoutHandle);
+					this.timeoutHandle = null;
+				}
+
+				if (delay > 0) {
+					this.timeoutHandle = setTimeout(() => {
+						this.visible = false;
+					}, delay);
+				}
+			}
+
 			setTextureImage(image: ImageData) {
+				// Must create a new texture if new dimensions are different in 3js.
+				if (this.sprite.material.map.image) {
+					const w = this.sprite.material.map.image.width;
+					const h = this.sprite.material.map.image.height;
+
+					if (w !== image.width || h !== image.height) {
+						const texture = new THREE.Texture();
+						texture.magFilter = TextureRepository.instance().filter;
+						texture.generateMipmaps = false;
+						texture.colorSpace = THREE.SRGBColorSpace;
+
+						this.sprite.material.map.dispose();
+						this.sprite.material.map = texture;
+					}
+				}
+
 				this.sprite.material.map.image = image;
 				this.sprite.material.map.needsUpdate = true;
 			}
@@ -135,13 +166,19 @@ namespace Renderer {
 
 			protected createUpscaledTextureImage(
 				draw: (upscaledWidth: number, upscaledHeight: number, upscaleFactor: number) => void,
-				upscaleFactor = 8
+				upscaleFactor = 2
 			) {
-				const w = this.width * upscaleFactor;
-				const h = this.height * upscaleFactor;
+				let w = this.width * upscaleFactor;
+				let h = this.height * upscaleFactor;
 
 				if (w < 1 || h < 1) {
-					console.error('Element.createUpscaledTextureImage: Invalid width or height');
+					if (w < 1) {
+						w = 1;
+					}
+
+					if (h < 1) {
+						h = 1;
+					}
 				}
 
 				this.canvas.width = w;

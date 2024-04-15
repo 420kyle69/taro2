@@ -178,13 +178,13 @@ namespace Renderer {
 
 			renderChat(text: string): void {
 				if (this.chat) {
-					this.chat.update(text);
+					this.chat.update({ text });
 				} else {
-					this.chat = new ChatBubble(text);
+					this.chat = new ChatBubble({ text });
 					const labelCenter = this.label.getCenter();
 					const labelOffset = this.label.height * labelCenter.y;
-					const chatOffset = labelOffset + this.label.height;
-					this.chat.setOffset(new THREE.Vector2(0, chatOffset), new THREE.Vector2(0.5, 0));
+					const chatOffset = (labelOffset + this.label.height) / this.chat.height;
+					this.chat.setCenter(0.5, 1 + chatOffset);
 					this.hud.add(this.chat);
 				}
 			}

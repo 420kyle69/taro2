@@ -123,7 +123,6 @@ var taroClientConfig = {
 		'renderer/three/Sprite.js',
 		'renderer/three/AnimatedSprite.js',
 		'renderer/three/Unit.js',
-		'renderer/three/ChatBubble.js',
 		'renderer/three/Sky.js',
 		'renderer/three/Tileset.js',
 		'renderer/three/Particles.js',
@@ -135,6 +134,7 @@ var taroClientConfig = {
 		'renderer/three/hud/Label.js',
 		'renderer/three/hud/FloatingText.js',
 		'renderer/three/hud/DynamicFloatingText.js',
+		'renderer/three/hud/ChatBubble.js',
 
 		'/client.js',
 		'/index.js',
