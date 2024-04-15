@@ -845,8 +845,8 @@ var ClientNetworkEvents = {
 		console.warn(data);
 	},
 
-	_onMovePlayerToMap: function (data) {
-		if (data && data.type == 'movePlayerToMap') {
+	_onSendPlayerToMap: function (data) {
+		if (data && data.type == 'sendPlayerToMap') {
 			const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&autoJoinToken=${data.autoJoinToken}`;
 			window.location.href = mapUrl;
 		}
