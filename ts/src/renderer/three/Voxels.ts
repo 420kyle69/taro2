@@ -1,15 +1,46 @@
 namespace Renderer {
 	export namespace Three {
 		export class Voxels extends Node {
+			brushArea: TileShape;
+			voxelData: { positions: any[]; uvs: any[]; normals: any[]; topIndices: any[]; sidesIndices: any[] }[] = [];
+			voxels: Map<string, VoxelCell>[] = [];
+			meshes: THREE.Mesh[] = [];
+			layerLookupTable: Record<number, number> = {};
 			constructor(
 				private topTileset: Tileset,
 				private sidesTileset: Tileset
 			) {
 				super();
+				this.brushArea = new TileShape();
+				taro.client.on('updateMap', () => {
+					let numTileLayers = 0;
+					for (const [idx, layer] of taro.game.data.map.layers.entries()) {
+						if (layer.type === 'tilelayer' && layer.data) {
+							const voxels = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
+							this.addLayer(voxels, idx, true);
+							this.setLayerLookupTable(idx, numTileLayers);
+							numTileLayers++;
+						}
+					}
+				});
+				taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
+					const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
+						const dataType = k as MapEditToolEnum;
+						const dataValue = v as any;
+						return { dataType, dataValue };
+					})[0];
+					switch (dataType) {
+						case 'edit': {
+							const nowValue = dataValue as TileData<'edit'>['edit'];
+							nowValue.selectedTiles.map((v, idx) => {
+								this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx]);
+							});
+						}
+					}
+				});
 			}
 
 			static create(config?: MapData['layers']) {
-
 				const textureRepository = TextureRepository.instance();
 				const tilesetMain = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'top' });
 				let tilesetSide = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'side' });
@@ -22,12 +53,13 @@ namespace Renderer {
 				const sidesTileset = new Tileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
 
 				const voxels = new Voxels(topTileset, sidesTileset);
-
 				if (config) {
 					let numTileLayers = 0;
 					for (const [idx, layer] of config.entries()) {
 						if (layer.type === 'tilelayer' && layer.data) {
-							voxels.addLayer(layer, numTileLayers, true, false, (idx + 1) * 100);
+							const voxelsData = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
+							voxels.addLayer(voxelsData, idx, true);
+							voxels.setLayerLookupTable(idx, numTileLayers);
 							numTileLayers++;
 						}
 					}
@@ -36,9 +68,66 @@ namespace Renderer {
 				return voxels;
 			}
 
-			addLayer(data: LayerData, height: number, transparent = true, flat = false, renderOrder = 0) {
+			putTiles(
+				tileX: number,
+				tileY: number,
+				selectedTiles: Record<number, Record<number, number>>,
+				brushSize: Vector2D | 'fitContent',
+				shape: Shape,
+				layer: number,
+				local?: boolean,
+				flat = false
+			) {
 				const voxels = new Map<string, VoxelCell>();
 
+				const allFacesVisible = [false, false, false, false, false, false];
+				const onlyBottomFaceVisible = [true, true, true, false, true, true];
+				const hiddenFaces = flat ? onlyBottomFaceVisible : allFacesVisible;
+				const calcData = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
+				const yOffset = 0.001;
+				const sample = calcData.sample;
+				const size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
+				const taroMap = taro.game.data.map;
+				const width = taroMap.width;
+				const height = taroMap.height;
+				tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
+				tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
+				for (let x = 0; x < size.x; x++) {
+					for (let y = 0; y < size.y; y++) {
+						if (
+							sample[x] &&
+							sample[x][y] !== undefined &&
+							DevModeScene.pointerInsideMap(tileX + x, tileY + y, { width, height })
+						) {
+							let _x = tileX + x;
+							let _z = tileY + y;
+							let tileId = sample[x][y];
+							const height = this.calcHeight(layer);
+							const pos = { x: _x, y: height + yOffset * height, z: _z };
+
+							voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
+								position: [pos.x, pos.y, pos.z],
+								type: tileId,
+								visible: true,
+								hiddenFaces: [...hiddenFaces],
+							});
+						}
+					}
+				}
+				this.addLayer(voxels, layer, true);
+			}
+
+			// because it may have debris layer, so we need a lookup table to find the real floor height
+			setLayerLookupTable(k: number, v: number) {
+				this.layerLookupTable[k] = v;
+			}
+
+			calcHeight(layerIdx: number) {
+				return this.layerLookupTable[layerIdx] ?? layerIdx;
+			}
+
+			static generateVoxelsFromLayerData(data: LayerData, height: number, flat = false) {
+				const voxels = new Map<string, VoxelCell>();
 				const allFacesVisible = [false, false, false, false, false, false];
 				const onlyBottomFaceVisible = [true, true, true, false, true, true];
 				const hiddenFaces = flat ? onlyBottomFaceVisible : allFacesVisible;
@@ -62,10 +151,15 @@ namespace Renderer {
 						});
 					}
 				}
+				return voxels;
+			}
 
-				const prunedVoxels = pruneCells(voxels);
+			addLayer(voxels: Map<string, VoxelCell>, layerIdx: number, transparent = true) {
+				const renderOrder = (layerIdx + 1) * 100;
+				const prunedVoxels = pruneCells(voxels, this.voxels[layerIdx]);
+				this.voxels[layerIdx] = prunedVoxels;
 				const voxelData = buildMeshDataFromCells(prunedVoxels, this.topTileset);
-
+				this.voxelData[layerIdx] = voxelData;
 				const geometry = new THREE.BufferGeometry();
 				geometry.setIndex([...voxelData.sidesIndices, ...voxelData.topIndices]);
 				geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
@@ -86,8 +180,9 @@ namespace Renderer {
 				mesh.renderOrder = renderOrder;
 				//@ts-ignore
 				geometry.computeBoundsTree();
-
+				this.remove(this.meshes[layerIdx]);
 				this.add(mesh);
+				this.meshes[layerIdx] = mesh;
 			}
 		}
 
@@ -95,8 +190,8 @@ namespace Renderer {
 			return `${x}.${y}.${z}`;
 		}
 
-		function pruneCells(cells) {
-			const prunedVoxels = new Map<string, VoxelCell>();
+		function pruneCells(cells: Map<string, VoxelCell>, prevCells?: Map<string, VoxelCell>) {
+			const prunedVoxels = prevCells ?? new Map<string, VoxelCell>();
 			for (let k of cells.keys()) {
 				const curCell = cells.get(k);
 
@@ -128,7 +223,7 @@ namespace Renderer {
 			return prunedVoxels;
 		}
 
-		function buildMeshDataFromCells(cells, tileset: Tileset) {
+		function buildMeshDataFromCells(cells: Map<string, VoxelCell>, tileset: Tileset) {
 			const xStep = tileset.tileWidth / tileset.width;
 			const yStep = tileset.tileHeight / tileset.height;
 

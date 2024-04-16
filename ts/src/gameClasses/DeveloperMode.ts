@@ -411,9 +411,9 @@ class DeveloperMode {
 				}
 				case 'edit': {
 					//save tile change to taro.game.data.map and taro.map.data
-					const nowValue = serverData as Omit<TileData<'edit'>['edit'], 'layer'> & { layer: number };
+					const nowValue = serverData as TileData<'edit'>['edit'];
 					nowValue.selectedTiles.map((v, idx) => {
-						this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer);
+						this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx]);
 					});
 					break;
 				}
@@ -463,8 +463,9 @@ class DeveloperMode {
 					if (sample[x] && sample[x][y] !== undefined && this.pointerInsideMap(x + tileX, y + tileY, map)) {
 						let index = sample[x][y];
 						if (index === -1) index = 0;
-						map.layers[layer].data[x + tileX + (y + tileY) * width] = index;
-						taro.map.data.layers[layer].data[x + tileX + (y + tileY) * width] = index;
+						let indices = x + tileX + (y + tileY) * width;
+						map.layers[layer].data[indices] = index;
+						taro.map.data.layers[layer].data[indices] = index;
 					}
 				}
 			}
