@@ -20,7 +20,7 @@ namespace Renderer {
 				public taroId: string,
 				public ownerId: string,
 				tex: THREE.Texture,
-				private taroEntity?: TaroEntityPhysics
+				public taroEntity?: TaroEntityPhysics
 			) {
 				super(tex);
 
