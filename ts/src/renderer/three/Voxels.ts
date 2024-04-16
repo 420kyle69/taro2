@@ -99,8 +99,8 @@ namespace Renderer {
 							sample[x][y] !== undefined &&
 							DevModeScene.pointerInsideMap(tileX + x, tileY + y, { width, height })
 						) {
-							let _x = tileX + x;
-							let _z = tileY + y;
+							let _x = tileX + x + 0.5;
+							let _z = tileY + y + 0.5;
 							let tileId = sample[x][y];
 							const height = this.calcHeight(layer);
 							const pos = { x: _x, y: height + yOffset * height, z: _z };
