@@ -39,6 +39,10 @@ var Projectile = TaroEntityPhysics.extend({
 			self.mount(taro.$('baseScene'));
 		}
 
+		if (taro.isClient) {
+			this.initParticleEmitters();
+		}
+
 		this.startRendering();
 
 		if (self._stats.states) {
@@ -102,24 +106,23 @@ var Projectile = TaroEntityPhysics.extend({
 		// add behaviour also have isClient block so we will have to execute this in both client and server
 		this.addBehaviour('projectileBehaviour', this._behaviour);
 		this.scaleDimensions(this._stats.width, this._stats.height);
-	},	
+	},
 
-	hide: function() {
+	hide: function () {
 		if (taro.isServer) {
-			this.streamUpdateData([{ isHidden: true }]);		
+			this.streamUpdateData([{ isHidden: true }]);
 		}
-		TaroEntityPhysics.prototype.destroyBody.call(this);				
+		TaroEntityPhysics.prototype.destroyBody.call(this);
 		TaroEntity.prototype._hide.call(this);
 	},
 
-	show: function() {
+	show: function () {
 		if (taro.isServer) {
 			this.streamUpdateData([{ isHidden: false }]);
 		}
 		TaroEntityPhysics.prototype.updateBody.call(this);
 		TaroEntity.prototype._show.call(this);
 	},
-
 
 	startRendering: function () {
 		if (taro.isClient) {
