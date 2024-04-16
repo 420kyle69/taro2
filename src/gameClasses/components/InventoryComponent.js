@@ -16,7 +16,7 @@ var InventoryComponent = TaroEntity.extend({
 		// render inventory slots on client end
 		var entity = this._entity;
 		var ownerPlayer = entity.getOwner();
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot ' : 'inventory-slot ';
 		if (
 			ownerPlayer &&
 			taro.isClient &&
@@ -64,7 +64,7 @@ var InventoryComponent = TaroEntity.extend({
 	createBackpack() {
 		var entity = this._entity;
 		var backpackSize = entity._stats.backpackSize;
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot ' : 'inventory-slot ';
 
 		if (backpackSize > 0) {
 			this.updateBackpackButton(true);
@@ -95,7 +95,7 @@ var InventoryComponent = TaroEntity.extend({
 		}
 	},
 	createTradingSlots: function () {
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot' : 'inventory-slot ';
 		if (this._entity._stats.inventorySize) {
 			var totalInventorySize = this.getTotalInventorySize();
 			// total 5 trading slots

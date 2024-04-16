@@ -1163,6 +1163,8 @@ var ShopComponent = TaroEntity.extend({
 							.append(img)
 							.append(itemName);
 
+						let longPressTimeOut;
+
 						itemImage
 							.popover({
 								html: true,
@@ -1187,6 +1189,17 @@ var ShopComponent = TaroEntity.extend({
 										$(this).off('mouseleave');
 									});
 								}
+							})
+							.on('touchstart', function () {
+								longPressTimeOut = setTimeout(() => {
+									$(this).popover('show');
+								}, 1000);
+							})
+							.on('touchend', function () {
+								clearTimeout(longPressTimeOut);
+								var _this = this;
+								$(_this).popover('hide');
+								$(this).off('mouseleave');
 							});
 
 						modalBody.append(itemImage.append(combine));

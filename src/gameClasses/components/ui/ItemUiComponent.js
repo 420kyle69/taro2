@@ -6,14 +6,24 @@ var ItemUiComponent = TaroEntity.extend({
 
 	init: function () {
 		const addPopoverListener = () => {
-			$('#backpack-items-div').on(
-				'mouseenter',
-				'.inventory-item-button.inventory-slot>.item-div.draggable-item',
-				function () {
+			let timeoutForPopover = null;
+
+			$('#backpack-items-div')
+				.on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					if (taro.isMobile) return;
 					$('.popover').popover('hide');
 					$(this).popover('show');
-				}
-			);
+				})
+				.on('touchstart', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					timeoutForPopover = setTimeout(() => {
+						$(this).popover('show');
+					}, 1000);
+				})
+				.on('touchend', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					clearTimeout(timeoutForPopover);
+					$('.popover').popover('hide');
+				});
+
 			$('#trade-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
 				$('.popover').popover('hide');
 				$(this).popover('show');
@@ -22,14 +32,22 @@ var ItemUiComponent = TaroEntity.extend({
 				$('.popover').popover('hide');
 				$(this).popover('show');
 			});
-			$('#inventory-slots').on(
-				'mouseenter',
-				'.inventory-item-button.inventory-slot>.item-div.draggable-item',
-				function () {
+			$('#inventory-slots')
+				.on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					if (taro.isMobile) return;
 					$('.popover').popover('hide');
 					$(this).popover('show');
-				}
-			);
+				})
+				.on('touchstart', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					timeoutForPopover = setTimeout(() => {
+						console.log('touchstarteddddd');
+						$(this).popover('show');
+					}, 1000);
+				})
+				.on('touchend', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					clearTimeout(timeoutForPopover);
+					$('.popover').popover('hide');
+				});
 		};
 
 		if (document.getElementById('backpack-items-div')) {
@@ -197,7 +215,7 @@ var ItemUiComponent = TaroEntity.extend({
 		}
 	},
 	getItemSlotDiv: function (itemStats, options) {
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot ' : 'inventory-slot ';
 		if (itemStats) {
 			var itemSlot = $('<div/>', {
 				id: itemStats.id,
