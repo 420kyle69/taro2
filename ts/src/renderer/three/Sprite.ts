@@ -73,6 +73,10 @@ namespace Renderer {
 				this.setScale(this.scaleUnflipped.x, this.scaleUnflipped.y);
 			}
 
+			getSize() {
+				return { width: this.scaleUnflipped.x, height: this.scaleUnflipped.y };
+			}
+
 			getSizeInPixels() {
 				return { width: Utils.worldToPixel(this.scaleUnflipped.x), height: Utils.worldToPixel(this.scaleUnflipped.y) };
 			}

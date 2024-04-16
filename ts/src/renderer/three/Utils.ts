@@ -51,31 +51,33 @@ namespace Renderer {
 				const green = (fillColor & 0xff00) >>> 8;
 				const blue = fillColor & 0xff;
 				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
-
 				ctx.lineWidth = lineWidth;
 
+				// Stroke inside the rect instead of on the edge
 				const lineWidthHalf = lineWidth / 2;
-				const minx = x - lineWidthHalf;
-				const maxx = x + lineWidthHalf;
+				const xMin = x + lineWidthHalf;
+				const xMax = x + width - lineWidthHalf;
+				const yMin = y + lineWidthHalf;
+				const yMax = y + height - lineWidthHalf;
 
 				ctx.beginPath();
-				ctx.moveTo(x, y);
-				ctx.lineTo(x, y + height);
+				ctx.moveTo(xMin, yMin);
+				ctx.lineTo(xMin, yMax);
 				ctx.stroke();
 
 				ctx.beginPath();
-				ctx.moveTo(x + width, y);
-				ctx.lineTo(x + width, y + height);
+				ctx.moveTo(xMax, yMin);
+				ctx.lineTo(xMax, yMax);
 				ctx.stroke();
 
 				ctx.beginPath();
-				ctx.moveTo(minx, y);
-				ctx.lineTo(maxx + width, y);
+				ctx.moveTo(xMin - lineWidthHalf, yMin);
+				ctx.lineTo(xMax + lineWidthHalf, yMin);
 				ctx.stroke();
 
 				ctx.beginPath();
-				ctx.moveTo(minx, y + height);
-				ctx.lineTo(maxx + width, y + height);
+				ctx.moveTo(xMin - lineWidthHalf, yMax);
+				ctx.lineTo(xMax + lineWidthHalf, yMax);
 				ctx.stroke();
 			}
 
@@ -136,20 +138,27 @@ namespace Renderer {
 				ctx.strokeStyle = `rgba(${red},${green},${blue},${alpha})`;
 				ctx.lineWidth = strokeThickness;
 
+				// Stroke inside the rect instead of on the edge
+				const lineWidthHalf = strokeThickness / 2;
+				const xMin = x + lineWidthHalf;
+				const xMax = x + width - lineWidthHalf;
+				const yMin = y + lineWidthHalf;
+				const yMax = y + height - lineWidthHalf;
+
 				ctx.beginPath();
-				ctx.moveTo(x + tl, y);
-				ctx.lineTo(x + width - tr, y);
-				ctx.moveTo(x + width - tr, y);
-				ctx.arc(x + width - tr, y + tr, tr, -(Math.PI * 0.5), 0);
-				ctx.lineTo(x + width, y + height - br);
-				ctx.moveTo(x + width, y + height - br);
-				ctx.arc(x + width - br, y + height - br, br, 0, Math.PI * 0.5);
-				ctx.lineTo(x + bl, y + height);
-				ctx.moveTo(x + bl, y + height);
-				ctx.arc(x + bl, y + height - bl, bl, Math.PI * 0.5, Math.PI);
-				ctx.lineTo(x, y + tl);
-				ctx.moveTo(x, y + tl);
-				ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
+				ctx.moveTo(xMin + tl, yMin);
+				ctx.lineTo(xMax - tr, yMin);
+				ctx.moveTo(xMax - tr, yMin);
+				ctx.arc(xMax - tr, yMin + tr, tr, -(Math.PI * 0.5), 0);
+				ctx.lineTo(xMax, yMax - br);
+				ctx.moveTo(xMax, yMax - br);
+				ctx.arc(xMax - br, yMax - br, br, 0, Math.PI * 0.5);
+				ctx.lineTo(xMin + bl, yMax);
+				ctx.moveTo(xMin + bl, yMax);
+				ctx.arc(xMin + bl, yMax - bl, bl, Math.PI * 0.5, Math.PI);
+				ctx.lineTo(xMin, yMin + tl);
+				ctx.moveTo(xMin, yMin + tl);
+				ctx.arc(xMin + tl, yMin + tl, tl, -Math.PI, -(Math.PI * 0.5));
 				ctx.stroke();
 			}
 
@@ -219,6 +228,10 @@ namespace Renderer {
 
 			export function getDepthZOffset(depth: number) {
 				return depth * 0.001;
+			}
+
+			export function isLeftButton(buttons: number) {
+				return !!(buttons & 1);
 			}
 
 			export function isRightButton(buttons: number) {

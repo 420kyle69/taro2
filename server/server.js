@@ -733,7 +733,7 @@ var Server = TaroClass.extend({
 		taro.network.define('joinGame', self._onJoinGame);
 		taro.network.define('gameOver', self._onGameOver);
 		taro.network.define('ping', self._onPing);
-		taro.network.define('movePlayerToMap', self._onSomeBullshit);
+		taro.network.define('sendPlayerToMap', self._onSomeBullshit);
 
 		taro.network.define('playerUnitMoved', self._onPlayerUnitMoved);
 		taro.network.define('playerKeyDown', self._onPlayerKeyDown);
