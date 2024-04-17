@@ -28,8 +28,9 @@ namespace Renderer {
 				//}
 			}
 
-			addMesh(x: number, y: number): THREE.Mesh {
+			addMesh(x: number, y: number, z: number): THREE.Mesh {
 				//const map = this.map;
+				console.log(x, y, z);
 				const data = taro.game.data;
 				const tileset = data.map.tilesets[0];
 				const key = `tiles/${tileset.name}`;
@@ -42,12 +43,16 @@ namespace Renderer {
                     height = map.tileHeight;
                 }*/
 
-				const geometry = new THREE.BoxGeometry(width, 1, height);
-				const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+				const geometry = new THREE.BoxGeometry(1, 1, 1);
+				const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 				const mesh = new THREE.Mesh(geometry, material);
-				mesh.position.set(x * width, 0.5, y * height);
+				mesh.position.set(x, z, y);
 				this.preview.add(mesh);
 				return mesh;
+			}
+
+			removeMeshes() {
+				this.preview.clear();
 			}
 
 			changeMesh(tile: number, i: number, j: number): void {}

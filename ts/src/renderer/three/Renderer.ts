@@ -17,8 +17,11 @@ namespace Renderer {
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
+			commandController: CommandController = new CommandController({
+				increaseBrushSize: () => {},
+				decreaseBrushSize: () => {},
+			});
 			mode = Mode.Normal;
-
 			private clock = new THREE.Clock();
 			private pointer = new THREE.Vector2();
 			private initLoadingManager = new THREE.LoadingManager();
@@ -27,7 +30,7 @@ namespace Renderer {
 			private sky: Sky;
 			private voxels: Voxels;
 			private particles: Particles;
-
+			private voxelEditor: VoxelEditor;
 			private raycastIntervalSeconds = 0.1;
 			private timeSinceLastRaycast = 0;
 
@@ -79,6 +82,41 @@ namespace Renderer {
 				let height;
 
 				window.addEventListener('mousemove', (evt: MouseEvent) => {
+					switch (taro.developerMode.activeButton) {
+						case 'cursor': {
+							break;
+						}
+						case 'brush': {
+							const raycaster = new THREE.Raycaster();
+							raycaster.setFromCamera(this.pointer, this.camera.instance);
+							const filteredMeshes = this.voxels.meshes.filter((m) => m);
+							const intersects = raycaster.intersectObjects(filteredMeshes);
+							let closest: THREE.Mesh | undefined = undefined;
+							for (let i = 0; i < intersects.length; i++) {
+								const intersect = intersects[i];
+
+								let meshIdx = -1;
+								filteredMeshes.forEach((e, idx) => {
+									if (e === intersect.object) {
+										meshIdx = idx;
+									}
+								});
+								if (meshIdx === this.voxelEditor.currentLayerIndex) {
+									closest = intersect.object as THREE.Mesh;
+									this.voxelEditor.voxelMarker.removeMeshes();
+
+									this.voxelEditor.voxelMarker.addMesh(
+										Math.floor(intersect.point.x),
+										Math.floor(intersect.point.z),
+										Math.floor(intersect.point.y)
+									);
+									this.voxels.add(this.voxelEditor.voxelMarker.preview);
+									break;
+								}
+							}
+							break;
+						}
+					}
 					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 					if (!Utils.isLeftButton(evt.buttons)) return;
 					if (taro.developerMode.regionTool) {
@@ -142,16 +180,37 @@ namespace Renderer {
 							case 'brush': {
 								const raycaster = new THREE.Raycaster();
 								raycaster.setFromCamera(this.pointer, this.camera.instance);
-								const intersects = raycaster.intersectObjects(this.voxels.meshes.filter((m) => m));
-								if (intersects?.length > 0) {
-									const closest = intersects[0].object as THREE.Mesh;
-									let idx = 0;
-									const mesh = this.voxels.meshes.find((e) => {
-										idx += 1;
-										return e === closest;
-									}) as THREE.Mesh;
-									console.log(intersects[0].point, idx);
-									if (mesh) {
+								const filteredMeshes = this.voxels.meshes.filter((m) => m);
+								const intersects = raycaster.intersectObjects(filteredMeshes);
+								let closest: THREE.Mesh | undefined = undefined;
+								for (let i = 0; i < intersects.length; i++) {
+									const intersect = intersects[i];
+
+									let meshIdx = -1;
+									filteredMeshes.forEach((e, idx) => {
+										if (e === intersect.object) {
+											meshIdx = idx;
+										}
+									});
+									if (meshIdx === this.voxelEditor.currentLayerIndex) {
+										console.log(intersect);
+										closest = intersect.object as THREE.Mesh;
+										console.log(Math.floor(intersect.point.x), Math.floor(intersect.point.z));
+										const _x = Math.floor(intersect.point.x);
+										const _y = Math.floor(intersect.point.z);
+										const selectedTiles = {};
+										const tileId = 22;
+										selectedTiles[_x] = {};
+										selectedTiles[_x][_y] = tileId;
+										this.voxelEditor.putTiles(
+											_x,
+											_y,
+											selectedTiles,
+											'fitContent',
+											'rectangle',
+											this.voxelEditor.currentLayerIndex
+										);
+										break;
 									}
 								}
 								break;
@@ -242,6 +301,39 @@ namespace Renderer {
 					if (region) {
 						region.name = data.newName;
 						region.updateLabel(data.newName);
+					}
+				});
+				taro.client.on('updateMap', () => {
+					let numTileLayers = 0;
+					for (const [idx, layer] of taro.game.data.map.layers.entries()) {
+						if (layer.type === 'tilelayer' && layer.data) {
+							const voxels = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
+							this.voxels.addLayer(voxels, idx, true);
+							this.voxels.setLayerLookupTable(idx, numTileLayers);
+							numTileLayers++;
+						}
+					}
+				});
+				taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
+					const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
+						const dataType = k as MapEditToolEnum;
+						const dataValue = v as any;
+						return { dataType, dataValue };
+					})[0];
+					switch (dataType) {
+						case 'edit': {
+							const nowValue = dataValue as TileData<'edit'>['edit'];
+							nowValue.selectedTiles.map((v, idx) => {
+								this.voxelEditor.putTiles(
+									nowValue.x,
+									nowValue.y,
+									v,
+									nowValue.size,
+									nowValue.shape,
+									nowValue.layer[idx]
+								);
+							});
+						}
 					}
 				});
 			}
@@ -355,6 +447,7 @@ namespace Renderer {
 				this.scene.add(this.sky);
 
 				this.voxels = Voxels.create(taro.game.data.map.layers);
+				this.voxelEditor = new VoxelEditor(this.voxels, this.commandController);
 				this.scene.add(this.voxels);
 
 				this.particles = new Particles();

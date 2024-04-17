@@ -6,23 +6,24 @@ class VoxelEditor {
 
 	paletteArea: Vector2D;
 	brushArea: TileShape;
-
+	currentLayerIndex: number;
 	selectedTileArea: Record<number, Record<number, number>>;
 	lastSelectedTileArea: Record<number, Record<number, number>>;
 	commandController: CommandController;
 	startDragIn: string;
 	voxels: Renderer.Three.Voxels;
+	voxelMarker: Renderer.Three.VoxelMarker;
 	tileSize: number;
 	prevData: { edit: MapEditTool['edit'] } | undefined;
 
-	constructor(
-		voxels: Renderer.Three.Voxels,
-		private devModeTools: DevModeTools,
-		commandController: CommandController
-	) {
-		const palette = (this.tilePalette = this.devModeTools.palette);
+	constructor(voxels: Renderer.Three.Voxels, commandController: CommandController) {
 		const gameMap = taro.game.data.map;
 		this.voxels = voxels;
+		this.currentLayerIndex = 0;
+		this.voxelMarker = new Renderer.Three.VoxelMarker(commandController);
+		taro.client.on('switch-layer', (value) => {
+			this.currentLayerIndex = value;
+		});
 		taro.client.on('updateMap', () => {
 			let numTileLayers = 0;
 			for (const [idx, layer] of taro.game.data.map.layers.entries()) {
@@ -51,7 +52,7 @@ class VoxelEditor {
 
 		const pointerPosition = { x: 0, y: 0 };
 
-		this.activateMarkers(false);
+		// this.activateMarkers(false);
 
 		this.startDragIn = 'none';
 		this.prevData = undefined;
@@ -112,7 +113,6 @@ class VoxelEditor {
 	activateMarkers(active: boolean): void {
 		this.marker.active = active;
 		this.paletteMarker.active = active;
-		if (active) this.devModeTools.regionEditor.regionTool = false;
 	}
 
 	showMarkers(value: boolean): void {
@@ -208,8 +208,8 @@ class VoxelEditor {
 		local?: boolean,
 		flat = false
 	) {
+		console.log(tileX, tileY, selectedTiles, brushSize, layer);
 		const voxels = new Map<string, Renderer.Three.VoxelCell>();
-
 		const allFacesVisible = [false, false, false, false, false, false];
 		const onlyBottomFaceVisible = [true, true, true, false, true, true];
 		const hiddenFaces = flat ? onlyBottomFaceVisible : allFacesVisible;
