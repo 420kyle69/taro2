@@ -106,55 +106,57 @@ namespace Renderer {
 						line.scale.set(width, 1, height);
 						line.visible = true;
 						this.scene.add(line);
-					} else if (
-						developerMode.active &&
-						developerMode.activeTab === 'map' &&
-						developerMode.activeButton === 'cursor' &&
-						Utils.isLeftButton(event.buttons)
-					) {
-						const raycaster = new THREE.Raycaster();
-						raycaster.setFromCamera(this.pointer, this.camera.instance);
+					} else if (developerMode.active && developerMode.activeTab === 'map' && Utils.isLeftButton(event.buttons)) {
+						switch (developerMode.activeButton) {
+							case 'cursor': {
+								const raycaster = new THREE.Raycaster();
+								raycaster.setFromCamera(this.pointer, this.camera.instance);
 
-						const intersects = raycaster.intersectObjects(this.entityManager.entities);
-						if (intersects?.length > 0) {
-							const closest = intersects[0].object as THREE.Mesh;
-							const region = this.entityManager.entities.find(
-								(e) => e instanceof Region && e.mesh === closest
-							) as Region;
-							if (region) {
-								/*const ownerPlayer = taro.$(unit.ownerId);
+								const intersects = raycaster.intersectObjects(this.entityManager.entities);
+								if (intersects?.length > 0) {
+									const closest = intersects[0].object as THREE.Mesh;
+									const region = this.entityManager.entities.find(
+										(e) => e instanceof Region && e.mesh === closest
+									) as Region;
+									if (region) {
+										/*const ownerPlayer = taro.$(unit.ownerId);
 								if (ownerPlayer?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}*/
-								const regionData = {
-									name: region.taroEntity._stats.id,
-									x: region.stats.x,
-									y: region.stats.y,
-									width: region.stats.width,
-									height: region.stats.height,
-									alpha: region.stats.alpha,
-									inside: region.stats.inside,
-								};
-								inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+										const regionData = {
+											name: region.taroEntity._stats.id,
+											x: region.stats.x,
+											y: region.stats.y,
+											width: region.stats.width,
+											height: region.stats.height,
+											alpha: region.stats.alpha,
+											inside: region.stats.inside,
+										};
+										inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+									}
+								}
+								break;
+							}
+							case 'brush': {
+								const raycaster = new THREE.Raycaster();
+								raycaster.setFromCamera(this.pointer, this.camera.instance);
+								const intersects = raycaster.intersectObjects(this.voxels.meshes.filter((m) => m));
+								if (intersects?.length > 0) {
+									const closest = intersects[0].object as THREE.Mesh;
+									let idx = 0;
+									const mesh = this.voxels.meshes.find((e) => {
+										idx += 1;
+										return e === closest;
+									}) as THREE.Mesh;
+									console.log(intersects[0].point, idx);
+									if (mesh) {
+									}
+								}
+								break;
 							}
 						}
-						/*gameObjects = gameObjects.filter((gameObject) => gameObject.phaserRegion);
-						gameObjects.forEach((gameObject) => {
-							this.devModeScene.regionEditor.addClickedList({
-								name: gameObject.phaserRegion.entity._stats.id,
-								x: gameObject.phaserRegion.stats.x,
-								y: gameObject.phaserRegion.stats.y,
-								width: gameObject.phaserRegion.stats.width,
-								height: gameObject.phaserRegion.stats.height,
-								alpha: gameObject.phaserRegion.stats.alpha,
-								inside: gameObject.phaserRegion.stats.inside,
-							});
-						});
-						if (gameObjects.length > 0) {
-							this.devModeScene.regionEditor.showClickedList();
-						}*/
 					}
 					if (Utils.isRightButton(event.buttons)) {
 						const raycaster = new THREE.Raycaster();

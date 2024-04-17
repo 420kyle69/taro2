@@ -12,32 +12,6 @@ namespace Renderer {
 			) {
 				super();
 				this.brushArea = new TileShape();
-				taro.client.on('updateMap', () => {
-					let numTileLayers = 0;
-					for (const [idx, layer] of taro.game.data.map.layers.entries()) {
-						if (layer.type === 'tilelayer' && layer.data) {
-							const voxels = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-							this.addLayer(voxels, idx, true);
-							this.setLayerLookupTable(idx, numTileLayers);
-							numTileLayers++;
-						}
-					}
-				});
-				taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
-					const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
-						const dataType = k as MapEditToolEnum;
-						const dataValue = v as any;
-						return { dataType, dataValue };
-					})[0];
-					switch (dataType) {
-						case 'edit': {
-							const nowValue = dataValue as TileData<'edit'>['edit'];
-							nowValue.selectedTiles.map((v, idx) => {
-								this.putTiles(nowValue.x, nowValue.y, v, nowValue.size, nowValue.shape, nowValue.layer[idx]);
-							});
-						}
-					}
-				});
 			}
 
 			static create(config?: MapData['layers']) {
@@ -66,55 +40,6 @@ namespace Renderer {
 				}
 
 				return voxels;
-			}
-
-			putTiles(
-				tileX: number,
-				tileY: number,
-				selectedTiles: Record<number, Record<number, number>>,
-				brushSize: Vector2D | 'fitContent',
-				shape: Shape,
-				layer: number,
-				local?: boolean,
-				flat = false
-			) {
-				const voxels = new Map<string, VoxelCell>();
-
-				const allFacesVisible = [false, false, false, false, false, false];
-				const onlyBottomFaceVisible = [true, true, true, false, true, true];
-				const hiddenFaces = flat ? onlyBottomFaceVisible : allFacesVisible;
-				const calcData = this.brushArea.calcSample(selectedTiles, brushSize, shape, true);
-				const yOffset = 0.001;
-				const sample = calcData.sample;
-				const size = brushSize === 'fitContent' ? { x: calcData.xLength, y: calcData.yLength } : brushSize;
-				const taroMap = taro.game.data.map;
-				const width = taroMap.width;
-				const height = taroMap.height;
-				tileX = brushSize === 'fitContent' ? calcData.minX : tileX;
-				tileY = brushSize === 'fitContent' ? calcData.minY : tileY;
-				for (let x = 0; x < size.x; x++) {
-					for (let y = 0; y < size.y; y++) {
-						if (
-							sample[x] &&
-							sample[x][y] !== undefined &&
-							DevModeScene.pointerInsideMap(tileX + x, tileY + y, { width, height })
-						) {
-							let _x = tileX + x + 0.5;
-							let _z = tileY + y + 0.5;
-							let tileId = sample[x][y];
-							const height = this.calcHeight(layer);
-							const pos = { x: _x, y: height + yOffset * height, z: _z };
-
-							voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
-								position: [pos.x, pos.y, pos.z],
-								type: tileId,
-								visible: true,
-								hiddenFaces: [...hiddenFaces],
-							});
-						}
-					}
-				}
-				this.addLayer(voxels, layer, true);
 			}
 
 			// because it may have debris layer, so we need a lookup table to find the real floor height
@@ -186,7 +111,7 @@ namespace Renderer {
 			}
 		}
 
-		function getKeyFromPos(x: number, y: number, z: number) {
+		export function getKeyFromPos(x: number, y: number, z: number) {
 			return `${x}.${y}.${z}`;
 		}
 
@@ -345,7 +270,7 @@ namespace Renderer {
 			data: number[];
 		};
 
-		type VoxelCell = {
+		export type VoxelCell = {
 			position: number[];
 			type: number;
 			visible: boolean;
