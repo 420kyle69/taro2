@@ -255,21 +255,21 @@ var Item = TaroEntityPhysics.extend({
 			}
 		}
 
-		if (taro.isClient && taro.game.data.defaultData.heightBasedZIndex) {
+		if (taro.isClient) {
 			this.emit('setOwnerUnit', this._stats.ownerUnitId);
 		}
 	},
 
-	hide: function() {
+	hide: function () {
 		if (taro.isServer) {
 			this.streamUpdateData([{ isHidden: true }]);
 		}
-		
-		TaroEntityPhysics.prototype.destroyBody.call(this);				
+
+		TaroEntityPhysics.prototype.destroyBody.call(this);
 		TaroEntity.prototype._hide.call(this);
 	},
 
-	show: function() {
+	show: function () {
 		if (taro.isServer) {
 			this.streamUpdateData([{ isHidden: false }]);
 		}
