@@ -4,6 +4,7 @@ namespace Renderer {
 			sprite: THREE.Mesh;
 			billboard = false;
 			scaleUnflipped = new THREE.Vector2(1, 1);
+			childSprites: Sprite[] = []; // Children already used by node/3js. Probably should move to composition to avoid name clashes.
 
 			private layer = 3;
 			private depth = 1;

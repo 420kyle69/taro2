@@ -1,47 +1,44 @@
 namespace Renderer {
 	export namespace Three {
 		export class EntityManager {
-			entities: (Unit | Region)[] = [];
+			entities: (Unit | Item | Region)[] = [];
 			units: Unit[] = [];
-			items: Unit[] = [];
+			items: Item[] = [];
 			projectiles: Unit[] = [];
 			regions: Region[] = [];
 
 			private animatedSprites: AnimatedSprite[] = [];
-			private unownedItems = new Map<string, Unit>();
-
-			constructor() {}
+			private unownedItems = new Map<string, Item>();
 
 			create(taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') {
 				let entity;
 
-				if (type !== 'region') {
-					entity = Unit.create(taroEntity);
-					this.animatedSprites.push(entity);
-				} else {
-					entity = new Region(taroEntity._id, taroEntity._stats.ownerId, taroEntity);
-				}
-
-				this.entities.push(entity);
-
 				switch (type) {
 					case 'unit': {
+						entity = Unit.create(taroEntity);
 						this.units.push(entity);
 						this.maybeAddUnownedItemsToUnit(entity);
 						break;
 					}
 					case 'item': {
+						entity = Item.create(taroEntity);
 						this.items.push(entity);
 						this.addItemToUnitOrUnownedItems(entity);
 						break;
 					}
-					case 'projectile':
+					case 'projectile': {
+						entity = Unit.create(taroEntity);
 						this.projectiles.push(entity);
 						break;
-					case 'region':
+					}
+					case 'region': {
+						entity = new Region(taroEntity._id, taroEntity._stats.ownerId, taroEntity);
 						this.regions.push(entity);
 						break;
+					}
 				}
+
+				this.entities.push(entity);
 
 				return entity;
 			}
@@ -63,15 +60,15 @@ namespace Renderer {
 			}
 
 			scaleGui(scale: number) {
-				for (const entity of this.entities) {
-					entity.hud.scale.setScalar(scale);
+				for (const unit of this.units) {
+					unit.hud.scale.setScalar(scale);
 				}
 			}
 
-			private addItemToUnitOrUnownedItems(item: Unit) {
+			private addItemToUnitOrUnownedItems(item: Item) {
 				for (const unit of this.units) {
 					if (item.taroId == unit.taroId) {
-						// Add item ref to unit's items.
+						unit.childSprites.push(item);
 					} else {
 						this.unownedItems.set(item.taroId, item);
 					}
@@ -80,9 +77,9 @@ namespace Renderer {
 
 			private maybeAddUnownedItemsToUnit(unit: Unit) {
 				for (const [taroId, item] of this.unownedItems.entries()) {
-					if (unit.taroId == item.taroEntity?._stats.ownerUnitId) {
+					if (unit.taroId == item.ownerUnitId) {
 						this.unownedItems.delete(taroId);
-						// Add item ref to unit's items.
+						unit.childSprites.push(item);
 					}
 				}
 			}
