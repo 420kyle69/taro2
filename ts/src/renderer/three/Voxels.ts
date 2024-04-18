@@ -164,7 +164,6 @@ namespace Renderer {
 						updateCellSides(curCell, cells) && (prevCells === undefined || updateCellSides(curCell, prevCells));
 					if (visible) {
 						prunedVoxels.set(k, curCell);
-						console.log(curCell);
 					}
 				}
 			}
