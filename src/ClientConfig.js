@@ -118,7 +118,6 @@ var taroClientConfig = {
 		'renderer/three/TextureRepository.js',
 		'renderer/three/Node.js',
 		'renderer/three/Voxels.js',
-		'renderer/three/VoxelEditor.js',
 		'renderer/three/Renderer.js',
 		'renderer/three/Camera.js',
 		'renderer/three/Sprite.js',
@@ -127,6 +126,7 @@ var taroClientConfig = {
 		'renderer/three/Sky.js',
 		'renderer/three/Tileset.js',
 		'renderer/three/Particles.js',
+		'renderer/three/VoxelEditor.js',
 		'renderer/three/VoxelMarker.js',
 		'renderer/three/MarkerLines.js',
 
