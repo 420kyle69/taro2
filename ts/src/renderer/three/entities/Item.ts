@@ -7,7 +7,7 @@ namespace Renderer {
 				public taroId: string,
 				public ownerId: string,
 				tex: THREE.Texture,
-				private taroEntity?: TaroEntityPhysics
+				public taroEntity?: TaroEntityPhysics
 			) {
 				super(tex);
 
@@ -33,8 +33,10 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					(data: { x: number; y: number; rotation: number }) => {
-						entity.position.x = Utils.pixelToWorld(data.x);
-						entity.position.z = Utils.pixelToWorld(data.y);
+						if (!entity.ownerUnitId || entity.taroEntity?._stats.type === 'weapon') {
+							entity.position.x = Utils.pixelToWorld(data.x);
+							entity.position.z = Utils.pixelToWorld(data.y);
+						}
 
 						entity.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;
@@ -86,7 +88,10 @@ namespace Renderer {
 					entity.add(text);
 				});
 
-				taroEntity.on('setOwnerUnit', (unitId: string) => (entity.ownerUnitId = unitId));
+				taroEntity.on('setOwnerUnit', (unitId: string) => {
+					console.log(entity.taroId, 'changed owner from', entity.ownerUnitId, 'to', unitId);
+					entity.ownerUnitId = unitId;
+				});
 
 				return entity;
 			}

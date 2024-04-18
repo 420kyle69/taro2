@@ -17,18 +17,21 @@ namespace Renderer {
 					case 'unit': {
 						entity = Unit.create(taroEntity);
 						this.units.push(entity);
+						this.animatedSprites.push(entity);
 						this.maybeAddUnownedItemsToUnit(entity);
 						break;
 					}
 					case 'item': {
 						entity = Item.create(taroEntity);
 						this.items.push(entity);
+						this.animatedSprites.push(entity);
 						this.addItemToUnitOrUnownedItems(entity);
 						break;
 					}
 					case 'projectile': {
 						entity = Unit.create(taroEntity);
 						this.projectiles.push(entity);
+						this.animatedSprites.push(entity);
 						break;
 					}
 					case 'region': {
@@ -57,6 +60,12 @@ namespace Renderer {
 				for (const sprite of this.animatedSprites) {
 					sprite.update(dt);
 				}
+
+				if (this.unownedItems.size > 0) {
+					for (const unit of this.units) {
+						this.maybeAddUnownedItemsToUnit(unit);
+					}
+				}
 			}
 
 			scaleGui(scale: number) {
@@ -66,20 +75,54 @@ namespace Renderer {
 			}
 
 			private addItemToUnitOrUnownedItems(item: Item) {
+				if (item.taroEntity?._stats.type === 'weapon') return;
+
 				for (const unit of this.units) {
-					if (item.taroId == unit.taroId) {
+					if (item.ownerUnitId == unit.taroId) {
 						unit.childSprites.push(item);
-					} else {
-						this.unownedItems.set(item.taroId, item);
+						item.parentedItemRenderHack = true;
+
+						return;
 					}
+				}
+
+				this.unownedItems.set(item.taroId, item);
+
+				if (item.taroEntity) {
+					item.taroEntity.on('setOwnerUnit', (unitId: string) => {
+						item.ownerUnitId = unitId;
+						this.maybeAddUnownedItemToUnit(item);
+					});
 				}
 			}
 
 			private maybeAddUnownedItemsToUnit(unit: Unit) {
+				const itemsToDelete = [];
+
 				for (const [taroId, item] of this.unownedItems.entries()) {
 					if (unit.taroId == item.ownerUnitId) {
-						this.unownedItems.delete(taroId);
 						unit.childSprites.push(item);
+						item.parentedItemRenderHack = true;
+						itemsToDelete.push(taroId);
+					}
+				}
+
+				for (const itemTaroId of itemsToDelete) {
+					this.unownedItems.delete(itemTaroId);
+				}
+			}
+
+			private maybeAddUnownedItemToUnit(item: Item) {
+				if (!this.unownedItems.has(item.taroId)) return;
+
+				for (const unit of this.units) {
+					if (item.ownerUnitId === unit.taroId) {
+						unit.childSprites.push(item);
+						item.parentedItemRenderHack = true;
+
+						this.unownedItems.delete(item.taroId);
+
+						return;
 					}
 				}
 			}
