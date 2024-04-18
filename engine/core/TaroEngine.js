@@ -2265,6 +2265,110 @@ var TaroEngine = TaroEntity.extend({
 		}).length;
 	},
 
+	mergeGameJson: function (worldJson, gameJson) {
+		const mergeableKeys = {
+			entityTypeVariables: true,
+			shops: true,
+			animationTypes: true,
+			states: true,
+			map: false,
+			buffTypes: true,
+			projectileTypes: true,
+			itemTypes: true,
+			music: true,
+			dialogues: true,
+			sound: true,
+			scripts: true,
+			unitTypes: true,
+			abilities: true,
+			variables: true,
+			attributeTypes: true,
+			settings: false,
+			images: true,
+			tilesets: false,
+			factions: true,
+			playerTypes: true,
+			particles: true,
+			particleTypes: true,
+			bodyTypes: true,
+			playerTypeVariables: true,
+			ui: true,
+			folders: false,
+			title: false,
+			isDeveloper: false,
+			releaseId: false,
+			roles: false,
+			defaultData: false,
+		};
+
+		// we don't want to merge UI. It will always pick data from world json.
+		if (gameJson.data?.ui) {
+			delete gameJson.data.ui;
+		}
+		Object.keys(mergeableKeys).forEach((mergeableKey) => {
+			if (mergeableKeys[mergeableKey]) {
+				if (worldJson.data[mergeableKey]) {
+					// cleanup all isWorld properties from gameJson (ideally there won't be any but just in case)
+					if (typeof gameJson.data[mergeableKey] === 'object') {
+						Object.keys(gameJson.data[mergeableKey]).forEach((key) => {
+							if (gameJson.data[mergeableKey][key]?.isWorld) {
+								delete gameJson.data[mergeableKey][key]?.isWorld;
+							}
+						});
+					};
+	
+					if (typeof worldJson.data[mergeableKey] === 'object' && Array.isArray(worldJson.data[mergeableKey])) {
+						// merge/concat all elements of the array
+						gameJson.data[mergeableKey] = worldJson.data[mergeableKey].concat(gameJson.data[mergeableKey] || []);
+					} else if (typeof worldJson.data[mergeableKey] === 'object') {
+
+						const gameJsonData = gameJson.data[mergeableKey];
+
+						// replace game json data with world json
+						gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
+
+						// set isWorld property for all keys
+						for (let key in worldJson.data[mergeableKey]) {
+							if (
+								worldJson.data[mergeableKey].hasOwnProperty(key) &&
+								worldJson.data[mergeableKey][key] &&
+								typeof worldJson.data[mergeableKey][key] === 'object'
+							) {
+								if (!gameJson.data[mergeableKey]) {
+									gameJson.data[mergeableKey] = {};
+								}
+	
+								gameJson.data[mergeableKey][key].isWorld = true;
+							}
+						}
+
+						// set game json properties thata re not in world json
+						for (let key in gameJsonData) {
+							if (
+								gameJsonData.hasOwnProperty(key) &&
+								gameJsonData[key] &&
+								typeof gameJsonData[key] === 'object' &&
+								typeof gameJson.data[mergeableKey][key] === "undefined"
+							) {
+								if (!gameJson.data[mergeableKey]) {
+									gameJson.data[mergeableKey] = {};
+								}
+
+								gameJson.data[mergeableKey][key] = gameJsonData[key];
+							}
+						}
+
+					} else {
+						// world takes precedence in merging strings/boolean/numbers
+						gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
+					}
+				}
+			}
+		});
+	
+		return gameJson;
+	},
+
 	devLog: function () {
 		// return;
 		// if (taro.env == 'local') {

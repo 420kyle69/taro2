@@ -1,9 +1,6 @@
 namespace Renderer {
 	export namespace Three {
 		export class Unit extends AnimatedSprite {
-			// TODO: Create separate class for units and items/projectiles. Only
-			// units need labels.
-
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },
@@ -20,7 +17,7 @@ namespace Renderer {
 				public taroId: string,
 				public ownerId: string,
 				tex: THREE.Texture,
-				private taroEntity?: TaroEntityPhysics
+				public taroEntity?: TaroEntityPhysics
 			) {
 				super(tex);
 
