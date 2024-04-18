@@ -464,8 +464,8 @@ namespace Renderer {
 
 				if (this.camera.target && !taro.isMobile) {
 					const worldPos = this.camera.getWorldPoint(this.pointer);
-					const x = Utils.worldToPixel(worldPos.x + 0.5);
-					const y = Utils.worldToPixel(worldPos.z + 0.5);
+					const x = Utils.worldToPixel(worldPos.x);
+					const y = Utils.worldToPixel(worldPos.z);
 					const yaw = this.camera.getAzimuthAngle();
 					const pitch = this.camera.getElevationAngle();
 					taro.input.emit('pointermove', [{ x, y, yaw, pitch }]);
