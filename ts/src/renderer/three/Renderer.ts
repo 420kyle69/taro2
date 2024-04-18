@@ -322,8 +322,6 @@ namespace Renderer {
 						}
 					}
 				});
-
-				this.camera.setDevelopmentMode(true);
 			}
 
 			static instance() {
@@ -539,8 +537,6 @@ namespace Renderer {
 					const dynamicText = DynamicFloatingText.create(config, zOffset);
 					entitiesLayer.add(dynamicText);
 				});
-
-				this.camera.setDevelopmentMode(true);
 			}
 
 			private render() {

@@ -33,7 +33,11 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					(data: { x: number; y: number; rotation: number }) => {
-						if (!entity.ownerUnitId || entity.taroEntity?._stats.type === 'weapon') {
+						if (
+							!entity.ownerUnitId ||
+							entity.taroEntity?._stats.type === 'weapon' ||
+							entity.taroEntity?._stats.stateId === 'dropped'
+						) {
 							entity.position.x = Utils.pixelToWorld(data.x);
 							entity.position.z = Utils.pixelToWorld(data.y);
 						}
