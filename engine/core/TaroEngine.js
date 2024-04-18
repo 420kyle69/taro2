@@ -2321,6 +2321,13 @@ var TaroEngine = TaroEntity.extend({
 						// merge/concat all elements of the array
 						gameJson.data[mergeableKey] = worldJson.data[mergeableKey].concat(gameJson.data[mergeableKey] || []);
 					} else if (typeof worldJson.data[mergeableKey] === 'object') {
+
+						const gameJsonData = gameJson.data[mergeableKey];
+
+						// replace game json data with world json
+						gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
+
+						// set isWorld property for all keys
 						for (let key in worldJson.data[mergeableKey]) {
 							if (
 								worldJson.data[mergeableKey].hasOwnProperty(key) &&
@@ -2331,10 +2338,26 @@ var TaroEngine = TaroEntity.extend({
 									gameJson.data[mergeableKey] = {};
 								}
 	
-								gameJson.data[mergeableKey][key] = worldJson.data[mergeableKey][key];
 								gameJson.data[mergeableKey][key].isWorld = true;
 							}
 						}
+
+						// set game json properties thata re not in world json
+						for (let key in gameJsonData) {
+							if (
+								gameJsonData.hasOwnProperty(key) &&
+								gameJsonData[key] &&
+								typeof gameJsonData[key] === 'object' &&
+								typeof gameJson.data[mergeableKey][key] === "undefined"
+							) {
+								if (!gameJson.data[mergeableKey]) {
+									gameJson.data[mergeableKey] = {};
+								}
+
+								gameJson.data[mergeableKey][key] = gameJsonData[key];
+							}
+						}
+
 					} else {
 						// world takes precedence in merging strings/boolean/numbers
 						gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
