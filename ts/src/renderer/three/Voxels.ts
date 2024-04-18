@@ -103,7 +103,7 @@ namespace Renderer {
 				geometry.addGroup(voxelData.sidesIndices.length, voxelData.topIndices.length, 1);
 
 				const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
-				const plane = new THREE.Plane(new THREE.Vector3(0, renderOrder, 0), 1);
+				const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1 - renderOrder / 100);
 				mesh.renderOrder = renderOrder;
 				//@ts-ignore
 				geometry.computeBoundsTree();
