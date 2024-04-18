@@ -35,6 +35,14 @@ class VoxelEditor {
 				}
 			}
 		});
+		taro.client.on('cursor', () => {
+			this.voxelMarker.removeMeshes();
+		});
+		taro.client.on('draw-region', () => {
+			this.voxelMarker.removeMeshes();
+		});
+		taro.client.on('brush', () => {});
+		taro.client.on('empty-tile', () => {});
 		//TODO
 		// this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2, commandController);
 		// this.paletteMarker = new TileMarker(
@@ -208,7 +216,6 @@ class VoxelEditor {
 		local?: boolean,
 		flat = false
 	) {
-		console.log(tileX, tileY, selectedTiles, brushSize, layer);
 		const voxels = new Map<string, Renderer.Three.VoxelCell>();
 		const allFacesVisible = [false, false, false, false, false, false];
 		const onlyBottomFaceVisible = [true, true, true, false, true, true];
@@ -244,7 +251,7 @@ class VoxelEditor {
 				}
 			}
 		}
-		this.voxels.addLayer(voxels, layer, true);
+		this.voxels.addLayer(voxels, layer);
 	}
 
 	getTile(tileX: number, tileY: number, map: Phaser.Tilemaps.Tilemap): number {

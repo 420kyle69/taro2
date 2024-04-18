@@ -5,6 +5,7 @@ namespace Renderer {
 			voxelData: { positions: any[]; uvs: any[]; normals: any[]; topIndices: any[]; sidesIndices: any[] }[] = [];
 			voxels: Map<string, VoxelCell>[] = [];
 			meshes: THREE.Mesh[] = [];
+			layerPlanes: THREE.Plane[] = [];
 			layerLookupTable: Record<number, number> = {};
 			constructor(
 				private topTileset: Tileset,
@@ -71,7 +72,7 @@ namespace Renderer {
 						voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
 							position: [pos.x, pos.y, pos.z],
 							type: tileId,
-							visible: true,
+							visible: tileId > 0,
 							hiddenFaces: [...hiddenFaces],
 						});
 					}
@@ -102,12 +103,14 @@ namespace Renderer {
 				geometry.addGroup(voxelData.sidesIndices.length, voxelData.topIndices.length, 1);
 
 				const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
+				const plane = new THREE.Plane(new THREE.Vector3(0, renderOrder, 0), 1);
 				mesh.renderOrder = renderOrder;
 				//@ts-ignore
 				geometry.computeBoundsTree();
 				this.remove(this.meshes[layerIdx]);
 				this.add(mesh);
 				this.meshes[layerIdx] = mesh;
+				this.layerPlanes[layerIdx] = plane;
 			}
 		}
 
@@ -115,34 +118,54 @@ namespace Renderer {
 			return `${x}.${y}.${z}`;
 		}
 
+		function updateCellSides(curCell: VoxelCell, cells: Map<string, VoxelCell>) {
+			let visible = false;
+			const neighborKeys = findNeighbors(curCell[0], curCell[1], curCell[2]);
+			for (let i = 0; i < 6; ++i) {
+				const hasNeighbor = cells.has(neighborKeys[i]);
+
+				if (hasNeighbor) {
+					curCell.hiddenFaces[i] = true;
+				}
+
+				if (!hasNeighbor) {
+					visible = true;
+				}
+			}
+			return visible;
+		}
+
+		function findNeighbors(x: number, y: number, z: number) {
+			const k1 = getKeyFromPos(x + 1, y, z);
+			const k2 = getKeyFromPos(x - 1, y, z);
+			const k3 = getKeyFromPos(x, y + 1, z);
+			const k4 = getKeyFromPos(x, y - 1, z);
+			const k5 = getKeyFromPos(x, y, z + 1);
+			const k6 = getKeyFromPos(x, y, z - 1);
+
+			const neighborKeys = [k1, k2, k3, k4, k5, k6];
+			return neighborKeys;
+		}
+
 		function pruneCells(cells: Map<string, VoxelCell>, prevCells?: Map<string, VoxelCell>) {
 			const prunedVoxels = prevCells ?? new Map<string, VoxelCell>();
 			for (let k of cells.keys()) {
 				const curCell = cells.get(k);
 
-				const k1 = getKeyFromPos(curCell.position[0] + 1, curCell.position[1], curCell.position[2]);
-				const k2 = getKeyFromPos(curCell.position[0] - 1, curCell.position[1], curCell.position[2]);
-				const k3 = getKeyFromPos(curCell.position[0], curCell.position[1] + 1, curCell.position[2]);
-				const k4 = getKeyFromPos(curCell.position[0], curCell.position[1] - 1, curCell.position[2]);
-				const k5 = getKeyFromPos(curCell.position[0], curCell.position[1], curCell.position[2] + 1);
-				const k6 = getKeyFromPos(curCell.position[0], curCell.position[1], curCell.position[2] - 1);
-
-				const neighborKeys = [k1, k2, k3, k4, k5, k6];
-				let visible = false;
-				for (let i = 0; i < 6; ++i) {
-					const hasNeighbor = cells.has(neighborKeys[i]);
-
-					if (hasNeighbor) {
-						curCell.hiddenFaces[i] = true;
+				if (prevCells && curCell.type === 0) {
+					let pos = curCell.position;
+					prevCells.delete(k);
+					findNeighbors(pos[0], pos[1], pos[2]).forEach((neighborKey) => {
+						let neighbor = prevCells.get(neighborKey);
+						if (neighbor !== undefined) {
+							updateCellSides(neighbor, prevCells);
+						}
+					});
+				} else {
+					let visible = updateCellSides(curCell, cells);
+					if (visible) {
+						prunedVoxels.set(k, curCell);
 					}
-
-					if (!hasNeighbor) {
-						visible = true;
-					}
-				}
-
-				if (visible) {
-					prunedVoxels.set(k, curCell);
 				}
 			}
 			return prunedVoxels;

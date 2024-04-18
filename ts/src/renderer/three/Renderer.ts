@@ -26,7 +26,7 @@ namespace Renderer {
 			private pointer = new THREE.Vector2();
 			private initLoadingManager = new THREE.LoadingManager();
 			private entityManager = new EntityManager();
-
+			private tmp_tileId = 7;
 			private sky: Sky;
 			private voxels: Voxels;
 			private particles: Particles;
@@ -43,7 +43,6 @@ namespace Renderer {
 				} else {
 					return Renderer._instance;
 				}
-
 				const { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } = window.MeshBVHLib;
 
 				//@ts-ignore
@@ -86,34 +85,28 @@ namespace Renderer {
 						case 'cursor': {
 							break;
 						}
+						case 'eraser': {
+						}
 						case 'brush': {
 							const raycaster = new THREE.Raycaster();
 							raycaster.setFromCamera(this.pointer, this.camera.instance);
-							const filteredMeshes = this.voxels.meshes.filter((m) => m);
-							const intersects = raycaster.intersectObjects(filteredMeshes);
-							let closest: THREE.Mesh | undefined = undefined;
-							for (let i = 0; i < intersects.length; i++) {
-								const intersect = intersects[i];
-
-								let meshIdx = -1;
-								filteredMeshes.forEach((e, idx) => {
-									if (e === intersect.object) {
-										meshIdx = idx;
-									}
-								});
-								if (meshIdx === this.voxelEditor.currentLayerIndex) {
-									closest = intersect.object as THREE.Mesh;
-									this.voxelEditor.voxelMarker.removeMeshes();
-
-									this.voxelEditor.voxelMarker.addMesh(
-										Math.floor(intersect.point.x),
-										Math.floor(intersect.point.z),
-										Math.floor(intersect.point.y)
-									);
-									this.voxels.add(this.voxelEditor.voxelMarker.preview);
-									break;
-								}
+							let intersectionPoint = new THREE.Vector3();
+							const intersect = raycaster.ray.intersectPlane(
+								this.voxels.layerPlanes[this.voxelEditor.currentLayerIndex],
+								intersectionPoint
+							);
+							if (!intersect) {
+								break;
 							}
+							this.voxelEditor.voxelMarker.removeMeshes();
+
+							this.voxelEditor.voxelMarker.addMesh(
+								Math.floor(intersect.x) + 0.5,
+								Math.floor(intersect.z) + 0.5,
+								// TODO
+								this.voxelEditor.voxels.layerLookupTable[this.voxelEditor.currentLayerIndex]
+							);
+							this.voxels.add(this.voxelEditor.voxelMarker.preview);
 							break;
 						}
 					}
@@ -123,8 +116,8 @@ namespace Renderer {
 						const worldPoint = this.camera.getWorldPoint(this.pointer);
 						width = worldPoint.x - this.regionDrawStart.x;
 						height = worldPoint.z - this.regionDrawStart.y;
-						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
-						line.scale.set(width, 1, height);
+						line?.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
+						line?.scale.set(width, 1, height);
 					}
 				});
 
@@ -177,42 +170,34 @@ namespace Renderer {
 								}
 								break;
 							}
+							case 'eraser': {
+							}
 							case 'brush': {
 								const raycaster = new THREE.Raycaster();
 								raycaster.setFromCamera(this.pointer, this.camera.instance);
-								const filteredMeshes = this.voxels.meshes.filter((m) => m);
-								const intersects = raycaster.intersectObjects(filteredMeshes);
-								let closest: THREE.Mesh | undefined = undefined;
-								for (let i = 0; i < intersects.length; i++) {
-									const intersect = intersects[i];
-
-									let meshIdx = -1;
-									filteredMeshes.forEach((e, idx) => {
-										if (e === intersect.object) {
-											meshIdx = idx;
-										}
-									});
-									if (meshIdx === this.voxelEditor.currentLayerIndex) {
-										console.log(intersect);
-										closest = intersect.object as THREE.Mesh;
-										console.log(Math.floor(intersect.point.x), Math.floor(intersect.point.z));
-										const _x = Math.floor(intersect.point.x);
-										const _y = Math.floor(intersect.point.z);
-										const selectedTiles = {};
-										const tileId = 22;
-										selectedTiles[_x] = {};
-										selectedTiles[_x][_y] = tileId;
-										this.voxelEditor.putTiles(
-											_x,
-											_y,
-											selectedTiles,
-											'fitContent',
-											'rectangle',
-											this.voxelEditor.currentLayerIndex
-										);
-										break;
-									}
+								let intersectionPoint = new THREE.Vector3();
+								const intersect = raycaster.ray.intersectPlane(
+									this.voxels.layerPlanes[this.voxelEditor.currentLayerIndex],
+									intersectionPoint
+								);
+								if (!intersect) {
+									break;
 								}
+								const _x = Math.floor(intersect.x);
+								const _y = Math.floor(intersect.z);
+								const selectedTiles = {};
+								const tileId = this.tmp_tileId;
+								selectedTiles[_x] = {};
+								selectedTiles[_x][_y] = developerMode.activeButton === 'eraser' ? 0 : tileId;
+								this.voxelEditor.putTiles(
+									_x,
+									_y,
+									selectedTiles,
+									'fitContent',
+									'rectangle',
+									this.voxelEditor.currentLayerIndex
+								);
+
 								break;
 							}
 						}
@@ -344,6 +329,10 @@ namespace Renderer {
 				}
 
 				return this._instance;
+			}
+
+			tmpSetTIleId(tileId: number) {
+				this.tmp_tileId = tileId;
 			}
 
 			getViewportBounds() {
