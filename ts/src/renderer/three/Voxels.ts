@@ -120,13 +120,11 @@ namespace Renderer {
 
 		function updateCellSides(curCell: VoxelCell, cells: Map<string, VoxelCell>) {
 			let visible = false;
-			const neighborKeys = findNeighbors(curCell[0], curCell[1], curCell[2]);
+			const neighborKeys = findNeighbors(curCell.position[0], curCell.position[1], curCell.position[2]);
 			for (let i = 0; i < 6; ++i) {
 				const hasNeighbor = cells.has(neighborKeys[i]);
 
-				if (hasNeighbor) {
-					curCell.hiddenFaces[i] = true;
-				}
+				curCell.hiddenFaces[i] = hasNeighbor;
 
 				if (!hasNeighbor) {
 					visible = true;
@@ -162,9 +160,11 @@ namespace Renderer {
 						}
 					});
 				} else {
-					let visible = updateCellSides(curCell, cells);
+					let visible =
+						updateCellSides(curCell, cells) && (prevCells === undefined || updateCellSides(curCell, prevCells));
 					if (visible) {
 						prunedVoxels.set(k, curCell);
+						console.log(curCell);
 					}
 				}
 			}
