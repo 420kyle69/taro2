@@ -78,6 +78,8 @@ namespace Renderer {
 			}
 
 			update(dt: number) {
+				super.update(dt);
+
 				this.elapsedTime += dt;
 
 				if (this.repeat !== -1 && this.cycle >= this.repeat + 1) {

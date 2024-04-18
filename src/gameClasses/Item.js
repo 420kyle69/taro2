@@ -256,7 +256,7 @@ var Item = TaroEntityPhysics.extend({
 			}
 		}
 
-		if (taro.isClient && taro.game.data.defaultData.heightBasedZIndex) {
+		if (taro.isClient) {
 			this.emit('setOwnerUnit', this._stats.ownerUnitId);
 		}
 	},
