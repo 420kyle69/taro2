@@ -322,8 +322,6 @@ namespace Renderer {
 						}
 					}
 				});
-
-				this.camera.setDevelopmentMode(true);
 			}
 
 			static instance() {
