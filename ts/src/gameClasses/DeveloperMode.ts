@@ -1008,13 +1008,28 @@ class DeveloperMode {
 		}
 	}
 
-	editEntity(data: EditEntityData, clientId: string) {
+	updateDevelopersData(data: EditEntityData) {
+		if (taro.isServer) {
+			(taro.server.developerClientIds || []).forEach((developerId) => {
+				if (data.clientId !== developerId) {
+					taro.network.send('updateDevelopersData', data, developerId);
+				}
+			});
+		} else {
+			inGameEditor.updateEntity?.(data);
+		}
+	}
+
+	editEntity(data: EditEntityData, clientId?: string) {
 		if (taro.isClient) {
 			taro.network.send<any>('editEntity', data);
 		} else {
+			if (data) {
+				data.clientId = clientId;
+			}
 			// only allow developers to modify entities
 			if (taro.server.developerClientIds.includes(clientId)) {
-				if (data.entityType === 'unit') {
+				if (data.entityType === 'unitTypes') {
 					switch (data.action) {
 						case 'create':
 							//this.createUnit(data);
@@ -1031,8 +1046,12 @@ class DeveloperMode {
 						case 'delete':
 							//this.deleteUnit(data);
 							break;
+						
+						case 'update-developers-data':
+							this.updateDevelopersData(data);
+							break;
 					}
-				} else if (data.entityType === 'item') {
+				} else if (data.entityType === 'itemTypes') {
 					switch (data.action) {
 						case 'create':
 							//this.createItem(data);
@@ -1050,7 +1069,7 @@ class DeveloperMode {
 							//this.deleteItem(data);
 							break;
 					}
-				} else if (data.entityType === 'projectile') {
+				} else if (data.entityType === 'projectileTypes') {
 					switch (data.action) {
 						case 'create':
 							//this.createProjectile(data);
@@ -1068,7 +1087,7 @@ class DeveloperMode {
 							//this.deleteProjectile(data);
 							break;
 					}
-				} else if (data.entityType === 'shop') {
+				} else if (data.entityType === 'shops') {
 					switch (data.action) {
 						case 'update':
 							this.updateShop(data);
@@ -1076,7 +1095,7 @@ class DeveloperMode {
 						default:
 							break;
 					}
-				} else if (data.entityType === 'dialogue') {
+				} else if (data.entityType === 'dialogues') {
 					switch (data.action) {
 						case 'update':
 							this.updateDialogue(data);
@@ -1233,6 +1252,7 @@ interface EditEntityData {
 	playerId?: string;
 	position?: { x: number; y: number };
 	angle?: number;
+	clientId?: string;
 }
 
 type devModeTab = 'play' | 'map' | 'entities' | 'moderate' | 'debug';
