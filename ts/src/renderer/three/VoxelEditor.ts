@@ -245,13 +245,33 @@ class VoxelEditor {
 					voxels.set(Renderer.Three.getKeyFromPos(pos.x, pos.y, pos.z), {
 						position: [pos.x, pos.y, pos.z],
 						type: tileId,
-						visible: true,
+						visible: tileId > 0,
 						hiddenFaces: [...hiddenFaces],
 					});
+					if (tileId === -1) tileId = 0;
+					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
 				}
 			}
 		}
 		this.voxels.addLayer(voxels, layer);
+		if (!local) {
+			const data: { edit: MapEditTool['edit'] } = {
+				edit: {
+					size: brushSize,
+					layer: [layer],
+					selectedTiles: [selectedTiles],
+					x: tileX,
+					y: tileY,
+					shape,
+					noMerge: true,
+				},
+			};
+			console.log(data);
+			if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
+				taro.network.send<'edit'>('editTile', data);
+				this.prevData = data;
+			}
+		}
 	}
 
 	getTile(tileX: number, tileY: number, map: Phaser.Tilemaps.Tilemap): number {
