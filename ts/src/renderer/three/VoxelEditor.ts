@@ -41,8 +41,8 @@ class VoxelEditor {
 		taro.client.on('draw-region', () => {
 			this.voxelMarker.removeMeshes();
 		});
-		taro.client.on('brush', () => {});
-		taro.client.on('empty-tile', () => {});
+		taro.client.on('brush', () => { });
+		taro.client.on('empty-tile', () => { });
 		//TODO
 		// this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2, commandController);
 		// this.paletteMarker = new TileMarker(
@@ -249,8 +249,9 @@ class VoxelEditor {
 						visible: true,
 						hiddenFaces: [...hiddenFaces],
 					});
-					if (tileId === -1) tileId = 0;
-					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId + 1;
+					tileId += 1;
+					if (tileId < 0) tileId = 0;
+					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
 				}
 			}
 		}
