@@ -266,7 +266,6 @@ class VoxelEditor {
 					noMerge: true,
 				},
 			};
-			console.log(data);
 			if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
 				taro.network.send<'edit'>('editTile', data);
 				this.prevData = data;
