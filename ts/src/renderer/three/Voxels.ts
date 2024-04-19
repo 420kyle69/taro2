@@ -153,7 +153,7 @@ namespace Renderer {
 			for (let k of cells.keys()) {
 				const curCell = cells.get(k);
 
-				if (prevCells && curCell.type === -1) {
+				if (prevCells && curCell.type < 0) {
 					let pos = curCell.position;
 					prevCells.delete(k);
 					findNeighbors(pos[0], pos[1], pos[2]).forEach((neighborKey) => {
