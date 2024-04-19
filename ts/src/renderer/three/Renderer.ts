@@ -50,7 +50,6 @@ namespace Renderer {
 				//@ts-ignore
 				THREE.BufferGeometry.prototype.disposeBoundsTree = disposeBoundsTree;
 				THREE.Mesh.prototype.raycast = acceleratedRaycast;
-
 				const renderer = new THREE.WebGLRenderer();
 				renderer.setSize(window.innerWidth, window.innerHeight);
 				document.querySelector('#game-div')?.appendChild(renderer.domElement);
@@ -80,7 +79,7 @@ namespace Renderer {
 				let width;
 				let height;
 
-				window.addEventListener('mousemove', (evt: MouseEvent) => {
+				renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
 					switch (taro.developerMode.activeButton) {
 						case 'cursor': {
 							break;
@@ -121,7 +120,9 @@ namespace Renderer {
 					}
 				});
 
-				window.addEventListener('mousedown', (event: MouseEvent) => {
+				// TODO: add undo/redo
+				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
+				renderer.domElement.addEventListener('mousedown', (event: MouseEvent) => {
 					const developerMode = taro.developerMode;
 					if (developerMode.regionTool) {
 						const worldPoint = this.camera.getWorldPoint(this.pointer);
