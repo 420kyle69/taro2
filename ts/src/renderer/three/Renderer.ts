@@ -17,17 +17,20 @@ namespace Renderer {
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
+			commandController: CommandController = new CommandController({
+				increaseBrushSize: () => {},
+				decreaseBrushSize: () => {},
+			});
 			mode = Mode.Normal;
-
 			private clock = new THREE.Clock();
 			private pointer = new THREE.Vector2();
 			private initLoadingManager = new THREE.LoadingManager();
 			private entityManager = new EntityManager();
-
+			private tmp_tileId = 7;
 			private sky: Sky;
 			private voxels: Voxels;
 			private particles: Particles;
-
+			private voxelEditor: VoxelEditor;
 			private raycastIntervalSeconds = 0.1;
 			private timeSinceLastRaycast = 0;
 
@@ -40,7 +43,6 @@ namespace Renderer {
 				} else {
 					return Renderer._instance;
 				}
-
 				const { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } = window.MeshBVHLib;
 
 				//@ts-ignore
@@ -79,14 +81,43 @@ namespace Renderer {
 				let height;
 
 				window.addEventListener('mousemove', (evt: MouseEvent) => {
+					switch (taro.developerMode.activeButton) {
+						case 'cursor': {
+							break;
+						}
+						case 'eraser': {
+						}
+						case 'brush': {
+							const raycaster = new THREE.Raycaster();
+							raycaster.setFromCamera(this.pointer, this.camera.instance);
+							let intersectionPoint = new THREE.Vector3();
+							const intersect = raycaster.ray.intersectPlane(
+								this.voxels.layerPlanes[this.voxelEditor.currentLayerIndex],
+								intersectionPoint
+							);
+							if (!intersect) {
+								break;
+							}
+							this.voxelEditor.voxelMarker.removeMeshes();
+
+							this.voxelEditor.voxelMarker.addMesh(
+								Math.floor(intersect.x) + 0.5,
+								Math.floor(intersect.z) + 0.5,
+								// TODO
+								this.voxelEditor.voxels.layerLookupTable[this.voxelEditor.currentLayerIndex]
+							);
+							this.voxels.add(this.voxelEditor.voxelMarker.preview);
+							break;
+						}
+					}
 					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
 					if (!Utils.isLeftButton(evt.buttons)) return;
 					if (taro.developerMode.regionTool) {
 						const worldPoint = this.camera.getWorldPoint(this.pointer);
 						width = worldPoint.x - this.regionDrawStart.x;
 						height = worldPoint.z - this.regionDrawStart.y;
-						line.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
-						line.scale.set(width, 1, height);
+						line?.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
+						line?.scale.set(width, 1, height);
 					}
 				});
 
@@ -106,55 +137,70 @@ namespace Renderer {
 						line.scale.set(width, 1, height);
 						line.visible = true;
 						this.scene.add(line);
-					} else if (
-						developerMode.active &&
-						developerMode.activeTab === 'map' &&
-						developerMode.activeButton === 'cursor' &&
-						Utils.isLeftButton(event.buttons)
-					) {
-						const raycaster = new THREE.Raycaster();
-						raycaster.setFromCamera(this.pointer, this.camera.instance);
+					} else if (developerMode.active && developerMode.activeTab === 'map' && Utils.isLeftButton(event.buttons)) {
+						switch (developerMode.activeButton) {
+							case 'cursor': {
+								const raycaster = new THREE.Raycaster();
+								raycaster.setFromCamera(this.pointer, this.camera.instance);
 
-						const intersects = raycaster.intersectObjects(this.entityManager.entities);
-						if (intersects?.length > 0) {
-							const closest = intersects[0].object as THREE.Mesh;
-							const region = this.entityManager.entities.find(
-								(e) => e instanceof Region && e.mesh === closest
-							) as Region;
-							if (region) {
-								/*const ownerPlayer = taro.$(unit.ownerId);
+								const intersects = raycaster.intersectObjects(this.entityManager.entities);
+								if (intersects?.length > 0) {
+									const closest = intersects[0].object as THREE.Mesh;
+									const region = this.entityManager.entities.find(
+										(e) => e instanceof Region && e.mesh === closest
+									) as Region;
+									if (region) {
+										/*const ownerPlayer = taro.$(unit.ownerId);
 								if (ownerPlayer?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}*/
-								const regionData = {
-									name: region.taroEntity._stats.id,
-									x: region.stats.x,
-									y: region.stats.y,
-									width: region.stats.width,
-									height: region.stats.height,
-									alpha: region.stats.alpha,
-									inside: region.stats.inside,
-								};
-								inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+										const regionData = {
+											name: region.taroEntity._stats.id,
+											x: region.stats.x,
+											y: region.stats.y,
+											width: region.stats.width,
+											height: region.stats.height,
+											alpha: region.stats.alpha,
+											inside: region.stats.inside,
+										};
+										inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+									}
+								}
+								break;
+							}
+							case 'eraser': {
+							}
+							case 'brush': {
+								const raycaster = new THREE.Raycaster();
+								raycaster.setFromCamera(this.pointer, this.camera.instance);
+								let intersectionPoint = new THREE.Vector3();
+								const intersect = raycaster.ray.intersectPlane(
+									this.voxels.layerPlanes[this.voxelEditor.currentLayerIndex],
+									intersectionPoint
+								);
+								if (!intersect) {
+									break;
+								}
+								const _x = Math.floor(intersect.x);
+								const _y = Math.floor(intersect.z);
+								const selectedTiles = {};
+								const tileId = this.tmp_tileId;
+								selectedTiles[_x] = {};
+								selectedTiles[_x][_y] = developerMode.activeButton === 'eraser' ? 0 : tileId;
+								this.voxelEditor.putTiles(
+									_x,
+									_y,
+									selectedTiles,
+									'fitContent',
+									'rectangle',
+									this.voxelEditor.currentLayerIndex
+								);
+
+								break;
 							}
 						}
-						/*gameObjects = gameObjects.filter((gameObject) => gameObject.phaserRegion);
-						gameObjects.forEach((gameObject) => {
-							this.devModeScene.regionEditor.addClickedList({
-								name: gameObject.phaserRegion.entity._stats.id,
-								x: gameObject.phaserRegion.stats.x,
-								y: gameObject.phaserRegion.stats.y,
-								width: gameObject.phaserRegion.stats.width,
-								height: gameObject.phaserRegion.stats.height,
-								alpha: gameObject.phaserRegion.stats.alpha,
-								inside: gameObject.phaserRegion.stats.inside,
-							});
-						});
-						if (gameObjects.length > 0) {
-							this.devModeScene.regionEditor.showClickedList();
-						}*/
 					}
 					if (Utils.isRightButton(event.buttons)) {
 						const raycaster = new THREE.Raycaster();
@@ -242,6 +288,40 @@ namespace Renderer {
 						region.updateLabel(data.newName);
 					}
 				});
+
+				taro.client.on('updateMap', () => {
+					let numTileLayers = 0;
+					for (const [idx, layer] of taro.game.data.map.layers.entries()) {
+						if (layer.type === 'tilelayer' && layer.data) {
+							const voxels = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
+							this.voxels.addLayer(voxels, idx, true);
+							this.voxels.setLayerLookupTable(idx, numTileLayers);
+							numTileLayers++;
+						}
+					}
+				});
+				taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
+					const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
+						const dataType = k as MapEditToolEnum;
+						const dataValue = v as any;
+						return { dataType, dataValue };
+					})[0];
+					switch (dataType) {
+						case 'edit': {
+							const nowValue = dataValue as TileData<'edit'>['edit'];
+							nowValue.selectedTiles.map((v, idx) => {
+								this.voxelEditor.putTiles(
+									nowValue.x,
+									nowValue.y,
+									v,
+									nowValue.size,
+									nowValue.shape,
+									nowValue.layer[idx]
+								);
+							});
+						}
+					}
+				});
 			}
 
 			static instance() {
@@ -250,6 +330,10 @@ namespace Renderer {
 				}
 
 				return this._instance;
+			}
+
+			tmpSetTIleId(tileId: number) {
+				this.tmp_tileId = tileId;
 			}
 
 			getViewportBounds() {
@@ -353,6 +437,7 @@ namespace Renderer {
 				this.scene.add(this.sky);
 
 				this.voxels = Voxels.create(taro.game.data.map.layers);
+				this.voxelEditor = new VoxelEditor(this.voxels, this.commandController);
 				this.scene.add(this.voxels);
 
 				this.particles = new Particles();
@@ -460,8 +545,8 @@ namespace Renderer {
 
 				if (this.camera.target && !taro.isMobile) {
 					const worldPos = this.camera.getWorldPoint(this.pointer);
-					const x = Utils.worldToPixel(worldPos.x + 0.5);
-					const y = Utils.worldToPixel(worldPos.z + 0.5);
+					const x = Utils.worldToPixel(worldPos.x);
+					const y = Utils.worldToPixel(worldPos.z);
 					const yaw = this.camera.getAzimuthAngle();
 					const pitch = this.camera.getElevationAngle();
 					taro.input.emit('pointermove', [{ x, y, yaw, pitch }]);

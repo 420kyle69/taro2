@@ -15,13 +15,13 @@ class CommandController implements CommandControllerProps {
 	defaultCommands: Record<DefaultCommands, () => void>;
 	nowInsertIndex = 0;
 	maxCommands: number;
-	map: Phaser.Tilemaps.Tilemap;
+	map?: Phaser.Tilemaps.Tilemap;
 	/**
 	 * if CommandController shift(), the cache's pointer do not auto shift, so add offset to make
 	 * sure it could point to right cache;
 	 */
 	offset = 0;
-	constructor(defaultCommands: Record<DefaultCommands, () => void>, map: Phaser.Tilemaps.Tilemap, maxCommands = 200) {
+	constructor(defaultCommands: Record<DefaultCommands, () => void>, map?: Phaser.Tilemaps.Tilemap, maxCommands = 200) {
 		this.defaultCommands = defaultCommands;
 		this.maxCommands = maxCommands;
 		this.map = map;
@@ -42,6 +42,7 @@ class CommandController implements CommandControllerProps {
 		if (history || forceToHistory) {
 			if (mapEdit && !forceToHistory) {
 				if (
+					this.map !== undefined &&
 					JSON.stringify(this.getAllTiles()) === JSON.stringify(mapBeforeCommand) &&
 					JSON.stringify(taro.game.data.map.layers) === oldTaroMap
 				) {
@@ -82,12 +83,15 @@ class CommandController implements CommandControllerProps {
 
 	getAllTiles(): Record<number, Record<number, number>> {
 		const nowTiles = {};
-		Object.entries(this.map.layer.data).map(([x, obj]) => {
-			nowTiles[x] = {};
-			Object.entries(obj).map(([y, tile]) => {
-				nowTiles[x][y] = tile.index;
+		if (this.map) {
+			Object.entries(this.map.layer.data).map(([x, obj]) => {
+				nowTiles[x] = {};
+				Object.entries(obj).map(([y, tile]) => {
+					nowTiles[x][y] = tile.index;
+				});
 			});
-		});
+		}
+
 		return nowTiles;
 	}
 }
