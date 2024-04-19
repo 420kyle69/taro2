@@ -250,7 +250,7 @@ class VoxelEditor {
 						hiddenFaces: [...hiddenFaces],
 					});
 					if (tileId === -1) tileId = 0;
-					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
+					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId + 1;
 				}
 			}
 		}
