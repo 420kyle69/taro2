@@ -239,13 +239,18 @@ class VoxelEditor {
 					let _x = tileX + x + 0.5;
 					let _z = tileY + y + 0.5;
 					let tileId = sample[x][y];
+					if (tileId <= 0) {
+						continue;
+					}
+
+					tileId -= 1;
 					const height = this.voxels.calcHeight(layer);
 					const pos = { x: _x, y: height + yOffset * height, z: _z };
 
 					voxels.set(Renderer.Three.getKeyFromPos(pos.x, pos.y, pos.z), {
 						position: [pos.x, pos.y, pos.z],
 						type: tileId,
-						visible: tileId > 0,
+						visible: true,
 						hiddenFaces: [...hiddenFaces],
 					});
 					if (tileId === -1) tileId = 0;
