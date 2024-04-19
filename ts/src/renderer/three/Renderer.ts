@@ -188,7 +188,7 @@ namespace Renderer {
 								const selectedTiles = {};
 								const tileId = this.tmp_tileId;
 								selectedTiles[_x] = {};
-								selectedTiles[_x][_y] = developerMode.activeButton === 'eraser' ? 0 : tileId;
+								selectedTiles[_x][_y] = developerMode.activeButton === 'eraser' ? -1 : tileId;
 								this.voxelEditor.putTiles(
 									_x,
 									_y,
@@ -291,6 +291,7 @@ namespace Renderer {
 
 				taro.client.on('updateMap', () => {
 					let numTileLayers = 0;
+					this.voxels.voxels = [];
 					for (const [idx, layer] of taro.game.data.map.layers.entries()) {
 						if (layer.type === 'tilelayer' && layer.data) {
 							const voxels = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);

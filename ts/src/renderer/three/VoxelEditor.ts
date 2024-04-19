@@ -239,6 +239,11 @@ class VoxelEditor {
 					let _x = tileX + x + 0.5;
 					let _z = tileY + y + 0.5;
 					let tileId = sample[x][y];
+					if (tileId <= 0) {
+						continue;
+					}
+
+					tileId -= 1;
 					const height = this.voxels.calcHeight(layer);
 					const pos = { x: _x, y: height + yOffset * height, z: _z };
 
@@ -248,10 +253,29 @@ class VoxelEditor {
 						visible: true,
 						hiddenFaces: [...hiddenFaces],
 					});
+					if (tileId === -1) tileId = 0;
+					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
 				}
 			}
 		}
 		this.voxels.addLayer(voxels, layer);
+		if (!local) {
+			const data: { edit: MapEditTool['edit'] } = {
+				edit: {
+					size: brushSize,
+					layer: [layer],
+					selectedTiles: [selectedTiles],
+					x: tileX,
+					y: tileY,
+					shape,
+					noMerge: true,
+				},
+			};
+			if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
+				taro.network.send<'edit'>('editTile', data);
+				this.prevData = data;
+			}
+		}
 	}
 
 	getTile(tileX: number, tileY: number, map: Phaser.Tilemaps.Tilemap): number {
