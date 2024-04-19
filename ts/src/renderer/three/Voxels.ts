@@ -64,7 +64,6 @@ namespace Renderer {
 					for (let x = 0; x < data.width; x++) {
 						let tileId = data.data[z * data.width + x];
 						if (tileId <= 0) continue;
-
 						tileId -= 1;
 
 						const pos = { x: x + 0.5, y: height + yOffset * height, z: z + 0.5 };
@@ -72,7 +71,7 @@ namespace Renderer {
 						voxels.set(getKeyFromPos(pos.x, pos.y, pos.z), {
 							position: [pos.x, pos.y, pos.z],
 							type: tileId,
-							visible: tileId > 0,
+							visible: true,
 							hiddenFaces: [...hiddenFaces],
 						});
 					}
@@ -103,14 +102,18 @@ namespace Renderer {
 				geometry.addGroup(voxelData.sidesIndices.length, voxelData.topIndices.length, 1);
 
 				const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
-				const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1 - renderOrder / 100);
+
+				if (this.layerPlanes[layerIdx] === undefined) {
+					const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1 - renderOrder / 100);
+					this.layerPlanes[layerIdx] = plane;
+				}
+
 				mesh.renderOrder = renderOrder;
 				//@ts-ignore
 				geometry.computeBoundsTree();
 				this.remove(this.meshes[layerIdx]);
 				this.add(mesh);
 				this.meshes[layerIdx] = mesh;
-				this.layerPlanes[layerIdx] = plane;
 			}
 		}
 
@@ -150,7 +153,7 @@ namespace Renderer {
 			for (let k of cells.keys()) {
 				const curCell = cells.get(k);
 
-				if (prevCells && curCell.type === 0) {
+				if (prevCells && curCell.type === -1) {
 					let pos = curCell.position;
 					prevCells.delete(k);
 					findNeighbors(pos[0], pos[1], pos[2]).forEach((neighborKey) => {
