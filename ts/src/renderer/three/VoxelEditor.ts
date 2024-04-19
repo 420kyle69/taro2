@@ -29,7 +29,7 @@ class VoxelEditor {
 			for (const [idx, layer] of taro.game.data.map.layers.entries()) {
 				if (layer.type === 'tilelayer' && layer.data) {
 					const voxels = Renderer.Three.Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-					this.voxels.addLayer(voxels, idx, true);
+					this.voxels.updateLayer(voxels, idx, true);
 					this.voxels.setLayerLookupTable(idx, numTileLayers);
 					numTileLayers++;
 				}
@@ -41,8 +41,8 @@ class VoxelEditor {
 		taro.client.on('draw-region', () => {
 			this.voxelMarker.removeMeshes();
 		});
-		taro.client.on('brush', () => { });
-		taro.client.on('empty-tile', () => { });
+		taro.client.on('brush', () => {});
+		taro.client.on('empty-tile', () => {});
 		//TODO
 		// this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2, commandController);
 		// this.paletteMarker = new TileMarker(
@@ -214,7 +214,8 @@ class VoxelEditor {
 		shape: Shape,
 		layer: number,
 		local?: boolean,
-		flat = false
+		flat = false,
+		isPreview = false
 	) {
 		const voxels = new Map<string, Renderer.Three.VoxelCell>();
 		const allFacesVisible = [false, false, false, false, false, false];
@@ -248,15 +249,18 @@ class VoxelEditor {
 						type: tileId,
 						visible: true,
 						hiddenFaces: [...hiddenFaces],
+						isPreview,
 					});
-					tileId += 1;
-					if (tileId < 0) tileId = 0;
-					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
+					if (!isPreview) {
+						tileId += 1;
+						if (tileId < 0) tileId = 0;
+						taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
+					}
 				}
 			}
 		}
-		this.voxels.addLayer(voxels, layer);
-		if (!local) {
+		this.voxels.updateLayer(voxels, layer, true, isPreview);
+		if (!local && !isPreview) {
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
 					size: brushSize,

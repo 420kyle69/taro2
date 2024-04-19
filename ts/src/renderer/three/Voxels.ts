@@ -5,6 +5,7 @@ namespace Renderer {
 			voxelData: { positions: any[]; uvs: any[]; normals: any[]; topIndices: any[]; sidesIndices: any[] }[] = [];
 			voxels: Map<string, VoxelCell>[] = [];
 			meshes: THREE.Mesh[] = [];
+			preview: THREE.Mesh | undefined = undefined;
 			layerPlanes: THREE.Plane[] = [];
 			layerLookupTable: Record<number, number> = {};
 			constructor(
@@ -33,7 +34,7 @@ namespace Renderer {
 					for (const [idx, layer] of config.entries()) {
 						if (layer.type === 'tilelayer' && layer.data) {
 							const voxelsData = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-							voxels.addLayer(voxelsData, idx, true);
+							voxels.updateLayer(voxelsData, idx, true);
 							voxels.setLayerLookupTable(idx, numTileLayers);
 							numTileLayers++;
 						}
@@ -73,20 +74,32 @@ namespace Renderer {
 							type: tileId,
 							visible: true,
 							hiddenFaces: [...hiddenFaces],
+							isPreview: false,
 						});
 					}
 				}
 				return voxels;
 			}
 
-			addLayer(voxels: Map<string, VoxelCell>, layerIdx: number, transparent = true) {
+			updateLayer(voxels: Map<string, VoxelCell>, layerIdx: number, transparent = true, isPreview = false) {
 				const renderOrder = (layerIdx + 1) * 100;
-				const prunedVoxels = pruneCells(voxels, this.voxels[layerIdx]);
-				this.voxels[layerIdx] = prunedVoxels;
+				const prunedVoxels = pruneCells(
+					voxels,
+					isPreview ? new Map([...this.voxels[layerIdx]]) : this.voxels[layerIdx]
+				);
+
 				const voxelData = buildMeshDataFromCells(prunedVoxels, this.topTileset);
-				this.voxelData[layerIdx] = voxelData;
+				if (!isPreview) {
+					this.voxels[layerIdx] = prunedVoxels;
+					this.voxelData[layerIdx] = voxelData;
+				}
 				const geometry = new THREE.BufferGeometry();
-				geometry.setIndex([...voxelData.sidesIndices, ...voxelData.topIndices]);
+				geometry.setIndex([
+					...voxelData.sidesIndices,
+					...voxelData.topIndices,
+					...voxelData.previewTopIndices,
+					...voxelData.previewSidesIndices,
+				]);
 				geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
 				geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
 				geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
@@ -97,11 +110,20 @@ namespace Renderer {
 					side: THREE.DoubleSide,
 				});
 				const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.topTileset.texture, side: THREE.DoubleSide });
-
+				const mat1Preview = mat1.clone();
+				mat1Preview.opacity = 0.5;
+				const mat2Preview = mat2.clone();
+				mat2Preview.opacity = 0.5;
+				let curLength = 0;
 				geometry.addGroup(0, voxelData.sidesIndices.length, 0);
-				geometry.addGroup(voxelData.sidesIndices.length, voxelData.topIndices.length, 1);
+				curLength += voxelData.sidesIndices.length;
+				geometry.addGroup(curLength, voxelData.topIndices.length, 1);
+				curLength += voxelData.topIndices.length;
+				geometry.addGroup(curLength, voxelData.previewTopIndices.length, 2);
+				curLength += voxelData.previewTopIndices.length;
+				geometry.addGroup(curLength, voxelData.previewSidesIndices.length, 3);
 
-				const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
+				const mesh = new THREE.Mesh(geometry, [mat1, mat2, mat1Preview, mat2Preview]);
 
 				if (this.layerPlanes[layerIdx] === undefined) {
 					const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1 - renderOrder / 100);
@@ -210,6 +232,8 @@ namespace Renderer {
 				normals: [],
 				topIndices: [],
 				sidesIndices: [],
+				previewTopIndices: [],
+				previewSidesIndices: [],
 			};
 
 			for (let c of cells.keys()) {
@@ -276,9 +300,17 @@ namespace Renderer {
 
 					// top and bottom face
 					if (i === 2 || i === 3) {
-						targetData.topIndices.push(...localIndices);
+						if (curCell.isPreview) {
+							targetData.previewTopIndices.push(...localIndices);
+						} else {
+							targetData.topIndices.push(...localIndices);
+						}
 					} else {
-						targetData.sidesIndices.push(...localIndices);
+						if (curCell.isPreview) {
+							targetData.previewSidesIndices.push(...localIndices);
+						} else {
+							targetData.sidesIndices.push(...localIndices);
+						}
 					}
 				}
 			}
@@ -300,6 +332,7 @@ namespace Renderer {
 			type: number;
 			visible: boolean;
 			hiddenFaces: boolean[];
+			isPreview: boolean;
 		};
 	}
 }

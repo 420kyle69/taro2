@@ -87,6 +87,26 @@ namespace Renderer {
 						case 'eraser': {
 						}
 						case 'brush': {
+							// const raycaster = new THREE.Raycaster();
+							// raycaster.setFromCamera(this.pointer, this.camera.instance);
+							// let intersectionPoint = new THREE.Vector3();
+							// const intersect = raycaster.ray.intersectPlane(
+							// 	this.voxels.layerPlanes[this.voxelEditor.currentLayerIndex],
+							// 	intersectionPoint
+							// );
+							// if (!intersect) {
+							// 	break;
+							// }
+							// this.voxelEditor.voxelMarker.removeMeshes();
+
+							// this.voxelEditor.voxelMarker.addMesh(
+							// 	Math.floor(intersect.x) + 0.5,
+							// 	Math.floor(intersect.z) + 0.5,
+							// 	// TODO
+							// 	this.voxelEditor.voxels.layerLookupTable[this.voxelEditor.currentLayerIndex]
+							// );
+							// this.voxels.add(this.voxelEditor.voxelMarker.preview);
+							// break;
 							const raycaster = new THREE.Raycaster();
 							raycaster.setFromCamera(this.pointer, this.camera.instance);
 							let intersectionPoint = new THREE.Vector3();
@@ -97,16 +117,23 @@ namespace Renderer {
 							if (!intersect) {
 								break;
 							}
-							this.voxelEditor.voxelMarker.removeMeshes();
-
-							this.voxelEditor.voxelMarker.addMesh(
-								Math.floor(intersect.x) + 0.5,
-								Math.floor(intersect.z) + 0.5,
-								// TODO
-								this.voxelEditor.voxels.layerLookupTable[this.voxelEditor.currentLayerIndex]
+							const _x = Math.floor(intersect.x);
+							const _y = Math.floor(intersect.z);
+							const selectedTiles = {};
+							const tileId = this.tmp_tileId;
+							selectedTiles[_x] = {};
+							selectedTiles[_x][_y] = taro.developerMode.activeButton === 'eraser' ? -1 : tileId;
+							this.voxelEditor.putTiles(
+								_x,
+								_y,
+								selectedTiles,
+								'fitContent',
+								'rectangle',
+								this.voxelEditor.currentLayerIndex,
+								true,
+								false,
+								true
 							);
-							this.voxels.add(this.voxelEditor.voxelMarker.preview);
-							break;
 						}
 					}
 					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
@@ -296,7 +323,7 @@ namespace Renderer {
 					for (const [idx, layer] of taro.game.data.map.layers.entries()) {
 						if (layer.type === 'tilelayer' && layer.data) {
 							const voxels = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-							this.voxels.addLayer(voxels, idx, true);
+							this.voxels.updateLayer(voxels, idx, false);
 							this.voxels.setLayerLookupTable(idx, numTileLayers);
 							numTileLayers++;
 						}
