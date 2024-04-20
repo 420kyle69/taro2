@@ -132,7 +132,7 @@ namespace Renderer {
 					child.position.copy(this.position);
 
 					//@ts-ignore
-					if (child.taroEntity) {
+					if (child?.taroEntity?._stats?.currentBody?.unitAnchor) {
 						//@ts-ignore
 						const x = Utils.pixelToWorld(child.taroEntity._stats.currentBody.unitAnchor.x);
 						//@ts-ignore
