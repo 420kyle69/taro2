@@ -1166,7 +1166,15 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'slotIndex':
+						var owner = self.getOwnerUnit();
 						this._stats[attrName] = newValue;
+						if (owner) {
+							if (this._stats.slotIndex >= owner._stats.inventorySize && !this._hidden) {
+								this.hide();
+							} else if (this._stats.slotIndex < owner._stats.inventorySize && this._hidden) {
+								this.show();
+							}
+						}
 						break;
 
 					case 'useQueued':
