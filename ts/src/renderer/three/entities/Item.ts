@@ -55,6 +55,9 @@ namespace Renderer {
 									entity.sprite.position.z = y;
 								}
 							}
+						} else if (entity.sprite.position.x != 0 || entity.sprite.position.z != 0) {
+							entity.sprite.position.x = 0;
+							entity.sprite.position.z = 0;
 						}
 
 						entity.setRotationY(-data.rotation);

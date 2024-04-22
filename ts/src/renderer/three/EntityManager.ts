@@ -89,9 +89,8 @@ namespace Renderer {
 						item.ownerUnitId = unitId;
 						item.ownerUnit = this.units.find((unit) => unit.taroId === unitId);
 
-						const addedToUnit = !(unitId === undefined || unitId === null);
-						if (addedToUnit) {
-							this.maybeAddUnownedItemToUnit(item);
+						if (item.ownerUnit && this.unownedItems.has(item.taroId)) {
+							this.unownedItems.delete(item.taroId);
 						}
 					});
 				}
@@ -109,18 +108,6 @@ namespace Renderer {
 
 				for (const itemTaroId of itemsToDelete) {
 					this.unownedItems.delete(itemTaroId);
-				}
-			}
-
-			private maybeAddUnownedItemToUnit(item: Item) {
-				if (!this.unownedItems.has(item.taroId)) return;
-
-				for (const unit of this.units) {
-					if (item.ownerUnitId === unit.taroId) {
-						item.ownerUnit = unit;
-						this.unownedItems.delete(item.taroId);
-						return;
-					}
 				}
 			}
 		}
