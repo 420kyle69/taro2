@@ -18,8 +18,8 @@ namespace Renderer {
 			camera: Camera;
 			scene: THREE.Scene;
 			commandController: CommandController = new CommandController({
-				increaseBrushSize: () => {},
-				decreaseBrushSize: () => {},
+				increaseBrushSize: () => { },
+				decreaseBrushSize: () => { },
 			});
 			mode = Mode.Normal;
 			private clock = new THREE.Clock();
@@ -202,7 +202,10 @@ namespace Renderer {
 							}
 						}
 					}
-					if (Utils.isRightButton(event.buttons)) {
+					if (Utils.isRightButton(event.buttons) &&
+						taro.game.data.defaultData.contextMenuEnabled &&
+						(!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play'))
+					) {
 						const raycaster = new THREE.Raycaster();
 						raycaster.setFromCamera(this.pointer, this.camera.instance);
 
