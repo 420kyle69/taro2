@@ -92,20 +92,20 @@ namespace Renderer {
 								this.updatePreview();
 							}
 						}
-						this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
-						if (!Utils.isLeftButton(evt.buttons)) return;
-						if (taro.developerMode.regionTool) {
-							const worldPoint = this.camera.getWorldPoint(this.pointer);
-							width = worldPoint.x - this.regionDrawStart.x;
-							height = worldPoint.z - this.regionDrawStart.y;
-							line?.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
-							line?.scale.set(width, 1, height);
-						}
+					}
+					this.pointer.set((evt.clientX / window.innerWidth) * 2 - 1, -(evt.clientY / window.innerHeight) * 2 + 1);
+					if (!Utils.isLeftButton(evt.buttons)) return;
+					if (taro.developerMode.regionTool) {
+						const worldPoint = this.camera.getWorldPoint(this.pointer);
+						width = worldPoint.x - this.regionDrawStart.x;
+						height = worldPoint.z - this.regionDrawStart.y;
+						line?.position.set(this.regionDrawStart.x + width / 2, 2, this.regionDrawStart.y + height / 2);
+						line?.scale.set(width, 1, height);
 					}
 				});
 
 				// TODO: add undo/redo
-				window.addEventListener('keydown', (k: KeyboardEvent) => {});
+				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
 
 				renderer.domElement.addEventListener('mousedown', (event: MouseEvent) => {
 					if (this.mode === Mode.Development) {
