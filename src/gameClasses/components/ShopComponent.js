@@ -1193,7 +1193,7 @@ var ShopComponent = TaroEntity.extend({
 							.on('touchstart', function () {
 								longPressTimeOut = setTimeout(() => {
 									$(this).popover('show');
-								}, 1000);
+								}, 500);
 							})
 							.on('touchend', function () {
 								clearTimeout(longPressTimeOut);
