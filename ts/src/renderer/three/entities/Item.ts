@@ -2,6 +2,7 @@ namespace Renderer {
 	export namespace Three {
 		export class Item extends AnimatedSprite {
 			ownerUnitId: string | undefined;
+			ownerUnit: Unit | undefined;
 
 			constructor(
 				public taroId: string,
@@ -33,13 +34,27 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					(data: { x: number; y: number; rotation: number }) => {
-						if (
-							!entity.ownerUnitId ||
-							entity.taroEntity?._stats.type === 'weapon' ||
-							entity.taroEntity?._stats.stateId === 'dropped'
-						) {
-							entity.position.x = Utils.pixelToWorld(data.x);
-							entity.position.z = Utils.pixelToWorld(data.y);
+						entity.position.x = Utils.pixelToWorld(data.x);
+						entity.position.z = Utils.pixelToWorld(data.y);
+
+						if (entity.ownerUnit) {
+							const parent = entity.ownerUnit;
+							entity.position.y = parent.position.y;
+
+							const anchoredOffset = entity.taroEntity?.anchoredOffset;
+							if (anchoredOffset) {
+								let x = Utils.pixelToWorld(anchoredOffset.x);
+								let y = Utils.pixelToWorld(anchoredOffset.y);
+
+								// This should be a local/world coordinates flag on the entity body.
+								if (entity.taroEntity?._stats.type == 'weapon') {
+									entity.position.x += x;
+									entity.position.z += y;
+								} else {
+									entity.sprite.position.x = x;
+									entity.sprite.position.z = y;
+								}
+							}
 						}
 
 						entity.setRotationY(-data.rotation);
@@ -93,7 +108,6 @@ namespace Renderer {
 				});
 
 				taroEntity.on('setOwnerUnit', (unitId: string) => {
-					console.log(entity.taroId, 'changed owner from', entity.ownerUnitId, 'to', unitId);
 					entity.ownerUnitId = unitId;
 				});
 

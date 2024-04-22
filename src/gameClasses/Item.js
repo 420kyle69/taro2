@@ -211,7 +211,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	setOwnerUnit: function (newOwner) {
-		var oldOwner = taro.$(this.oldOwnerId);
+		var oldOwner = taro.$(this._stats.oldOwnerUnitId);
 
 		if (newOwner == oldOwner) return;
 		if (newOwner) {
@@ -230,20 +230,20 @@ var Item = TaroEntityPhysics.extend({
 				this.streamMode(2);
 			}
 
-			this.oldOwnerId = this._stats.ownerUnitId;
+			this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
 			this._stats.ownerUnitId = newOwner.id();
 		} else {
 			// item is being dropped.
 			this._stats.ownerUnitId = null;
 
-			if (oldOwner) {
+			if (this._stats.oldOwnerUnitId) {
 				if (taro.isClient) {
 					if (oldOwner._stats) {
 						oldOwner._stats.currentItemId = null;
 					}
 				}
 
-				this.oldOwnerId = null;
+				this._stats.oldOwnerUnitId = null;
 			}
 
 			if (taro.isServer) {
@@ -854,14 +854,6 @@ var Item = TaroEntityPhysics.extend({
 			if (self._stats.currentBody) {
 				var unitRotate = ownerUnit._rotate.z;
 
-				// Keep the items anchored in the correct place even when the
-				// camera is rotated. The camera's yaw is present in the
-				// angleToTargetRelative variable.
-				if (ownerUnit.angleToTarget && ownerUnit.angleToTargetRelative) {
-					const yaw = ownerUnit.angleToTarget - ownerUnit.angleToTargetRelative;
-					unitRotate += yaw;
-				}
-
 				if (self._stats.currentBody.fixedRotation) {
 					rotate = unitRotate;
 				}
@@ -1091,6 +1083,7 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'ownerUnitId':
+						this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
 						this._stats[attrName] = newValue;
 						if (taro.isClient) {
 							var newOwner = taro.$(newValue);
