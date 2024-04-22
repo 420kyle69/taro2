@@ -75,13 +75,9 @@ namespace Renderer {
 			}
 
 			private addItemToUnitOrUnownedItems(item: Item) {
-				if (item.taroEntity?._stats.type === 'weapon') return;
-
 				for (const unit of this.units) {
 					if (item.ownerUnitId == unit.taroId) {
-						unit.childSprites.push(item);
-						item.parentedItemRenderHack = true;
-
+						item.ownerUnit = unit;
 						return;
 					}
 				}
@@ -91,7 +87,11 @@ namespace Renderer {
 				if (item.taroEntity) {
 					item.taroEntity.on('setOwnerUnit', (unitId: string) => {
 						item.ownerUnitId = unitId;
-						this.maybeAddUnownedItemToUnit(item);
+						item.ownerUnit = this.units.find((unit) => unit.taroId === unitId);
+
+						if (item.ownerUnit && this.unownedItems.has(item.taroId)) {
+							this.unownedItems.delete(item.taroId);
+						}
 					});
 				}
 			}
@@ -101,29 +101,13 @@ namespace Renderer {
 
 				for (const [taroId, item] of this.unownedItems.entries()) {
 					if (unit.taroId == item.ownerUnitId) {
-						unit.childSprites.push(item);
-						item.parentedItemRenderHack = true;
+						item.ownerUnit = unit;
 						itemsToDelete.push(taroId);
 					}
 				}
 
 				for (const itemTaroId of itemsToDelete) {
 					this.unownedItems.delete(itemTaroId);
-				}
-			}
-
-			private maybeAddUnownedItemToUnit(item: Item) {
-				if (!this.unownedItems.has(item.taroId)) return;
-
-				for (const unit of this.units) {
-					if (item.ownerUnitId === unit.taroId) {
-						unit.childSprites.push(item);
-						item.parentedItemRenderHack = true;
-
-						this.unownedItems.delete(item.taroId);
-
-						return;
-					}
 				}
 			}
 		}

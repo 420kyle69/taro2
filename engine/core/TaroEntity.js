@@ -4360,7 +4360,7 @@ var TaroEntity = TaroObject.extend({
 
 						case 'ownerId':
 							this._stats[attrName] = newValue;
-							this.oldOwnerId = this._stats[attrName];
+							this.oldOwnerId = this._stats[attrName]; // should this not be placed above the line above?
 							break;
 
 						case 'rotate':
@@ -4965,6 +4965,7 @@ var TaroEntity = TaroObject.extend({
 						'itemTypeId',
 						'anim',
 						'stateId',
+						'oldOwnerUnitId',
 						'ownerUnitId',
 						'quantity',
 						'currentBody',

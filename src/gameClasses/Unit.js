@@ -1447,7 +1447,7 @@ var Unit = TaroEntityPhysics.extend({
 				// give it a body (cuz it's dropped)
 				// if item is already being held, then simply detach it
 				var owner = item.getOwnerUnit();
-				item.oldOwnerId = owner.id();
+				item._stats.oldOwnerUnitId = owner.id();
 
 				var defaultData = {
 					translate: {
