@@ -42,8 +42,8 @@ namespace Renderer {
                     height = map.tileHeight;
                 }*/
 
-				const geometry = new THREE.BoxGeometry(1.1, 1.1, 1.1);
-				const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+				const geometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
+				const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
 				const mesh = new THREE.Mesh(geometry, material);
 				mesh.position.set(x, z, y);
 				this.preview.add(mesh);

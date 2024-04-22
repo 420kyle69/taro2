@@ -131,8 +131,12 @@ namespace Renderer {
 				}
 
 				mesh.renderOrder = renderOrder;
-				//@ts-ignore
-				geometry.computeBoundsTree();
+
+				if (!isPreview) {
+					//@ts-ignore
+					geometry.computeBoundsTree();
+				}
+
 				this.remove(this.meshes[layerIdx]);
 				this.add(mesh);
 				this.meshes[layerIdx] = mesh;
