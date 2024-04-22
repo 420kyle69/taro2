@@ -122,7 +122,6 @@ var taroClientConfig = {
 		'renderer/three/Camera.js',
 		'renderer/three/Sprite.js',
 		'renderer/three/AnimatedSprite.js',
-		'renderer/three/Unit.js',
 		'renderer/three/Sky.js',
 		'renderer/three/Tileset.js',
 		'renderer/three/Particles.js',
