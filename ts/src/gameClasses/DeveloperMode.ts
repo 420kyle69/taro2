@@ -847,6 +847,8 @@ class DeveloperMode {
 		});
 		if (taro.isServer) {
 			taro.network.send('updateUnit', data);
+		} else {
+			inGameEditor.updateEntity?.(data);
 		}
 	}
 
@@ -918,6 +920,8 @@ class DeveloperMode {
 		});
 		if (taro.isServer) {
 			taro.network.send('updateItem', data);
+		} else {
+			inGameEditor.updateEntity?.(data);
 		}
 	}
 
@@ -963,6 +967,8 @@ class DeveloperMode {
 		});
 		if (taro.isServer) {
 			taro.network.send('updateProjectile', data);
+		} else {
+			inGameEditor.updateEntity?.(data);
 		}
 	}
 
