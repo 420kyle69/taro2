@@ -119,6 +119,10 @@ namespace Renderer {
 				};
 
 				window.addEventListener('keypress', (evt) => {
+					if (evt.key === '~') {
+						this.setDevelopmentMode(!this.isDevelopmentMode);
+					}
+
 					if (!this.isDevelopmentMode) return;
 
 					if (evt.key === 'l') {
