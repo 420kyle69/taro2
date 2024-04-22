@@ -4327,11 +4327,7 @@ var TaroEntity = TaroObject.extend({
 										) {
 											this.variable.update(variableId, data.variables[variableId]);
 
-											if (
-												variableData.dataType === 'particleEmitter' &&
-												!this._stats.particleEmitters[variableId] &&
-												!data.variables[variableId].function
-											) {
+											if (variableData.dataType === 'particleEmitter' && !data.variables[variableId].function) {
 												this._stats.particleEmitters[variableId] = data.variables[variableId];
 												this.createParticleEmitter(data.variables[variableId]);
 											}
@@ -5507,6 +5503,19 @@ var TaroEntity = TaroObject.extend({
 		}
 
 		return null;
+	},
+
+	initParticleEmitters: function () {
+		Object.keys(this.variables).forEach((key) => {
+			if (
+				this.variables[key].dataType === 'particleEmitter' &&
+				this.variables[key].value &&
+				!this.variables[key].function
+			) {
+				this._stats.particleEmitters[key] = this.variables[key].value;
+				this.createParticleEmitter(this.variables[key].value);
+			}
+		});
 	},
 
 	createParticleEmitter: function (particleTypeId) {

@@ -357,12 +357,12 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	hide: function() {	
+	hide: function () {
 		if (!this._hidden) {
 			this.stopMoving();
-			
+
 			// hide all items carried by this unit
-			this._stats.itemIds.forEach(itemId => {
+			this._stats.itemIds.forEach((itemId) => {
 				const item = taro.$(itemId);
 				if (itemId != undefined && item) {
 					item._hide(); // don't use .hide() to avoid unnecessary streaming. we know that hiding unit's items will also hide.
@@ -376,26 +376,25 @@ var Unit = TaroEntityPhysics.extend({
 			if (taro.isServer) {
 				this.streamUpdateData([{ isHidden: true }]);
 			}
-			TaroEntityPhysics.prototype.destroyBody.call(this);		
+			TaroEntityPhysics.prototype.destroyBody.call(this);
 			TaroEntity.prototype._hide.call(this);
 		}
 	},
 
-	show: function() {
-		
+	show: function () {
 		if (this._hidden) {
 			if (this._stats.aiEnabled) {
 				this.ai.enable();
 			}
-	
+
 			// update visibility of all items based on their current state
-			this._stats.itemIds.forEach(itemId => {
+			this._stats.itemIds.forEach((itemId) => {
 				const item = taro.$(itemId);
 				if (itemId != undefined && item) {
 					item._show(); // don't use .show() to avoid unnecessary streaming. we know that showing unit's items will also show.
 				}
 			});
-			
+
 			if (taro.isServer) {
 				this.streamUpdateData([{ isHidden: false }]);
 			}
@@ -921,6 +920,7 @@ var Unit = TaroEntityPhysics.extend({
 		if (taro.isClient) {
 			self.updateTexture();
 			self._scaleTexture();
+			self.initParticleEmitters();
 		}
 
 		// update bodies of all items in the inventory
@@ -2086,13 +2086,12 @@ var Unit = TaroEntityPhysics.extend({
 	 */
 	_behaviour: function (ctx) {
 		var self = this;
-		
+
 		if (!taro.gameLoopTickHasExecuted) {
 			return;
 		}
 
 		if (taro.isClient) {
-			
 			var processedUpdates = [];
 			var updateQueue = taro.client.entityUpdateQueue[this.id()];
 
@@ -2249,7 +2248,7 @@ var Unit = TaroEntityPhysics.extend({
 				this.attribute._behaviour();
 			}
 		}
-		
+
 		if (this.isClient) {
 			if (taro.isClient) {
 				// make minimap unit follow the unit
@@ -2264,7 +2263,6 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		if (taro.isClient && taro.client.selectedUnit == this) {
-			
 			// never run on server, pure UI
 			for (let i = 0; i < self._stats.itemIds.length; i++) {
 				var itemId = self._stats.itemIds[i];

@@ -69,6 +69,7 @@ var Item = TaroEntityPhysics.extend({
 		if (taro.isClient) {
 			// must create Phaser item before emitting init events
 			taro.client.emit('create-item', this);
+			this.initParticleEmitters();
 		}
 		self.setState(self._stats.stateId, self._stats.defaultData);
 
@@ -1158,7 +1159,15 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'slotIndex':
+						var owner = self.getOwnerUnit();
 						this._stats[attrName] = newValue;
+						if (owner) {
+							if (this._stats.slotIndex >= owner._stats.inventorySize && !this._hidden) {
+								this.hide();
+							} else if (this._stats.slotIndex < owner._stats.inventorySize && this._hidden) {
+								this.show();
+							}
+						}
 						break;
 
 					case 'useQueued':
