@@ -416,6 +416,7 @@ var TaroNode = TaroClass.extend({
 
 			if (!this.fs.existsSync(`${gamePath}/${item}`)) {
 				// The module file is missing, throw an error!
+				console.log(`Cannot load module from: "${gamePath}/${item}", exiting!`);
 				this.log(`Cannot load module from: "${gamePath}/${item}", exiting!`, 'warning');
 				setTimeout(this.exitProcess, 50);
 				return false;

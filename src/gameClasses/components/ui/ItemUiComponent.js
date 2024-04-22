@@ -16,8 +16,12 @@ var ItemUiComponent = TaroEntity.extend({
 				})
 				.on('touchstart', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
 					timeoutForPopover = setTimeout(() => {
-						$(this).popover('show');
-					}, 1000);
+						// check if the element contains a class ui-draggable-dragging
+						// if it does, then don't show the popover
+						if (!$(this).hasClass('ui-draggable-dragging')) {
+							$(this).popover('show');
+						}
+					}, 500);
 				})
 				.on('touchend', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
 					clearTimeout(timeoutForPopover);
@@ -40,9 +44,10 @@ var ItemUiComponent = TaroEntity.extend({
 				})
 				.on('touchstart', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
 					timeoutForPopover = setTimeout(() => {
-						console.log('touchstarteddddd');
-						$(this).popover('show');
-					}, 1000);
+						if (!$(this).hasClass('ui-draggable-dragging')) {
+							$(this).popover('show');
+						}
+					}, 500);
 				})
 				.on('touchend', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
 					clearTimeout(timeoutForPopover);
