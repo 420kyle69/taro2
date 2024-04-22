@@ -91,8 +91,8 @@ class EntitiesToRender {
 					entity.anchoredOffset = entity.getAnchoredOffset(rotate);
 
 					if (entity.anchoredOffset) {
-						x = ownerUnit._translate.x + entity.anchoredOffset.x;
-						y = ownerUnit._translate.y + entity.anchoredOffset.y;
+						x = ownerUnit._translate.x;
+						y = ownerUnit._translate.y;
 						rotate = entity.anchoredOffset.rotate;
 					}
 					//if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
@@ -113,7 +113,7 @@ class EntitiesToRender {
 					entity._category == 'item'
 				) {
 					// var timeStart = performance.now();
-					entity.transformTexture(x, y, rotateRelative);
+					entity.transformTexture(x, y, rotateRelative); // uses absolute position without anchorOffset for items. That info is later retrieved in the render function
 
 					// entity isn't moving anymore. prevent rendering to conserve cpu
 					if (

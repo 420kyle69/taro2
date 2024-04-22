@@ -4,8 +4,6 @@ namespace Renderer {
 			sprite: THREE.Mesh;
 			billboard = false;
 			scaleUnflipped = new THREE.Vector2(1, 1);
-			childSprites: Sprite[] = []; // Children already used by node/3js. Probably should move to composition to avoid name clashes.
-			parentedItemRenderHack = false;
 
 			private layer = 3;
 			private depth = 1;
@@ -85,8 +83,6 @@ namespace Renderer {
 
 			update(_dt: number) {
 				if (this.billboard) {
-					// HACK: Part of the hack below, so it renders clothes
-					// correctly on start.
 					this.faceCamera(Three.instance().camera);
 					this.correctZOffsetBasedOnCameraAngle();
 				}
@@ -110,37 +106,8 @@ namespace Renderer {
 				this.angleOffset = Math.tan(angle) * adj;
 				const offset = this.zOffset + this.angleOffset;
 
-				// HACK: Render items that are not weapons, like clothes,
-				// correctly. This is a temporary fix until we refactor how
-				// items work. They should have a hierarchical architecture.
-				// For weapons, only the parent and an angle should be
-				// communicated. Right now the renderer only gets positional
-				// data, resulting in these hacks. The other one is in the
-				// EntityManager.ts file, where it says it should not add
-				// weapons as children to their parent unit. The engine/renderer
-				// currently makes no distinction between dropped and wielded
-				// items. They should be split up, so that dropped items are
-				// normal entities (like Units), and wielded items work
-				// hierarchically (moving/rotating) depending on the parent.
-				// This also allows for lower detail items on the floor and
-				// higher detail items when equipped.
-				if (!this.parentedItemRenderHack) {
+				if (!(this instanceof Item) || (this instanceof Item && !this.ownerUnit)) {
 					this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + offset;
-				}
-
-				for (const child of this.childSprites) {
-					child.position.copy(this.position);
-
-					//@ts-ignore
-					if (child.taroEntity) {
-						//@ts-ignore
-						const x = Utils.pixelToWorld(child.taroEntity._stats.currentBody.unitAnchor.x);
-						//@ts-ignore
-						let y = -Utils.pixelToWorld(child.taroEntity._stats.currentBody.unitAnchor.y);
-
-						child.sprite.position.x = x;
-						child.sprite.position.z = y;
-					}
 				}
 			}
 		}
