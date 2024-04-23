@@ -16,6 +16,8 @@ class VoxelEditor {
 	tileSize: number;
 	prevData: { edit: MapEditTool['edit'] } | undefined;
 
+	leftButtonDown: boolean;
+
 	constructor(voxels: Renderer.Three.Voxels, commandController: CommandController) {
 		const gameMap = taro.game.data.map;
 		this.voxels = voxels;
@@ -273,7 +275,9 @@ class VoxelEditor {
 			}
 		}
 		this.voxels.updateLayer(voxels, layer, true, isPreview);
-		if (!local && !isPreview) {
+		//console.log('left button down', this.leftButtonDown, 'isPreview', isPreview, 'local', local);
+		if ((!local && !isPreview) || (local && isPreview && this.leftButtonDown)) {
+			//console.log('send edit left button down', this.leftButtonDown);
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
 					size: brushSize,
@@ -286,6 +290,7 @@ class VoxelEditor {
 				},
 			};
 			if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
+				console.log('send edit', data, this.prevData);
 				taro.network.send<'edit'>('editTile', data);
 				this.prevData = data;
 			}
@@ -293,12 +298,12 @@ class VoxelEditor {
 	}
 
 	getTile(tileX: number, tileY: number, map: Phaser.Tilemaps.Tilemap): number {
-		if (DevModeScene.pointerInsideMap(tileX, tileY, map)) {
+		/*if (DevModeScene.pointerInsideMap(tileX, tileY, map)) {
 			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
 				let selectedTile = map.getTileAt(tileX, tileY);
 				return selectedTile.index;
 			}
-		}
+		}*/
 		return -1;
 	}
 
