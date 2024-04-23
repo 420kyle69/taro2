@@ -1,5 +1,9 @@
 namespace Renderer {
 	export namespace Three {
+		export enum RegionMode {
+			Normal,
+			Development,
+		}
 		export class Region extends Node {
 			gameObject: THREE.Object3D;
 			mesh: THREE.Mesh;
@@ -42,10 +46,12 @@ namespace Renderer {
 					opacity: stats.alpha,
 					transparent: true,
 				});
+
 				const mesh = (this.mesh = new THREE.Mesh(geometry, material));
 				mesh.position.set(x + width / 2, 1.5, y + height / 2);
 				mesh.scale.set(width, 1, height);
 				this.add(mesh);
+
 				if (stats.inside) {
 					this.devModeOnly = false;
 					mesh.renderOrder = 997;
@@ -62,12 +68,9 @@ namespace Renderer {
 				}
 
 				if (taro.developerMode.activeTab === 'map') {
-					label.visible = true;
-				}
-				if ((taro.developerMode.activeTab === 'map' && this.devModeOnly) || !this.devModeOnly) {
-					gameObject.visible = true;
+					this.setDevelopmentMode();
 				} else {
-					gameObject.visible = false;
+					this.setNormalMode();
 				}
 
 				taroEntity.on(
@@ -93,19 +96,32 @@ namespace Renderer {
 				);
 			}
 
-			show() {
-				this.gameObject.visible = true;
-			}
-
-			hide() {
-				if (this.devModeOnly) {
-					this.gameObject.visible = false;
-				}
-			}
-
 			updateLabel(name: string) {
 				const label = this.label;
 				label.update({ text: name });
+			}
+
+			setMode(mode: RegionMode) {
+				switch (mode) {
+					case RegionMode.Normal: {
+						this.setNormalMode();
+						break;
+					}
+					case RegionMode.Development: {
+						this.setDevelopmentMode();
+						break;
+					}
+				}
+			}
+
+			private setNormalMode() {
+				this.gameObject.visible = !this.devModeOnly;
+				this.label.visible = false;
+			}
+
+			private setDevelopmentMode() {
+				this.gameObject.visible = true;
+				this.label.visible = true;
 			}
 		}
 	}
