@@ -29,6 +29,7 @@ namespace Renderer {
 
 			private entityManager = new EntityManager();
 			private entitiesLayer = new THREE.Group();
+			private regionsLayer = new THREE.Group();
 
 			private sky: Sky;
 			private voxels: Voxels;
@@ -273,6 +274,7 @@ namespace Renderer {
 						this.onDevelopmentMode();
 					}
 				});
+
 				taro.client.on('leaveMapTab', () => {
 					if (this.mode == Mode.Development) {
 						this.mode = Mode.Normal;
@@ -280,6 +282,7 @@ namespace Renderer {
 						this.onNormalMode();
 					}
 				});
+
 				taro.client.on('update-region-name', (data: { name: string; newName: string }) => {
 					const region = this.entityManager.entities.find((e) => e instanceof Region && e.name === data.name) as Region;
 					if (region) {
@@ -395,11 +398,13 @@ namespace Renderer {
 			private onDevelopmentMode() {
 				this.camera.setDevelopmentMode(true);
 				this.hideEntities();
+				this.entityManager.regions.forEach((r) => r.setMode(RegionMode.Development));
 			}
 
 			private onNormalMode() {
 				this.camera.setDevelopmentMode(false);
 				this.showEntities();
+				this.entityManager.regions.forEach((r) => r.setMode(RegionMode.Normal));
 			}
 
 			private showEntities() {
@@ -481,9 +486,20 @@ namespace Renderer {
 				this.entitiesLayer.position.y = 0.51;
 				this.scene.add(this.entitiesLayer);
 
+				this.regionsLayer.position.y = 0.51;
+				this.scene.add(this.regionsLayer);
+
 				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') => {
 					const entity = this.entityManager.create(taroEntity, type);
-					this.entitiesLayer.add(entity);
+
+					switch (type) {
+						case 'region':
+							this.regionsLayer.add(entity);
+							break;
+						default:
+							this.entitiesLayer.add(entity);
+					}
+
 					taroEntity.on('destroy', () => {
 						this.entityManager.destroy(entity);
 						this.particles.destroyEmittersWithTarget(entity);
