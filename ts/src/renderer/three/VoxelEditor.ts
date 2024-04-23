@@ -264,7 +264,7 @@ class VoxelEditor {
 
 	getTile(tileX: number, tileY: number, tileZ: number, layer?: number): number {
 		const renderer = Renderer.Three.instance();
-		const voxelsMap = renderer.voxels.voxels[layer ?? this.currentLayerIndex];
+		const voxelsMap = Renderer.Three.getVoxels().voxels[layer ?? this.currentLayerIndex];
 		return voxelsMap.get(Renderer.Three.getKeyFromPos(tileX + 0.5, tileY, tileZ + 0.5))?.type + 1 ?? -1;
 	}
 

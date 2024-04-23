@@ -15,6 +15,10 @@ namespace Renderer {
 			return Renderer.getPointer();
 		}
 
+		export function getVoxels() {
+			return Renderer.getVoxels();
+		}
+
 		class Renderer {
 			private static _instance: Renderer;
 			renderer: THREE.WebGLRenderer;
@@ -31,7 +35,7 @@ namespace Renderer {
 			private regionsLayer = new THREE.Group();
 
 			private sky: Sky;
-			public voxels: Voxels;
+			private voxels: Voxels;
 			private particles: Particles;
 
 			private raycastIntervalSeconds = 0.1;
@@ -301,6 +305,10 @@ namespace Renderer {
 
 			static getPointer() {
 				return this._instance.pointer.clone();
+			}
+
+			static getVoxels() {
+				return this._instance.voxels;
 			}
 
 			tmpSetTIleId(tileId: number) {

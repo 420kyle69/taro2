@@ -62,6 +62,7 @@ namespace Renderer {
 			updatePreview(shouldUpdatePos = true) {
 				this.removeMeshes();
 				const renderer = Renderer.Three.instance();
+				const voxels = Renderer.Three.getVoxels();
 				if (shouldUpdatePos) {
 					const raycaster = new THREE.Raycaster();
 
@@ -80,7 +81,7 @@ namespace Renderer {
 						renderer.voxelEditor.voxels.layerLookupTable[renderer.voxelEditor.currentLayerIndex],
 						Math.floor(this.lastPoint.z) + 0.5
 					);
-					renderer.voxels.add(this.preview);
+					voxels.add(this.preview);
 					return;
 				}
 
