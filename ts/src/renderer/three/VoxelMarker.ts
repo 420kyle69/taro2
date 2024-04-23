@@ -5,27 +5,21 @@ namespace Renderer {
 			preview: THREE.Group;
 			meshes: Record<number, Record<number, THREE.Mesh>>;
 			commandController: CommandController;
+			renderer: Renderer.Three.Renderer;
 			active: boolean;
 			extrudedKey: string;
+			private lastPoint: THREE.Vector3 | undefined = undefined;
 
-			constructor(
-				//private scene: Phaser.Scene,
-				//private devModeScene: DevModeScene,
-				//private map: Phaser.Tilemaps.Tilemap,
-				//private palette: boolean,
-				//w: number,
-				commandController: CommandController
-			) {
+			constructor(commandController: CommandController) {
 				super();
 
 				this.active = true;
+				this.renderer = Three.Renderer.instance();
 				this.commandController = commandController;
 				this.lines = new MarkerLines();
 
-				//if (!palette) {
 				this.preview = new THREE.Group();
 				this.meshes = {};
-				//}
 			}
 
 			addMesh(x: number, y: number, z: number): THREE.Mesh {
@@ -45,7 +39,7 @@ namespace Renderer {
 				const geometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
 				const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
 				const mesh = new THREE.Mesh(geometry, material);
-				mesh.position.set(x, z, y);
+				mesh.position.set(x, y, z);
 				this.preview.add(mesh);
 				return mesh;
 			}
@@ -65,6 +59,52 @@ namespace Renderer {
 						mesh.material[0].opacity = 0;
 					});
 				});
+			}
+
+			updatePreview(shouldUpdatePos = true) {
+				this.removeMeshes();
+				if (shouldUpdatePos) {
+					const raycaster = new THREE.Raycaster();
+					raycaster.setFromCamera(Renderer.getPointer(), this.renderer.camera.instance);
+					let intersectionPoint = new THREE.Vector3();
+					const intersect = raycaster.ray.intersectPlane(
+						this.renderer.voxels.layerPlanes[this.renderer.voxelEditor.currentLayerIndex],
+						intersectionPoint
+					);
+
+					if (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersectionPoint))) {
+						return;
+					}
+					this.lastPoint = intersectionPoint.clone();
+				}
+
+				if (taro.developerMode.activeButton === 'eraser') {
+					this.renderer.voxelEditor.voxelMarker.addMesh(
+						Math.floor(this.lastPoint.x) + 0.5,
+						this.renderer.voxelEditor.voxels.layerLookupTable[this.renderer.voxelEditor.currentLayerIndex],
+						Math.floor(this.lastPoint.z) + 0.5
+					);
+					this.renderer.voxels.add(this.renderer.voxelEditor.voxelMarker.preview);
+					return;
+				}
+
+				const _x = Math.floor(this.lastPoint.x);
+				const _y = Math.floor(this.lastPoint.z);
+				const selectedTiles = {};
+				const tileId = this.renderer.tmp_tileId;
+				selectedTiles[_x] = {};
+				selectedTiles[_x][_y] = taro.developerMode.activeButton === 'eraser' ? -1 : tileId;
+				this.renderer.voxelEditor.putTiles(
+					_x,
+					_y,
+					selectedTiles,
+					'fitContent',
+					'rectangle',
+					this.renderer.voxelEditor.currentLayerIndex,
+					true,
+					false,
+					true
+				);
 			}
 
 			showPreview(): void {

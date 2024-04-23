@@ -39,7 +39,7 @@ declare class TaroEngine extends TaroClass {
 
 	game: GameComponent;
 
-	renderer: PhaserRenderer;
+	renderer: PhaserRenderer | Renderer.Three.Renderer;
 
 	developerMode: DeveloperMode;
 

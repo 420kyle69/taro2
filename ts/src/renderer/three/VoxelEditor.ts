@@ -1,9 +1,5 @@
 class VoxelEditor {
-	tilePalette: TilePalette;
-
-	marker: TileMarker;
-	paletteMarker: TileMarker;
-
+	renderer: Renderer.Three.Renderer;
 	paletteArea: Vector2D;
 	brushArea: TileShape;
 	currentLayerIndex: number;
@@ -19,14 +15,14 @@ class VoxelEditor {
 	constructor(voxels: Renderer.Three.Voxels, commandController: CommandController) {
 		const gameMap = taro.game.data.map;
 		this.voxels = voxels;
+		this.renderer = Renderer.Three.instance();
 		this.currentLayerIndex = 0;
 		this.voxelMarker = new Renderer.Three.VoxelMarker(commandController);
 		taro.client.on('switch-layer', (value) => {
 			if (value !== this.currentLayerIndex) {
 				this.voxels.updateLayer(new Map(), this.currentLayerIndex);
 				this.currentLayerIndex = value;
-				//TODO: make taro.renderer type safe
-				(taro.renderer as any).updatePreview();
+				this.renderer.voxelEditor.voxelMarker.updatePreview();
 			}
 		});
 
@@ -56,16 +52,7 @@ class VoxelEditor {
 			this.voxels.updateLayer(new Map(), this.currentLayerIndex);
 			(taro.renderer as any).updatePreview();
 		});
-		//TODO
-		// this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2, commandController);
-		// this.paletteMarker = new TileMarker(
-		// 	this.devModeTools.scene,
-		// 	devModeScene,
-		// 	this.tilePalette.map,
-		// 	true,
-		// 	1,
-		// 	commandController
-		// );
+
 		this.commandController = commandController;
 		this.paletteArea = { x: 1, y: 1 };
 		this.brushArea = new TileShape();
@@ -117,37 +104,8 @@ class VoxelEditor {
 		// };
 	}
 
-	updateSelectedTiles(devModeScene: DevModeScene) {
-		const palettePoint = devModeScene.cameras
-			.getCamera('palette')
-			.getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
-		const palettePointerTileX = this.tilePalette.map.worldToTileX(palettePoint.x);
-		const palettePointerTileY = this.tilePalette.map.worldToTileY(palettePoint.y);
-		if (!this.selectedTileArea[palettePointerTileX]) {
-			this.selectedTileArea[palettePointerTileX] = {};
-		}
-		const tile = this.getTile(palettePointerTileX, palettePointerTileY, this.tilePalette.map);
-		this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
-		this.marker.changePreview();
-	}
-
-	activateMarkers(active: boolean): void {
-		this.marker.active = active;
-		this.paletteMarker.active = active;
-	}
-
-	showMarkers(value: boolean): void {
-		this.marker.graphics.setVisible(value);
-		this.marker.showPreview(value);
-		this.paletteMarker.graphics.setVisible(value);
-	}
-
-	clearTint(): void {
-		this.tilePalette.map.layers[0].data.forEach((tilearray) => {
-			tilearray.forEach((tile) => {
-				if (tile) tile.tint = 0xffffff;
-			});
-		});
+	updateSelectedTiles(x, y) {
+		this.voxelMarker;
 	}
 
 	edit<T extends MapEditToolEnum>(data: TileData<T>): void {
