@@ -98,8 +98,8 @@ namespace Renderer {
 
 				this.controls.mouseButtons = {
 					LEFT: undefined,
-					MIDDLE: THREE.MOUSE.PAN,
-					RIGHT: THREE.MOUSE.ROTATE,
+					MIDDLE: THREE.MOUSE.ROTATE,
+					RIGHT: THREE.MOUSE.PAN,
 				};
 
 				this.controls.addEventListener('change', () => {
