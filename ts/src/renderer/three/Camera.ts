@@ -5,6 +5,7 @@ namespace Renderer {
 			target: THREE.Object3D | null = null;
 			controls: OrbitControls;
 			zoom = 1;
+			lastAuthoritativeZoom = 1;
 			zoomHeight = 700;
 			isPerspective = false;
 
@@ -25,7 +26,6 @@ namespace Renderer {
 			private originalDistance = 1;
 			private originalHalfWidth;
 
-			private originalZoom = 1;
 			private elevationAngle = 0;
 			private azimuthAngle = 0;
 			private pointerlockSpeed = 0.35;
@@ -131,7 +131,7 @@ namespace Renderer {
 						this.isPerspective = false;
 						this.instance = this.orthographicCamera;
 						this.controls.object = this.orthographicCamera;
-						this.zoom = this.originalZoom;
+						this.zoom = this.lastAuthoritativeZoom;
 
 						this.setElevationAngle(90);
 						this.setAzimuthAngle(0);
@@ -335,7 +335,7 @@ namespace Renderer {
 
 			setZoom(ratio: number) {
 				this.zoom = ratio;
-				this.originalZoom = ratio;
+				this.lastAuthoritativeZoom = ratio;
 				this.setDistance(this.originalDistance / ratio);
 			}
 
@@ -428,7 +428,7 @@ namespace Renderer {
 
 					this.setElevationAngle(this.elevationAngle);
 					this.setAzimuthAngle(this.azimuthAngle);
-					this.setZoom(this.originalZoom);
+					this.setZoom(this.lastAuthoritativeZoom);
 
 					if (this.target) {
 						const targetWorldPos = new THREE.Vector3();
