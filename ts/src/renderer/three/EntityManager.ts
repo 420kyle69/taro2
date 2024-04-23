@@ -74,13 +74,6 @@ namespace Renderer {
 				}
 			}
 
-			setRegionsVisible(visible: boolean) {
-				for (const region of this.regions) {
-					region.visible = visible;
-					region.label.visible = taro.developerMode.activeTab === 'map';
-				}
-			}
-
 			private addItemToUnitOrUnownedItems(item: Item) {
 				for (const unit of this.units) {
 					if (item.ownerUnitId == unit.taroId) {
