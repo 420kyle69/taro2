@@ -195,26 +195,26 @@ namespace Renderer {
 								}
 							}
 						}
+					}
 
-						if (
-							Utils.isRightButton(event.buttons) &&
-							taro.game.data.defaultData.contextMenuEnabled &&
-							(!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play'))
-						) {
-							const raycaster = new THREE.Raycaster();
-							raycaster.setFromCamera(this.pointer, this.camera.instance);
+					if (
+						Utils.isRightButton(event.buttons) &&
+						taro.game.data.defaultData.contextMenuEnabled &&
+						(!taro.developerMode.active || (taro.developerMode.active && taro.developerMode.activeTab === 'play'))
+					) {
+						const raycaster = new THREE.Raycaster();
+						raycaster.setFromCamera(this.pointer, this.camera.instance);
 
-							const intersects = raycaster.intersectObjects(this.entityManager.entities);
-							if (intersects.length > 0) {
-								const closest = intersects[0].object as THREE.Mesh;
-								const unit = this.entityManager.entities.find((e) => e instanceof Unit && e.sprite === closest);
+						const intersects = raycaster.intersectObjects(this.entityManager.entities);
+						if (intersects.length > 0) {
+							const closest = intersects[0].object as THREE.Mesh;
+							const unit = this.entityManager.entities.find((e) => e instanceof Unit && e.sprite === closest);
 
-								if (unit) {
-									const ownerPlayer = taro.$(unit.ownerId);
-									if (ownerPlayer?._stats?.controlledBy === 'human') {
-										if (typeof showUserDropdown !== 'undefined') {
-											showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
-										}
+							if (unit) {
+								const ownerPlayer = taro.$(unit.ownerId);
+								if (ownerPlayer?._stats?.controlledBy === 'human') {
+									if (typeof showUserDropdown !== 'undefined') {
+										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}
 							}
