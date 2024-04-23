@@ -276,6 +276,9 @@ class DeveloperMode {
 			//this.emptyTile();
 			this.activeButton = 'eraser';
 		});
+		taro.client.on('setting', () => {
+			inGameEditor.openMapConfiguration();
+		});
 	}
 
 	addInitEntities(): void {

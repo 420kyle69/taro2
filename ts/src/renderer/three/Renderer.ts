@@ -17,7 +17,6 @@ namespace Renderer {
 
 		export class Renderer {
 			private static _instance: Renderer;
-
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
@@ -26,10 +25,13 @@ namespace Renderer {
 				decreaseBrushSize: () => {},
 			});
 			mode = Mode.Normal;
+
 			private clock = new THREE.Clock();
 			private pointer = new THREE.Vector2();
 			private initLoadingManager = new THREE.LoadingManager();
+
 			private entityManager = new EntityManager();
+			private entitiesLayer = new THREE.Group();
 
 			private sky: Sky;
 			public voxels: Voxels;
@@ -351,28 +353,27 @@ namespace Renderer {
 				return window.innerHeight;
 			}
 
-			setVisible(visible: boolean) {
-				this.particles.visible = visible;
-				this.entityManager.entities.forEach((e) => {
-					if (e instanceof Region) {
-						e.label.visible = !visible;
-						if (e.devModeOnly) {
-							e.gameObject.visible = !visible;
-						}
-					} else {
-						e.visible = visible;
-					}
-				});
-			}
-
 			private onDevelopmentMode() {
 				this.camera.setDevelopmentMode(true);
-				this.setVisible(false);
+				this.hideEntities();
 			}
 
 			private onNormalMode() {
 				this.camera.setDevelopmentMode(false);
-				this.setVisible(true);
+				this.showEntities();
+			}
+
+			private showEntities() {
+				this.setEntitiesVisible(true);
+			}
+
+			private hideEntities() {
+				this.setEntitiesVisible(false);
+			}
+
+			private setEntitiesVisible(visible: boolean) {
+				this.particles.visible = visible;
+				this.entitiesLayer.visible = visible;
 			}
 
 			private loadTextures() {
@@ -439,13 +440,12 @@ namespace Renderer {
 				this.particles = new Particles();
 				this.scene.add(this.particles);
 
-				const entitiesLayer = new THREE.Group();
-				entitiesLayer.position.y = 0.51;
-				this.scene.add(entitiesLayer);
+				this.entitiesLayer.position.y = 0.51;
+				this.scene.add(this.entitiesLayer);
 
 				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') => {
 					const entity = this.entityManager.create(taroEntity, type);
-					entitiesLayer.add(entity);
+					this.entitiesLayer.add(entity);
 					taroEntity.on('destroy', () => {
 						this.entityManager.destroy(entity);
 						this.particles.destroyEmittersWithTarget(entity);
@@ -495,7 +495,7 @@ namespace Renderer {
 
 				taro.client.on('create-particle-emitter', (particle: Particle) => {
 					const emitter = this.particles.createEmitter(particle);
-					emitter.position.y += entitiesLayer.position.y;
+					emitter.position.y += this.entitiesLayer.position.y;
 
 					if (particle.entityId) {
 						const entity = this.entityManager.entities.find((entity) => entity.taroId == particle.entityId);
@@ -525,13 +525,13 @@ namespace Renderer {
 
 				taro.client.on('floating-text', (config: FloatingTextConfig) => {
 					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
-					entitiesLayer.add(FloatingText.create(config, zOffset));
+					this.entitiesLayer.add(FloatingText.create(config, zOffset));
 				});
 
 				taro.client.on('dynamic-floating-text', (config: DynamicFloatingTextConfig) => {
 					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
 					const dynamicText = DynamicFloatingText.create(config, zOffset);
-					entitiesLayer.add(dynamicText);
+					this.entitiesLayer.add(dynamicText);
 				});
 			}
 
