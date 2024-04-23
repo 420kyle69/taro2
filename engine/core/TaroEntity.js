@@ -2222,14 +2222,11 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	flip: function (isFlipping) {
-		if (this._stats.flip !== isFlipping) {
-			if (taro.isServer) {
-				this.streamUpdateData([{ flip: isFlipping }]);
-			} else if (taro.isClient) {
-				this.emit('flip', [isFlipping]);
-			}
+		if (taro.isServer && this._stats.flip !== isFlipping) {
+			this.streamUpdateData([{ flip: isFlipping }]);
+		} else if (taro.isClient) {
+			this.emit('flip', [isFlipping]);
 		}
-
 		this._stats.flip = isFlipping;
 	},
 
