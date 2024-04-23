@@ -321,8 +321,8 @@ var Unit = TaroEntityPhysics.extend({
 		}
 
 		if (taro.isClient) {
+			self.updateNameLabel();
 			if (newOwnerPlayer) {
-				self.updateNameLabel();
 				self.redrawAttributeBars();
 
 				var isMyUnitUpdated = newOwnerPlayer._stats.clientId == taro.network.id();
