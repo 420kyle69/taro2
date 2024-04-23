@@ -5,7 +5,6 @@ namespace Renderer {
 			preview: THREE.Group;
 			meshes: Record<number, Record<number, THREE.Mesh>>;
 			commandController: CommandController;
-			renderer: Renderer.Three.Renderer;
 			active: boolean;
 			extrudedKey: string;
 			private lastPoint: THREE.Vector3 | undefined = undefined;
@@ -14,7 +13,6 @@ namespace Renderer {
 				super();
 
 				this.active = true;
-				this.renderer = Three.Renderer.instance();
 				this.commandController = commandController;
 				this.lines = new MarkerLines();
 
@@ -63,44 +61,42 @@ namespace Renderer {
 
 			updatePreview(shouldUpdatePos = true) {
 				this.removeMeshes();
+				const renderer = Renderer.Three.instance();
 				if (shouldUpdatePos) {
 					const raycaster = new THREE.Raycaster();
-					raycaster.setFromCamera(Renderer.getPointer(), this.renderer.camera.instance);
-					let intersectionPoint = new THREE.Vector3();
-					const intersect = raycaster.ray.intersectPlane(
-						this.renderer.voxels.layerPlanes[this.renderer.voxelEditor.currentLayerIndex],
-						intersectionPoint
-					);
 
-					if (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersectionPoint))) {
+					raycaster.setFromCamera(Renderer.Three.getPointer(), renderer.camera.instance);
+					const intersect = renderer.raycastFloor();
+
+					if (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersect))) {
 						return;
 					}
-					this.lastPoint = intersectionPoint.clone();
+					this.lastPoint = intersect.clone();
 				}
 
 				if (taro.developerMode.activeButton === 'eraser') {
-					this.renderer.voxelEditor.voxelMarker.addMesh(
+					this.addMesh(
 						Math.floor(this.lastPoint.x) + 0.5,
-						this.renderer.voxelEditor.voxels.layerLookupTable[this.renderer.voxelEditor.currentLayerIndex],
+						renderer.voxelEditor.voxels.layerLookupTable[renderer.voxelEditor.currentLayerIndex],
 						Math.floor(this.lastPoint.z) + 0.5
 					);
-					this.renderer.voxels.add(this.renderer.voxelEditor.voxelMarker.preview);
+					renderer.voxels.add(this.preview);
 					return;
 				}
 
 				const _x = Math.floor(this.lastPoint.x);
 				const _y = Math.floor(this.lastPoint.z);
 				const selectedTiles = {};
-				const tileId = this.renderer.tmp_tileId;
+				const tileId = renderer.tmp_tileId;
 				selectedTiles[_x] = {};
 				selectedTiles[_x][_y] = taro.developerMode.activeButton === 'eraser' ? -1 : tileId;
-				this.renderer.voxelEditor.putTiles(
+				renderer.voxelEditor.putTiles(
 					_x,
 					_y,
 					selectedTiles,
 					'fitContent',
 					'rectangle',
-					this.renderer.voxelEditor.currentLayerIndex,
+					renderer.voxelEditor.currentLayerIndex,
 					true,
 					false,
 					true

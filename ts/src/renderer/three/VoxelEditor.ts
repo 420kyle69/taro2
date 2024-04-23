@@ -1,28 +1,30 @@
 class VoxelEditor {
-	renderer: Renderer.Three.Renderer;
 	paletteArea: Vector2D;
 	brushArea: TileShape;
 	currentLayerIndex: number;
 	selectedTileArea: Record<number, Record<number, number>>;
 	lastSelectedTileArea: Record<number, Record<number, number>>;
-	commandController: CommandController;
 	startDragIn: string;
 	voxels: Renderer.Three.Voxels;
 	voxelMarker: Renderer.Three.VoxelMarker;
 	tileSize: number;
 	prevData: { edit: MapEditTool['edit'] } | undefined;
+	commandController: CommandController = new CommandController({
+		increaseBrushSize: () => {},
+		decreaseBrushSize: () => {},
+	});
 
-	constructor(voxels: Renderer.Three.Voxels, commandController: CommandController) {
+	constructor(voxels: Renderer.Three.Voxels) {
 		const gameMap = taro.game.data.map;
 		this.voxels = voxels;
-		this.renderer = Renderer.Three.instance();
+		const renderer = Renderer.Three.instance();
 		this.currentLayerIndex = 0;
-		this.voxelMarker = new Renderer.Three.VoxelMarker(commandController);
+		this.voxelMarker = new Renderer.Three.VoxelMarker(this.commandController);
 		taro.client.on('switch-layer', (value) => {
 			if (value !== this.currentLayerIndex) {
 				this.voxels.updateLayer(new Map(), this.currentLayerIndex);
 				this.currentLayerIndex = value;
-				this.renderer.voxelEditor.voxelMarker.updatePreview();
+				renderer.voxelEditor.voxelMarker.updatePreview();
 			}
 		});
 
@@ -42,18 +44,28 @@ class VoxelEditor {
 		taro.client.on('cursor', () => {
 			this.voxelMarker.removeMeshes();
 		});
+
 		taro.client.on('draw-region', () => {
 			this.voxelMarker.removeMeshes();
 		});
+
 		taro.client.on('brush', () => {
-			(taro.renderer as any).updatePreview();
-		});
-		taro.client.on('empty-tile', () => {
-			this.voxels.updateLayer(new Map(), this.currentLayerIndex);
-			(taro.renderer as any).updatePreview();
+			this.voxelMarker.updatePreview();
 		});
 
-		this.commandController = commandController;
+		taro.client.on('empty-tile', () => {
+			this.voxels.updateLayer(new Map(), this.currentLayerIndex);
+			this.voxelMarker.updatePreview();
+		});
+
+		taro.client.on('undo', () => {
+			this.commandController.undo();
+		});
+
+		taro.client.on('redo', () => {
+			this.commandController.redo();
+		});
+
 		this.paletteArea = { x: 1, y: 1 };
 		this.brushArea = new TileShape();
 		this.selectedTileArea = {};
@@ -250,14 +262,36 @@ class VoxelEditor {
 		}
 	}
 
-	getTile(tileX: number, tileY: number, map: Phaser.Tilemaps.Tilemap): number {
-		if (DevModeScene.pointerInsideMap(tileX, tileY, map)) {
-			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
-				let selectedTile = map.getTileAt(tileX, tileY);
-				return selectedTile.index;
-			}
+	getTile(tileX: number, tileY: number, tileZ: number, layer?: number): number {
+		const renderer = Renderer.Three.instance();
+		const voxelsMap = renderer.voxels.voxels[layer ?? this.currentLayerIndex];
+		return voxelsMap.get(Renderer.Three.getKeyFromPos(tileX + 0.5, tileY, tileZ + 0.5))?.type + 1 ?? -1;
+	}
+
+	handleMapToolEdit() {
+		const renderer = Renderer.Three.instance();
+		const developerMode = taro.developerMode;
+		const intersect = renderer.raycastFloor();
+		if (!intersect) {
+			return;
 		}
-		return -1;
+		const _x = Math.floor(intersect.x);
+		const _y = Math.floor(intersect.z);
+		const selectedTiles = {};
+		const tileId = renderer.tmp_tileId;
+		selectedTiles[_x] = {};
+		selectedTiles[_x][_y] = developerMode.activeButton === 'eraser' ? -1 : tileId;
+		const nowTile = rfdc()(selectedTiles);
+		nowTile[_x][_y] = this.getTile(_x, this.voxels.calcLayersHeight(this.currentLayerIndex), _y);
+		const nowLayer = this.currentLayerIndex;
+		this.commandController.addCommand({
+			func: () => {
+				this.putTiles(_x, _y, selectedTiles, 'fitContent', 'rectangle', nowLayer);
+			},
+			undo: () => {
+				this.putTiles(_x, _y, nowTile, 'fitContent', 'rectangle', nowLayer);
+			},
+		});
 	}
 
 	floodFill(
