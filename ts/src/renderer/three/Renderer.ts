@@ -135,6 +135,7 @@ namespace Renderer {
 							line.visible = true;
 							this.scene.add(line);
 						} else if (developerMode.active && developerMode.activeTab === 'map' && Utils.isLeftButton(event.buttons)) {
+							this.voxelEditor.leftButtonDown = true;
 							switch (developerMode.activeButton) {
 								case 'cursor': {
 									const raycaster = new THREE.Raycaster();
@@ -202,6 +203,7 @@ namespace Renderer {
 				});
 
 				window.addEventListener('mouseup', () => {
+					this.voxelEditor.leftButtonDown = false;
 					if (taro.developerMode.regionTool) {
 						taro.developerMode.regionTool = false;
 						this.camera.controls.enablePan = true;
