@@ -906,6 +906,22 @@ var Item = TaroEntityPhysics.extend({
 		return offset;
 	},
 
+	changeSlotIndex: function (index) {
+		var owner = self.getOwnerUnit();
+		if (taro.isServer) {
+			this._stats.slotIndex = index;
+			this.streamUpdateData([{ slotIndex: index }]);
+		}
+
+		if (owner) {
+			if (this._stats.slotIndex >= owner._stats.inventorySize && !this._hidden) {
+				this.hide();
+			} else if (this._stats.slotIndex < owner._stats.inventorySize && this._hidden) {
+				this.show();
+			}
+		}
+	},
+
 	changeItemType: function (type, defaultData) {
 		var self = this;
 		var ownerUnit = taro.$(this._stats.ownerUnitId);
@@ -1157,7 +1173,6 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'slotIndex':
-						var owner = self.getOwnerUnit();
 						this._stats[attrName] = newValue;
 						break;
 
