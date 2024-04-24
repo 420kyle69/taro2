@@ -56,7 +56,6 @@ var TaroEntity = TaroObject.extend({
 		this._lastSeenBy = {};
 
 		this._inView = true;
-		this._hidden = false;
 
 		this._stats = {};
 		this._streamDataQueued = {};
@@ -109,11 +108,18 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_show: function () {
-		if (this._hidden) {
-			this._hidden = false;
-			if (taro.isClient) {
-				this.emit('show');
-			}
+		if (this._category === 'item') {
+			let ll = taro.isServer ? 'trace' : 'log';
+			console[ll](`
+				id:  ${this.id()}
+				owner: ${this._stats.ownerUnitId}
+				isHidden: ${this._stats.isHidden}
+				slotIndex: ${this._stats.slotIndex}
+				stateId: ${this._stats.stateId}
+			`);
+		}
+		if (taro.isClient) {
+			this.emit('show');
 		}
 		return this;
 	},
@@ -126,12 +132,19 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_hide: function () {
-		if (!this._hidden) {
-			this._hidden = true;
-			if (taro.isClient) {
-				this.emit('hide');
-				this.texture('');
-			}
+		if (this._category === 'item') {
+			let ll = taro.isServer ? 'trace' : 'log';
+			console[ll](`
+				id:  ${this.id()}
+				owner: ${this._stats.ownerUnitId}
+				isHidden: ${this._stats.isHidden}
+				slotIndex: ${this._stats.slotIndex}
+				stateId: ${this._stats.stateId}
+			`);
+		}
+
+		if (taro.isClient) {
+			this.emit('hide');
 		}
 		return this;
 	},
@@ -4484,6 +4497,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 
 							case 'isHidden':
+								console.log('SUD::isHidden', newValue);
 								this._stats[attrName] = newValue;
 								if (newValue == true) {
 									this.hide();
@@ -4683,7 +4697,7 @@ var TaroEntity = TaroObject.extend({
 						}
 					}
 				} else {
-					return String(this._hidden);
+					return String(this._stats.isHidden);
 				}
 				break;
 

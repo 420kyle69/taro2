@@ -357,7 +357,7 @@ var Unit = TaroEntityPhysics.extend({
 	},
 
 	hide: function () {
-		if (!this._hidden) {
+		if (!this._stats.isHidden) {
 			console.log('UNIT:  hide');
 			this.stopMoving();
 
@@ -382,7 +382,7 @@ var Unit = TaroEntityPhysics.extend({
 	},
 
 	show: function () {
-		if (this._hidden) {
+		if (this._stats.isHidden) {
 			console.log('UNIT:  show');
 			if (this._stats.aiEnabled) {
 				this.ai.enable();
@@ -2117,7 +2117,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		// ignore unit movement or controls if hidden
 		// make sure that this executes after this._streamUpdateData because we still need to fetch isHidden updates from the server
-		if (this._hidden) {
+		if (this._stats.isHidden) {
 			return;
 		}
 

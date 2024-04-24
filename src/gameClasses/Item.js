@@ -84,13 +84,12 @@ var Item = TaroEntityPhysics.extend({
 
 			taro.server.totalItemsCreated++;
 		} else if (taro.isClient) {
-			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._hidden) {
+			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._stats.isHidden) {
 				self.hide();
 			} else {
 				self.show();
-
-				self.width(self._stats.currentBody.width).height(self._stats.currentBody.height);
 			}
+			self.width(self._stats.currentBody.width).height(self._stats.currentBody.height);
 			self.addToRenderer();
 			self.drawBounds(false);
 		}
