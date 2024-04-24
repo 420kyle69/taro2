@@ -4476,7 +4476,6 @@ var TaroEntity = TaroObject.extend({
 								break;
 
 							case 'isHidden':
-								console.log('SUD::isHidden', newValue);
 								this._stats[attrName] = newValue;
 								if (newValue == true) {
 									this.hide();

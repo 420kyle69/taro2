@@ -67,7 +67,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 			return;
 		}
 
-		console.log('TaroEntityPhysics.updateBody', body);
 		this.width(parseFloat(body.width) * this._scale.x);
 		this.height(parseFloat(body.height) * this._scale.y);
 
