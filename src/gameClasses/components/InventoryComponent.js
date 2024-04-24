@@ -293,6 +293,8 @@ var InventoryComponent = TaroEntity.extend({
 				self._entity._stats.itemIds[slotIndex] = item.id();
 				if (slotIndex != self._entity.currentItemIndex) {
 					item._stats.slotIndex = slotIndex;
+				}
+				if (slotIndex >= unit._stats.inventorySize) {
 					item.hide();
 				}
 			} else if (taro.isClient && self._entity._stats.clientId === taro.network.id()) {
@@ -350,7 +352,7 @@ var InventoryComponent = TaroEntity.extend({
 		}
 
 		if (taro.isServer) {
-			unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]);
+			unit.streamUpdateData([{ itemIds: unit._stats.itemIds }], unit._stats.clientId);
 		} else if (taro.isClient) {
 			if (taro.client.myPlayer && taro.client.myPlayer._stats.selectedUnitId == unit.id() && itemExistInItemIds) {
 				$(taro.client.getCachedElementById(`item-${slotIndex}`)).html('');

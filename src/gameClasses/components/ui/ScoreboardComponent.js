@@ -4,9 +4,10 @@ var ScoreboardComponent = TaroEntity.extend({
 
 	init: function () {
 		var self = this;
+		TaroObject.prototype.init.call(this);
 		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
 		self.isUpdateQueued = false;
-		self._hidden = false;
+		self._stats.isHidden = false;
 
 		self.setUI();
 	},
@@ -113,11 +114,32 @@ var ScoreboardComponent = TaroEntity.extend({
 
 	convertNumbersToKMB: function (value) {
 		if (!taro.game.data.settings.prettifyingScoreboard) {
-			return value // do not convert if scoreboard is not prettified
+			return value; // do not convert if scoreboard is not prettified
 		}
 
 		const suffixes = [
-			'', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'De', 'Un', 'Do', 'Tr', 'Qad', 'Qid', 'Sxd', 'Spd', 'Od', 'Nd', 'Vi'
+			'',
+			'K',
+			'M',
+			'B',
+			'T',
+			'Qa',
+			'Qi',
+			'Sx',
+			'Sp',
+			'Oc',
+			'No',
+			'De',
+			'Un',
+			'Do',
+			'Tr',
+			'Qad',
+			'Qid',
+			'Sxd',
+			'Spd',
+			'Od',
+			'Nd',
+			'Vi',
 		];
 
 		// Convert the value to a number and take its absolute value
@@ -144,7 +166,7 @@ var ScoreboardComponent = TaroEntity.extend({
 
 		return returnValue;
 	},
-	
+
 	update: function () {
 		var self = this;
 		var DEFAULT_COLOR = 'white';
@@ -155,7 +177,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		if (taro.isClient && scoreboardElement && leaderboardToggleElement) {
 			scoreboardElement.innerHTML = '';
 
-			if (self._hidden) {
+			if (self._stats.isHidden) {
 				if (leaderboardToggleElement) {
 					leaderboardToggleElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -257,15 +279,15 @@ var ScoreboardComponent = TaroEntity.extend({
 	},
 
 	hideScores: function () {
-		this._hidden = true;
+		this._stats.isHidden = true;
 	},
 
 	showScores: function () {
-		this._hidden = false;
+		this._stats.isHidden = false;
 	},
 
 	toggleScores: function () {
-		this._hidden = !this._hidden;
+		this._stats.isHidden = !this._stats.isHidden;
 		this.update();
 	},
 });

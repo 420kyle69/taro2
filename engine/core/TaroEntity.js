@@ -56,7 +56,6 @@ var TaroEntity = TaroObject.extend({
 		this._lastSeenBy = {};
 
 		this._inView = true;
-		this._hidden = false;
 
 		this._stats = {};
 		this._streamDataQueued = {};
@@ -109,11 +108,8 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_show: function () {
-		if (this._hidden) {
-			this._hidden = false;
-			if (taro.isClient) {
-				this.emit('show');
-			}
+		if (taro.isClient) {
+			this.emit('show');
 		}
 		return this;
 	},
@@ -126,12 +122,8 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_hide: function () {
-		if (!this._hidden) {
-			this._hidden = true;
-			if (taro.isClient) {
-				this.emit('hide');
-				this.texture('');
-			}
+		if (taro.isClient) {
+			this.emit('hide');
 		}
 		return this;
 	},
@@ -4484,6 +4476,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 
 							case 'isHidden':
+								this._stats[attrName] = newValue;
 								if (newValue == true) {
 									this.hide();
 								} else {
@@ -4682,7 +4675,7 @@ var TaroEntity = TaroObject.extend({
 						}
 					}
 				} else {
-					return String(this._hidden);
+					return String(this._stats.isHidden);
 				}
 				break;
 
@@ -4949,6 +4942,7 @@ var TaroEntity = TaroObject.extend({
 						'width',
 						'height',
 						'scaleDimensions',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
@@ -4972,6 +4966,8 @@ var TaroEntity = TaroObject.extend({
 						'height',
 						'scaleDimensions',
 						'description',
+						'slotIndex',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
@@ -4990,6 +4986,7 @@ var TaroEntity = TaroObject.extend({
 						'scaleDimensions',
 						'sourceItemId',
 						'streamMode',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
