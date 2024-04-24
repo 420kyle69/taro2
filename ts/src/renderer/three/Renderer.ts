@@ -580,7 +580,7 @@ namespace Renderer {
 				this.timeSinceLastRaycast += dt;
 				if (this.timeSinceLastRaycast > this.raycastIntervalSeconds) {
 					this.timeSinceLastRaycast = 0;
-					this.checkForHiddenEntities();
+					// this.checkForHiddenEntities();
 				}
 
 				TWEEN.update();
