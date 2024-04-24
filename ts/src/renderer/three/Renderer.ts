@@ -2,8 +2,9 @@
 
 namespace Renderer {
 	export enum Mode {
-		Normal,
-		Development,
+		Play,
+		Map,
+		Entities,
 	}
 
 	export namespace Three {
@@ -24,7 +25,7 @@ namespace Renderer {
 			renderer: THREE.WebGLRenderer;
 			camera: Camera;
 			scene: THREE.Scene;
-			mode = Mode.Normal;
+			mode = Mode.Play;
 
 			private clock = new THREE.Clock();
 			private pointer = new THREE.Vector2();
@@ -91,7 +92,7 @@ namespace Renderer {
 				let height: number;
 
 				renderer.domElement.addEventListener('mousemove', (evt: MouseEvent) => {
-					if (this.mode === Mode.Development) {
+					if (this.mode === Mode.Map) {
 						switch (taro.developerMode.activeButton) {
 							case 'cursor': {
 								break;
@@ -118,7 +119,7 @@ namespace Renderer {
 				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
 
 				renderer.domElement.addEventListener('mousedown', (event: MouseEvent) => {
-					if (this.mode === Mode.Development) {
+					if (this.mode === Mode.Map) {
 						const developerMode = taro.developerMode;
 						if (developerMode.regionTool) {
 							const worldPoint = this.camera.getWorldPoint(this.pointer);
@@ -253,20 +254,31 @@ namespace Renderer {
 
 				this.loadTextures();
 
+				taro.client.on('enterPlayTab', () => {
+					this.mode = Mode.Play;
+					this.onEnterPlayMode();
+				});
+
+				taro.client.on('leavePlayTab', () => {
+					this.onExitPlayMode();
+				});
+
 				taro.client.on('enterMapTab', () => {
-					if (this.mode == Mode.Normal) {
-						this.mode = Mode.Development;
-						this.onDevelopmentMode();
-					}
+					this.mode = Mode.Map;
+					this.onEnterMapMode();
 				});
 
 				taro.client.on('leaveMapTab', () => {
-					if (this.mode == Mode.Development) {
-						this.mode = Mode.Normal;
-						this.voxelEditor.voxels.updateLayer(new Map(), this.voxelEditor.currentLayerIndex);
-						this.voxelEditor.showAllLayers();
-						this.onNormalMode();
-					}
+					this.onExitMapMode();
+				});
+
+				taro.client.on('enterEntitiesTab', () => {
+					this.mode = Mode.Entities;
+					this.onEnterEntitiesMode();
+				});
+
+				taro.client.on('leaveEntitiesTab', () => {
+					this.onExitEntitiesMode();
 				});
 
 				taro.client.on('update-region-name', (data: { name: string; newName: string }) => {
@@ -354,17 +366,29 @@ namespace Renderer {
 				return window.innerHeight;
 			}
 
-			private onDevelopmentMode() {
-				this.camera.setDevelopmentMode(true);
+			private onEnterPlayMode() {
+				this.camera.setEditorMode(false);
+			}
+
+			private onExitPlayMode() {
+				this.camera.setEditorMode(true);
+			}
+
+			private onEnterMapMode() {
 				this.hideEntities();
 				this.entityManager.regions.forEach((r) => r.setMode(RegionMode.Development));
 			}
 
-			private onNormalMode() {
-				this.camera.setDevelopmentMode(false);
+			private onExitMapMode() {
 				this.showEntities();
 				this.entityManager.regions.forEach((r) => r.setMode(RegionMode.Normal));
+				this.voxelEditor.voxels.updateLayer(new Map(), this.voxelEditor.currentLayerIndex);
+				this.voxelEditor.showAllLayers();
 			}
+
+			private onEnterEntitiesMode() {}
+
+			private onExitEntitiesMode() {}
 
 			private showEntities() {
 				this.setEntitiesVisible(true);

@@ -8,6 +8,7 @@ namespace Renderer {
 			preview: THREE.Mesh | undefined = undefined;
 			layerPlanes: THREE.Plane[] = [];
 			layerLookupTable: Record<number, number> = {};
+
 			constructor(
 				private topTileset: Tileset,
 				private sidesTileset: Tileset
@@ -34,7 +35,7 @@ namespace Renderer {
 					for (const [idx, layer] of config.entries()) {
 						if (layer.type === 'tilelayer' && layer.data) {
 							const voxelsData = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-							voxels.updateLayer(voxelsData, idx, true);
+							voxels.updateLayer(voxelsData, idx);
 							voxels.setLayerLookupTable(idx, numTileLayers);
 							numTileLayers++;
 						}
@@ -91,7 +92,7 @@ namespace Renderer {
 				return voxels;
 			}
 
-			updateLayer(voxels: Map<string, VoxelCell>, layerIdx: number, transparent = true, isPreview = false) {
+			updateLayer(voxels: Map<string, VoxelCell>, layerIdx: number, isPreview = false) {
 				const renderOrder = (layerIdx + 1) * 100;
 				const prunedVoxels = pruneCells(
 					voxels,
@@ -115,11 +116,13 @@ namespace Renderer {
 				geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
 
 				const mat1 = new THREE.MeshBasicMaterial({
-					transparent,
 					map: this.sidesTileset.texture,
 					side: THREE.DoubleSide,
 				});
-				const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.topTileset.texture, side: THREE.DoubleSide });
+				const mat2 = new THREE.MeshBasicMaterial({
+					map: this.topTileset.texture,
+					side: THREE.DoubleSide,
+				});
 				const mat1Preview = mat1.clone();
 				mat1Preview.opacity = 0.5;
 				const mat2Preview = mat2.clone();
@@ -139,8 +142,6 @@ namespace Renderer {
 					const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1 - renderOrder / 100);
 					this.layerPlanes[layerIdx] = plane;
 				}
-
-				mesh.renderOrder = renderOrder;
 
 				if (!isPreview) {
 					//@ts-ignore
