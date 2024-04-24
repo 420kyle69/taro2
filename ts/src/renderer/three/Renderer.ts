@@ -134,46 +134,50 @@ namespace Renderer {
 							line.scale.set(width, 1, height);
 							line.visible = true;
 							this.scene.add(line);
-						} else if (developerMode.active && developerMode.activeTab === 'map' && Utils.isLeftButton(event.buttons)) {
-							this.voxelEditor.leftButtonDown = true;
-							switch (developerMode.activeButton) {
-								case 'cursor': {
-									const raycaster = new THREE.Raycaster();
-									raycaster.setFromCamera(this.pointer, this.camera.instance);
+						} else if (developerMode.active && developerMode.activeTab === 'map') {
+							if (Utils.isLeftButton(event.buttons)) {
+								this.voxelEditor.leftButtonDown = true;
+								switch (developerMode.activeButton) {
+									case 'cursor': {
+										const raycaster = new THREE.Raycaster();
+										raycaster.setFromCamera(this.pointer, this.camera.instance);
 
-									const intersects = raycaster.intersectObjects(this.entityManager.entities);
-									if (intersects?.length > 0) {
-										const closest = intersects[0].object as THREE.Mesh;
-										const region = this.entityManager.entities.find(
-											(e) => e instanceof Region && e.mesh === closest
-										) as Region;
-										if (region) {
-											/*const ownerPlayer = taro.$(unit.ownerId);
-									if (ownerPlayer?._stats?.controlledBy === 'human') {
-										if (typeof showUserDropdown !== 'undefined') {
-											showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+										const intersects = raycaster.intersectObjects(this.entityManager.entities);
+										if (intersects?.length > 0) {
+											const closest = intersects[0].object as THREE.Mesh;
+											const region = this.entityManager.entities.find(
+												(e) => e instanceof Region && e.mesh === closest
+											) as Region;
+											if (region) {
+												/*const ownerPlayer = taro.$(unit.ownerId);
+										if (ownerPlayer?._stats?.controlledBy === 'human') {
+											if (typeof showUserDropdown !== 'undefined') {
+												showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+											}
+										}*/
+												const regionData = {
+													name: region.taroEntity._stats.id,
+													x: region.stats.x,
+													y: region.stats.y,
+													width: region.stats.width,
+													height: region.stats.height,
+													alpha: region.stats.alpha,
+													inside: region.stats.inside,
+												};
+												inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+											}
 										}
-									}*/
-											const regionData = {
-												name: region.taroEntity._stats.id,
-												x: region.stats.x,
-												y: region.stats.y,
-												width: region.stats.width,
-												height: region.stats.height,
-												alpha: region.stats.alpha,
-												inside: region.stats.inside,
-											};
-											inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
-										}
+										break;
 									}
-									break;
+									case 'eraser': {
+									}
+									case 'brush': {
+										this.voxelEditor.handleMapToolEdit();
+										break;
+									}
 								}
-								case 'eraser': {
-								}
-								case 'brush': {
-									this.voxelEditor.handleMapToolEdit();
-									break;
-								}
+							} else if (Utils.isRightButton(event.buttons) && developerMode.activeButton === 'brush') {
+								this.voxelEditor.handleMapToolCopy();
 							}
 						}
 					}
