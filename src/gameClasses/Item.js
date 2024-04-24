@@ -86,10 +86,8 @@ var Item = TaroEntityPhysics.extend({
 		} else if (taro.isClient) {
 			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._hidden) {
 				self.hide();
-				this.emit('hide');
 			} else {
 				self.show();
-				this.emit('show');
 
 				self.width(self._stats.currentBody.width).height(self._stats.currentBody.height);
 			}
@@ -668,9 +666,9 @@ var Item = TaroEntityPhysics.extend({
 	updateQuantity: function (qty) {
 		this._stats.quantity = qty;
 		if (taro.isServer) {
+			var clientId = this.getOwnerUnit()?.getOwner()?._stats.clientId;
 			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
 			if (taro.runMode == 0) {
-				var clientId = this.getOwnerUnit()?.getOwner()?._stats.clientId;
 				this.streamUpdateData([{ quantity: qty }], clientId);
 			}
 
@@ -679,7 +677,7 @@ var Item = TaroEntityPhysics.extend({
 				var ownerUnit = this.getOwnerUnit();
 				this.remove();
 				if (ownerUnit) {
-					ownerUnit.streamUpdateData([{ itemIds: ownerUnit._stats.itemIds }]);
+					ownerUnit.streamUpdateData([{ itemIds: ownerUnit._stats.itemIds }], clientId);
 				}
 			}
 		} else if (taro.isClient && taro.client.selectedUnit == this.getOwnerUnit()) {
@@ -1161,13 +1159,6 @@ var Item = TaroEntityPhysics.extend({
 					case 'slotIndex':
 						var owner = self.getOwnerUnit();
 						this._stats[attrName] = newValue;
-						if (owner) {
-							if (this._stats.slotIndex >= owner._stats.inventorySize && !this._hidden) {
-								this.hide();
-							} else if (this._stats.slotIndex < owner._stats.inventorySize && this._hidden) {
-								this.show();
-							}
-						}
 						break;
 
 					case 'useQueued':

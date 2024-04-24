@@ -104,7 +104,7 @@ var ServerNetworkEvents = {
 				isAdBlockEnabled: data.isAdBlockEnabled,
 				isMobile: data.isMobile,
 			});
-			
+
 			if (player) {
 				player.joinGame();
 			}
@@ -494,7 +494,7 @@ var ServerNetworkEvents = {
 					itemIds[data.from] = undefined;
 				}
 
-				unit.streamUpdateData([{ itemIds: itemIds }]);
+				unit.streamUpdateData([{ itemIds: itemIds }], clientId);
 				unit.changeItem(unit._stats.currentItemIndex);
 			}
 		}

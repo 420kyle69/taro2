@@ -4949,6 +4949,7 @@ var TaroEntity = TaroObject.extend({
 						'width',
 						'height',
 						'scaleDimensions',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
@@ -4972,6 +4973,8 @@ var TaroEntity = TaroObject.extend({
 						'height',
 						'scaleDimensions',
 						'description',
+						'slotIndex',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
@@ -4990,6 +4993,7 @@ var TaroEntity = TaroObject.extend({
 						'scaleDimensions',
 						'sourceItemId',
 						'streamMode',
+						'isHidden',
 					];
 					data = {
 						attributes: {},

@@ -358,6 +358,7 @@ var Unit = TaroEntityPhysics.extend({
 
 	hide: function () {
 		if (!this._hidden) {
+			console.log('UNIT:  hide');
 			this.stopMoving();
 
 			// hide all items carried by this unit
@@ -382,6 +383,7 @@ var Unit = TaroEntityPhysics.extend({
 
 	show: function () {
 		if (this._hidden) {
+			console.log('UNIT:  show');
 			if (this._stats.aiEnabled) {
 				this.ai.enable();
 			}
@@ -1294,7 +1296,7 @@ var Unit = TaroEntityPhysics.extend({
 					}
 
 					// Unit
-					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
+					self.streamUpdateData([{ itemIds: self._stats.itemIds }], self._stats.clientId);
 
 					if (item._stats.bonus && item._stats.bonus.passive) {
 						if (
