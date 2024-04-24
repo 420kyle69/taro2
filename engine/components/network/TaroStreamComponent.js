@@ -207,7 +207,7 @@ var TaroStreamComponent = TaroEventingClass.extend({
 						},
 						rotate: ntransdata[2],
 					};
-					console.log(createData);
+
 					entity = new classConstructor(createData, entityId);
 
 					entity.bypassSmoothing = true;

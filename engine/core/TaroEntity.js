@@ -108,16 +108,6 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_show: function () {
-		if (this._category === 'item') {
-			let ll = taro.isServer ? 'trace' : 'log';
-			console[ll](`
-				id:  ${this.id()}
-				owner: ${this._stats.ownerUnitId}
-				isHidden: ${this._stats.isHidden}
-				slotIndex: ${this._stats.slotIndex}
-				stateId: ${this._stats.stateId}
-			`);
-		}
 		if (taro.isClient) {
 			this.emit('show');
 		}
@@ -132,17 +122,6 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_hide: function () {
-		if (this._category === 'item') {
-			let ll = taro.isServer ? 'trace' : 'log';
-			console[ll](`
-				id:  ${this.id()}
-				owner: ${this._stats.ownerUnitId}
-				isHidden: ${this._stats.isHidden}
-				slotIndex: ${this._stats.slotIndex}
-				stateId: ${this._stats.stateId}
-			`);
-		}
-
 		if (taro.isClient) {
 			this.emit('hide');
 		}
