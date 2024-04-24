@@ -960,7 +960,8 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						break;
-
+					
+					case 'getItemInInventorySlot':
 					case 'getItemAtSlot':
 						var unit = self.getValue(text.unit, vars);
 						var slotIndex = self.getValue(text.slot, vars);
@@ -1056,20 +1057,6 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'getLastChatMessageSentByPlayer':
 						returnValue = taro.game.lastChatMessageSentByPlayer;
-
-						break;
-
-					// doesn't work yet
-					case 'getItemInInventorySlot':
-						var slotIndex = self.getValue(text.slot, vars);
-
-						if (entity && entity._category == 'unit') {
-							var item = entity.inventory.getItemBySlotNumber(slotIndex);
-
-							if (item) {
-								returnValue = item;
-							}
-						}
 
 						break;
 
