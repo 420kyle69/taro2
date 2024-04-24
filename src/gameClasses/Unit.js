@@ -106,11 +106,10 @@ var Unit = TaroEntityPhysics.extend({
 			// otherwise, client.js will wait for player entity and run this on client.js
 			if (this._stats.ownerId) {
 				// if the owner player entity is received on the client side already
+				this.setOwnerPlayer(this._stats.ownerId);
+				this.equipSkin();
 				const ownerPlayer = taro.$(this._stats.ownerId);
 				if (ownerPlayer) {
-					this.setOwnerPlayer(this._stats.ownerId);
-					this.equipSkin();
-
 					// player was already set to camera-track this unit
 					if (ownerPlayer._stats.cameraTrackedUnitId == this.id()) {
 						this.emit('follow');

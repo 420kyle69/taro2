@@ -53,6 +53,16 @@ namespace Renderer {
 				return this.layerLookupTable[layerIdx] ?? layerIdx;
 			}
 
+			static getLayersYOffset() {
+				return 0.001;
+			}
+
+			calcLayersHeight(rawLayer: number) {
+				const renderer = Renderer.Three.instance();
+				const height = this.layerLookupTable[rawLayer ?? renderer.voxelEditor.currentLayerIndex];
+				return height + Renderer.Three.Voxels.getLayersYOffset() * height;
+			}
+
 			static generateVoxelsFromLayerData(data: LayerData, height: number, flat = false) {
 				const voxels = new Map<string, VoxelCell>();
 				const allFacesVisible = [false, false, false, false, false, false];

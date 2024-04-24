@@ -35,7 +35,7 @@ namespace Renderer {
 				let tex = textureRepository.get(taroEntity._stats.cellSheet.url);
 				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, tex.clone(), taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
-				entity.hud.scale.setScalar(1 / renderer.camera.zoom);
+				entity.hud.scale.setScalar(1 / renderer.camera.lastAuthoritativeZoom);
 
 				if (taroEntity._stats.cameraPointerLock) {
 					entity.cameraConfig.pointerLock = taroEntity._stats.cameraPointerLock;
