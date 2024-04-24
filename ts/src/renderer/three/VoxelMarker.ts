@@ -69,10 +69,10 @@ namespace Renderer {
 					raycaster.setFromCamera(Renderer.Three.getPointer(), renderer.camera.instance);
 					const intersect = renderer.raycastFloor();
 
-					if (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersect))) {
+					if (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersect.floor()))) {
 						return;
 					}
-					this.lastPoint = intersect.clone();
+					this.lastPoint = intersect.floor().clone();
 				}
 
 				if (taro.developerMode.activeButton === 'eraser') {
