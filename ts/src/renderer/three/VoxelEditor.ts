@@ -244,9 +244,7 @@ class VoxelEditor {
 			}
 		}
 		this.voxels.updateLayer(voxels, layer, true, isPreview);
-		//console.log('left button down', this.leftButtonDown, 'isPreview', isPreview, 'local', local);
 		if ((!local && !isPreview) || (local && isPreview && this.leftButtonDown)) {
-			//console.log('send edit left button down', this.leftButtonDown);
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
 					size: brushSize,
@@ -259,7 +257,6 @@ class VoxelEditor {
 				},
 			};
 			if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
-				console.log('send edit', data, this.prevData);
 				taro.network.send<'edit'>('editTile', data);
 				this.prevData = data;
 			}
@@ -296,6 +293,20 @@ class VoxelEditor {
 				this.putTiles(_x, _y, nowTile, 'fitContent', 'rectangle', nowLayer);
 			},
 		});
+	}
+
+	handleMapToolCopy() {
+		const renderer = Renderer.Three.instance();
+		const intersect = renderer.raycastFloor();
+		if (!intersect) {
+			return;
+		}
+		const _x = Math.floor(intersect.x);
+		const _y = Math.floor(intersect.z);
+		const taroMap = taro.game.data.map;
+		if (taroMap.layers[this.currentLayerIndex].data[_y * taroMap.width + _x] !== 0) {
+			renderer.tmp_tileId = taroMap.layers[this.currentLayerIndex].data[_y * taroMap.width + _x];
+		}
 	}
 
 	floodFill(
