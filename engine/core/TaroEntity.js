@@ -5011,6 +5011,7 @@ var TaroEntity = TaroObject.extend({
 						'username',
 						'profilePicture',
 						'roleIds',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
