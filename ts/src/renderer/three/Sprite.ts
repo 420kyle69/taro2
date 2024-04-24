@@ -17,7 +17,11 @@ namespace Renderer {
 
 				const geometry = new THREE.PlaneGeometry(1, 1);
 				geometry.rotateX(-Math.PI / 2);
-				const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+				const material = new THREE.MeshBasicMaterial({
+					map: tex,
+					transparent: true,
+					alphaTest: 0.3,
+				});
 				this.sprite = new THREE.Mesh(geometry, material);
 				this.add(this.sprite);
 
@@ -89,8 +93,8 @@ namespace Renderer {
 			}
 
 			private calcRenderOrder() {
-				this.sprite.renderOrder = this.layer * 100 + this.depth;
-				this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + this.zOffset;
+				this.position.y = Utils.getLayerZOffset(this.layer) + this.zOffset;
+				this.sprite.position.y = Utils.getDepthZOffset(20) - Utils.getDepthZOffset(this.depth);
 			}
 
 			private faceCamera(camera: Camera) {

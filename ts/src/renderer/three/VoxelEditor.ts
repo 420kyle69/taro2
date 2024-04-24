@@ -24,7 +24,7 @@ class VoxelEditor {
 		taro.client.on('switch-layer', (value) => {
 			if (value !== this.currentLayerIndex) {
 				this.voxels.updateLayer(new Map(), this.currentLayerIndex);
-				this.currentLayerIndex = value;
+				this.switchLayer(value);
 				renderer.voxelEditor.voxelMarker.updatePreview();
 			}
 		});
@@ -35,7 +35,7 @@ class VoxelEditor {
 			for (const [idx, layer] of taro.game.data.map.layers.entries()) {
 				if (layer.type === 'tilelayer' && layer.data) {
 					const voxels = Renderer.Three.Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-					this.voxels.updateLayer(voxels, idx, false);
+					this.voxels.updateLayer(voxels, idx);
 					this.voxels.setLayerLookupTable(idx, numTileLayers);
 					numTileLayers++;
 				}
@@ -66,6 +66,10 @@ class VoxelEditor {
 
 		taro.client.on('redo', () => {
 			this.commandController.redo();
+		});
+
+		taro.client.on('hide-layer', (data) => {
+			this.hideLayer(data.index, data.state);
 		});
 
 		this.paletteArea = { x: 1, y: 1 };
@@ -249,7 +253,7 @@ class VoxelEditor {
 				}
 			}
 		}
-		this.voxels.updateLayer(voxels, layer, true, isPreview);
+		this.voxels.updateLayer(voxels, layer, isPreview);
 		if (!local && !isPreview) {
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
@@ -412,6 +416,28 @@ class VoxelEditor {
 		if (map.layers[layer]) {
 			map.layers[layer].opacity = opacity;
 			//TODO
+		}
+	}
+
+	switchLayer(value: number): void {
+		const voxels = Renderer.Three.getVoxels();
+		if (!voxels.meshes[value]) {
+			return;
+		}
+		this.currentLayerIndex = value;
+		voxels.meshes[value].visible = true;
+	}
+
+	hideLayer(layer: number, state: boolean): void {
+		Renderer.Three.getVoxels().meshes[layer].visible = !state;
+	}
+
+	showAllLayers(): void {
+		const voxels = Renderer.Three.getVoxels();
+		for (let i = 0; i < voxels.meshes.length; i++) {
+			if (voxels?.meshes[i]?.visible === false) {
+				this.hideLayer(i, false);
+			}
 		}
 	}
 

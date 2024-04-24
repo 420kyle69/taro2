@@ -264,6 +264,7 @@ namespace Renderer {
 					if (this.mode == Mode.Development) {
 						this.mode = Mode.Normal;
 						this.voxelEditor.voxels.updateLayer(new Map(), this.voxelEditor.currentLayerIndex);
+						this.voxelEditor.showAllLayers();
 						this.onNormalMode();
 					}
 				});
@@ -580,7 +581,7 @@ namespace Renderer {
 				this.timeSinceLastRaycast += dt;
 				if (this.timeSinceLastRaycast > this.raycastIntervalSeconds) {
 					this.timeSinceLastRaycast = 0;
-					this.checkForHiddenEntities();
+					// this.checkForHiddenEntities();
 				}
 
 				TWEEN.update();
