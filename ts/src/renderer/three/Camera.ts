@@ -12,7 +12,7 @@ namespace Renderer {
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
 
-			isDevelopmentMode = false;
+			isEditorMode = false;
 
 			private orthographicCamera: THREE.OrthographicCamera;
 			private perspectiveCamera: THREE.PerspectiveCamera;
@@ -120,10 +120,10 @@ namespace Renderer {
 
 				window.addEventListener('keypress', (evt) => {
 					if (evt.key === '~') {
-						this.setDevelopmentMode(!this.isDevelopmentMode);
+						this.setEditorMode(!this.isEditorMode);
 					}
 
-					if (!this.isDevelopmentMode) return;
+					if (!this.isEditorMode) return;
 
 					if (evt.key === 'l') {
 						this.isLocked ? this.unlock() : this.lock();
@@ -283,7 +283,7 @@ namespace Renderer {
 			}
 
 			update() {
-				if (this.isDevelopmentMode) {
+				if (this.isEditorMode) {
 					const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
 					const elevationAngle = this.getElevationAngle() * (180 / Math.PI);
 					this.debugInfo.style.display = 'block';
@@ -301,7 +301,7 @@ namespace Renderer {
 					this.debugInfo.innerHTML += `zoom: ${editorZoom}</br>`;
 				}
 
-				if (this.target && !this.isDevelopmentMode) {
+				if (this.target && !this.isEditorMode) {
 					const targetWorldPos = new THREE.Vector3();
 					this.target.getWorldPosition(targetWorldPos);
 					this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z, true);
@@ -414,10 +414,10 @@ namespace Renderer {
 				this.onChangeCbs.push(cb);
 			}
 
-			setDevelopmentMode(state: boolean) {
-				this.isDevelopmentMode = state;
+			setEditorMode(state: boolean) {
+				this.isEditorMode = state;
 
-				if (this.isDevelopmentMode) {
+				if (this.isEditorMode) {
 					this.controls.enablePan = true;
 					this.controls.enableRotate = true;
 					this.controls.enableZoom = true;
