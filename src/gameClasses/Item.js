@@ -915,9 +915,9 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		if (owner) {
-			if (this._stats.slotIndex >= owner._stats.inventorySize && !this._hidden) {
+			if (this._stats.slotIndex >= owner._stats.inventorySize) {
 				this.hide();
-			} else if (this._stats.slotIndex < owner._stats.inventorySize && this._hidden) {
+			} else if (this._stats.slotIndex < owner._stats.inventorySize) {
 				this.show();
 			}
 		}

@@ -4484,6 +4484,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 
 							case 'isHidden':
+								this._stats[attrName] = newValue;
 								if (newValue == true) {
 									this.hide();
 								} else {
