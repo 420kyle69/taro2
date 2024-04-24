@@ -129,9 +129,9 @@ namespace Renderer {
 				curLength += voxelData.sidesIndices.length;
 				geometry.addGroup(curLength, voxelData.topIndices.length, 1);
 				curLength += voxelData.topIndices.length;
-				geometry.addGroup(curLength, voxelData.previewTopIndices.length, 2);
-				curLength += voxelData.previewTopIndices.length;
-				geometry.addGroup(curLength, voxelData.previewSidesIndices.length, 3);
+				geometry.addGroup(curLength, voxelData.previewSidesIndices.length, 2);
+				curLength += voxelData.previewSidesIndices.length;
+				geometry.addGroup(curLength, voxelData.previewTopIndices.length, 3);
 
 				const mesh = new THREE.Mesh(geometry, [mat1, mat2, mat1Preview, mat2Preview]);
 

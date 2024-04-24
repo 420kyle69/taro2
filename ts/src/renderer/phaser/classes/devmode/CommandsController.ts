@@ -36,16 +36,11 @@ class CommandController implements CommandControllerProps {
 	 * command exec, if no change happened, it will not go into the history.
 	 */
 	addCommand(command: CommandEmitterProps, forceToHistory = false, history = true, mapEdit = true) {
-		const mapBeforeCommand = this.getAllTiles();
 		const oldTaroMap = JSON.stringify(taro.game.data.map.layers);
 		command.func();
 		if (history || forceToHistory) {
 			if (mapEdit && !forceToHistory) {
-				if (
-					this.map !== undefined &&
-					JSON.stringify(this.getAllTiles()) === JSON.stringify(mapBeforeCommand) &&
-					JSON.stringify(taro.game.data.map.layers) === oldTaroMap
-				) {
+				if (JSON.stringify(taro.game.data.map.layers) === oldTaroMap) {
 					return;
 				}
 			}
@@ -79,19 +74,5 @@ class CommandController implements CommandControllerProps {
 			this.commands[this.nowInsertIndex].func();
 			this.nowInsertIndex += 1;
 		}
-	}
-
-	getAllTiles(): Record<number, Record<number, number>> {
-		const nowTiles = {};
-		if (this.map) {
-			Object.entries(this.map.layer.data).map(([x, obj]) => {
-				nowTiles[x] = {};
-				Object.entries(obj).map(([y, tile]) => {
-					nowTiles[x][y] = tile.index;
-				});
-			});
-		}
-
-		return nowTiles;
 	}
 }
