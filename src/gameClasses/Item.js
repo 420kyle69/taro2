@@ -89,7 +89,10 @@ var Item = TaroEntityPhysics.extend({
 			} else {
 				self.show();
 			}
-			self.width(self._stats.currentBody.width).height(self._stats.currentBody.height);
+			if (self._stats.currentBody) {
+				self.width(self._stats.currentBody.width);
+				self.height(self._stats.currentBody.height);
+			}
 			self.addToRenderer();
 			self.drawBounds(false);
 		}
