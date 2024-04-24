@@ -244,7 +244,7 @@ class VoxelEditor {
 			}
 		}
 		this.voxels.updateLayer(voxels, layer, true, isPreview);
-		if ((!local && !isPreview) || (local && isPreview && this.leftButtonDown)) {
+		if (!local && !isPreview) {
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
 					size: brushSize,
@@ -285,14 +285,18 @@ class VoxelEditor {
 		const nowTile = rfdc()(selectedTiles);
 		nowTile[_x][_y] = this.getTile(_x, this.voxels.calcLayersHeight(this.currentLayerIndex), _y);
 		const nowLayer = this.currentLayerIndex;
-		this.commandController.addCommand({
-			func: () => {
-				this.putTiles(_x, _y, selectedTiles, 'fitContent', 'rectangle', nowLayer);
-			},
-			undo: () => {
-				this.putTiles(_x, _y, nowTile, 'fitContent', 'rectangle', nowLayer);
-			},
-		});
+		if (!this.leftButtonDown) {
+			this.voxelMarker.updatePreview();
+		} else {
+			this.commandController.addCommand({
+				func: () => {
+					this.putTiles(_x, _y, selectedTiles, 'fitContent', 'rectangle', nowLayer);
+				},
+				undo: () => {
+					this.putTiles(_x, _y, nowTile, 'fitContent', 'rectangle', nowLayer);
+				},
+			});
+		}
 	}
 
 	handleMapToolCopy() {

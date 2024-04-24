@@ -99,7 +99,7 @@ namespace Renderer {
 							case 'eraser': {
 							}
 							case 'brush': {
-								this.voxelEditor.voxelMarker.updatePreview();
+								this.voxelEditor.handleMapToolEdit();
 							}
 						}
 					}
