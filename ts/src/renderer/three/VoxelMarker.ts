@@ -21,21 +21,12 @@ namespace Renderer {
 			}
 
 			addMesh(x: number, y: number, z: number): THREE.Mesh {
-				//const map = this.map;
-				const data = taro.game.data;
-				const tileset = data.map.tilesets[0];
-				const key = `tiles/${tileset.name}`;
-				const extrudedKey = (this.extrudedKey = `extruded-${key}`);
-
-				let width = Constants.TILE_SIZE;
-				let height = Constants.TILE_SIZE;
-				/*if (taro.game.data.defaultData.dontResize) {
-                    width = map.tileWidth;
-                    height = map.tileHeight;
-                }*/
-
 				const geometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
-				const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+				const material = new THREE.MeshBasicMaterial({
+					color: 0x880000,
+					opacity: 0.5,
+					transparent: true,
+				});
 				const mesh = new THREE.Mesh(geometry, material);
 				mesh.position.set(x, y, z);
 				this.preview.add(mesh);
@@ -46,20 +37,7 @@ namespace Renderer {
 				this.preview.clear();
 			}
 
-			changeMesh(tile: number, i: number, j: number): void {}
-
-			changePreview(): void {}
-
-			hideMeshes(): void {
-				this.preview.visible = false;
-				Object.values(this.meshes).forEach((v) => {
-					Object.values(v).forEach((mesh) => {
-						mesh.material[0].opacity = 0;
-					});
-				});
-			}
-
-			updatePreview(shouldUpdatePos = true) {
+			updatePreview(shouldUpdatePos = true, force = false) {
 				const renderer = Renderer.Three.instance();
 				const voxels = Renderer.Three.getVoxels();
 				if (shouldUpdatePos) {
@@ -68,14 +46,14 @@ namespace Renderer {
 					raycaster.setFromCamera(Renderer.Three.getPointer(), renderer.camera.instance);
 					const intersect = renderer.raycastFloor();
 
-					if (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersect.floor()))) {
+					if (!force && (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersect.floor())))) {
 						return;
 					}
 					this.lastPoint = intersect.floor().clone();
 				}
 
+				this.removeMeshes();
 				if (taro.developerMode.activeButton === 'eraser') {
-					this.removeMeshes();
 					this.addMesh(
 						Math.floor(this.lastPoint.x) + 0.5,
 						renderer.voxelEditor.voxels.layerLookupTable[renderer.voxelEditor.currentLayerIndex],
@@ -102,10 +80,6 @@ namespace Renderer {
 					false,
 					true
 				);
-			}
-
-			showPreview(): void {
-				//this.preview.visible = true;
 			}
 		}
 	}

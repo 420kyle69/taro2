@@ -43,20 +43,21 @@ class VoxelEditor {
 		});
 
 		taro.client.on('cursor', () => {
-			this.voxelMarker.removeMeshes();
+			this.removePreview();
 		});
 
 		taro.client.on('draw-region', () => {
-			this.voxelMarker.removeMeshes();
+			this.removePreview();
 		});
 
 		taro.client.on('brush', () => {
-			this.voxelMarker.updatePreview();
+			this.voxels.updateLayer(new Map(), this.currentLayerIndex);
+			this.voxelMarker.updatePreview(true, true);
 		});
 
 		taro.client.on('empty-tile', () => {
 			this.voxels.updateLayer(new Map(), this.currentLayerIndex);
-			this.voxelMarker.updatePreview();
+			this.voxelMarker.updatePreview(true, true);
 		});
 
 		taro.client.on('undo', () => {
@@ -115,6 +116,11 @@ class VoxelEditor {
 		// 		true
 		// 	);
 		// };
+	}
+
+	removePreview() {
+		this.voxels.updateLayer(new Map(), this.currentLayerIndex);
+		this.voxelMarker.removeMeshes();
 	}
 
 	updateSelectedTiles(x, y) {
@@ -266,7 +272,8 @@ class VoxelEditor {
 	getTile(tileX: number, tileY: number, tileZ: number, layer?: number): number {
 		const renderer = Renderer.Three.instance();
 		const voxelsMap = Renderer.Three.getVoxels().voxels[layer ?? this.currentLayerIndex];
-		return voxelsMap.get(Renderer.Three.getKeyFromPos(tileX + 0.5, tileY, tileZ + 0.5))?.type + 1 ?? -1;
+		let tileId = voxelsMap.get(Renderer.Three.getKeyFromPos(tileX + 0.5, tileY, tileZ + 0.5))?.type ?? -2;
+		return tileId + 1;
 	}
 
 	handleMapToolEdit() {
