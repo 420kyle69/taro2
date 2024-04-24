@@ -907,6 +907,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	changeSlotIndex: function (index) {
+		var self = this;
 		var owner = self.getOwnerUnit();
 		if (taro.isServer) {
 			this._stats.slotIndex = index;
