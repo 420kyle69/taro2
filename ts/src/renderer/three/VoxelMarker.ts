@@ -60,7 +60,6 @@ namespace Renderer {
 			}
 
 			updatePreview(shouldUpdatePos = true) {
-				this.removeMeshes();
 				const renderer = Renderer.Three.instance();
 				const voxels = Renderer.Three.getVoxels();
 				if (shouldUpdatePos) {
@@ -76,6 +75,7 @@ namespace Renderer {
 				}
 
 				if (taro.developerMode.activeButton === 'eraser') {
+					this.removeMeshes();
 					this.addMesh(
 						Math.floor(this.lastPoint.x) + 0.5,
 						renderer.voxelEditor.voxels.layerLookupTable[renderer.voxelEditor.currentLayerIndex],
