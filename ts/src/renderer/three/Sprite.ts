@@ -94,7 +94,7 @@ namespace Renderer {
 
 			private calcRenderOrder() {
 				this.position.y = Utils.getLayerZOffset(this.layer) + this.zOffset;
-				this.sprite.position.y = Utils.getDepthZOffset(20) - Utils.getDepthZOffset(this.depth);
+				this.sprite.position.y = Utils.getDepthZOffset(this.depth);
 			}
 
 			private faceCamera(camera: Camera) {
