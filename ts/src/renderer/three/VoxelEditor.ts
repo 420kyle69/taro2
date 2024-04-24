@@ -35,7 +35,7 @@ class VoxelEditor {
 			for (const [idx, layer] of taro.game.data.map.layers.entries()) {
 				if (layer.type === 'tilelayer' && layer.data) {
 					const voxels = Renderer.Three.Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-					this.voxels.updateLayer(voxels, idx, false);
+					this.voxels.updateLayer(voxels, idx);
 					this.voxels.setLayerLookupTable(idx, numTileLayers);
 					numTileLayers++;
 				}
@@ -247,7 +247,7 @@ class VoxelEditor {
 				}
 			}
 		}
-		this.voxels.updateLayer(voxels, layer, true, isPreview);
+		this.voxels.updateLayer(voxels, layer, isPreview);
 		if (!local && !isPreview) {
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
