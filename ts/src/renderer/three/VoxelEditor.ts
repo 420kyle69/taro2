@@ -244,9 +244,7 @@ class VoxelEditor {
 			}
 		}
 		this.voxels.updateLayer(voxels, layer, true, isPreview);
-		//console.log('left button down', this.leftButtonDown, 'isPreview', isPreview, 'local', local);
-		if ((!local && !isPreview) || (local && isPreview && this.leftButtonDown)) {
-			//console.log('send edit left button down', this.leftButtonDown);
+		if (!local && !isPreview) {
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
 					size: brushSize,
@@ -259,7 +257,6 @@ class VoxelEditor {
 				},
 			};
 			if (this.prevData === undefined || JSON.stringify(this.prevData) !== JSON.stringify(data)) {
-				console.log('send edit', data, this.prevData);
 				taro.network.send<'edit'>('editTile', data);
 				this.prevData = data;
 			}
