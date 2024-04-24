@@ -54,7 +54,6 @@ namespace Renderer {
 
 				if (stats.inside) {
 					this.devModeOnly = false;
-					mesh.renderOrder = 997;
 					gameObject = this.gameObject = mesh;
 				} else {
 					this.devModeOnly = true;
