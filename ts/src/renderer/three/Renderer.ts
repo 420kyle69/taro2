@@ -415,15 +415,15 @@ namespace Renderer {
 			}
 
 			private loadTextures() {
-				const textureRepository = TextureRepository.instance();
-				textureRepository.setFilter(taro.game.data.defaultData.renderingFilter);
-				textureRepository.setLoadingManager(this.initLoadingManager);
+				const textureMgr = TextureManager.instance();
+				textureMgr.setFilter(taro.game.data.defaultData.renderingFilter);
+				textureMgr.setLoadingManager(this.initLoadingManager);
 
 				const data = taro.game.data;
 
 				data.map.tilesets.forEach((tileset) => {
 					const key = tileset.image;
-					textureRepository.loadTextureFromUrl(key, Utils.patchAssetUrl(key));
+					textureMgr.loadTextureFromUrl(key, Utils.patchAssetUrl(key));
 				});
 
 				const taroEntities = [
@@ -440,7 +440,7 @@ namespace Renderer {
 					const cols = cellSheet.columnCount;
 					const rows = cellSheet.rowCount;
 
-					textureRepository.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
+					textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
 						for (let animationsKey in taroEntity.animations) {
 							const animation = taroEntity.animations[animationsKey];
 							const frames = animation.frames;
@@ -470,18 +470,18 @@ namespace Renderer {
 
 				for (const taroEntity of Object.values(data.particleTypes)) {
 					const key = taroEntity.url;
-					textureRepository.loadTextureFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
+					textureMgr.loadTextureFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
 				}
 
 				const urls = taro.game.data.settings.skybox;
-				textureRepository.loadTextureFromUrl('left', urls.left);
-				textureRepository.loadTextureFromUrl('right', urls.right);
-				textureRepository.loadTextureFromUrl('top', urls.top);
-				textureRepository.loadTextureFromUrl('bottom', urls.bottom);
-				textureRepository.loadTextureFromUrl('front', urls.front);
-				textureRepository.loadTextureFromUrl('back', urls.back);
+				textureMgr.loadTextureFromUrl('left', urls.left);
+				textureMgr.loadTextureFromUrl('right', urls.right);
+				textureMgr.loadTextureFromUrl('top', urls.top);
+				textureMgr.loadTextureFromUrl('bottom', urls.bottom);
+				textureMgr.loadTextureFromUrl('front', urls.front);
+				textureMgr.loadTextureFromUrl('back', urls.back);
 
-				textureRepository.setLoadingManager(THREE.DefaultLoadingManager);
+				textureMgr.setLoadingManager(THREE.DefaultLoadingManager);
 			}
 
 			private forceLoadUnusedCSSFonts() {

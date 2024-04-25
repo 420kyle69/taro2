@@ -18,13 +18,13 @@ namespace Renderer {
 			}
 
 			static create(config?: MapData['layers']) {
-				const textureRepository = TextureRepository.instance();
 				const tilesetMain = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'top' });
 				let tilesetSide = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'side' });
 				if (!tilesetSide) tilesetSide = tilesetMain;
 
-				const texMain = textureRepository.get(tilesetMain.image);
-				const texSide = textureRepository.get(tilesetSide.image);
+				const textureMgr = TextureManager.instance();
+				const texMain = textureMgr.get(tilesetMain.image);
+				const texSide = textureMgr.get(tilesetSide.image);
 
 				const topTileset = new TextureSheet(tilesetMain.image, texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
 				const sidesTileset = new TextureSheet(tilesetSide.image, texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);

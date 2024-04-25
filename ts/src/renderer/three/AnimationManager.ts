@@ -32,7 +32,7 @@ namespace Renderer {
 
 				const material = new THREE.MeshBasicMaterial({ transparent: true, alphaTest: 0.3 });
 
-				const spriteSheet = TextureRepository.instance().getTextureSheet(key);
+				const spriteSheet = TextureManager.instance().getTextureSheet(key);
 				if (spriteSheet) {
 					material.map = spriteSheet.texture;
 				}

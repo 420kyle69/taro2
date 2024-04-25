@@ -1,7 +1,7 @@
 namespace Renderer {
 	export namespace Three {
-		export class TextureRepository {
-			private static _instance: TextureRepository;
+		export class TextureManager {
+			private static _instance: TextureManager;
 
 			filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter = THREE.LinearFilter;
 

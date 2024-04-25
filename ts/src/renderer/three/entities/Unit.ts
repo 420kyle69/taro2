@@ -29,10 +29,10 @@ namespace Renderer {
 			}
 
 			static create(taroEntity: TaroEntityPhysics) {
-				const textureRepository = TextureRepository.instance();
+				const textureMgr = TextureManager.instance();
 				const renderer = Three.instance();
 
-				let spriteSheet = textureRepository.getTextureSheet(taroEntity._stats.cellSheet.url);
+				let spriteSheet = textureMgr.getTextureSheet(taroEntity._stats.cellSheet.url);
 				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, spriteSheet, taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
 				entity.hud.scale.setScalar(1 / renderer.camera.lastAuthoritativeZoom);
@@ -100,9 +100,9 @@ namespace Renderer {
 				});
 
 				// taroEntity.on('update-texture', (data) => {
-				// 	const textureRepository = TextureRepository.instance();
+				// 	const textureMgr = TextureManager.instance();
 				// 	const key = taroEntity._stats.cellSheet.url;
-				// 	const tex2 = textureRepository.get(key);
+				// 	const tex2 = textureMgr.get(key);
 				// 	if (tex2) {
 				// 		this.createAnimations(taroEntity._stats);
 				// 		tex = tex2.clone();
@@ -110,7 +110,7 @@ namespace Renderer {
 				// 		const bounds = taroEntity._bounds2d;
 				// 		entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 				// 	} else {
-				// 		textureRepository.loadTextureFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
+				// 		textureMgr.loadTextureFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
 				// 			this.createAnimations(taroEntity._stats);
 				// 			tex = tex2.clone();
 				// 			entity.setTexture(tex);

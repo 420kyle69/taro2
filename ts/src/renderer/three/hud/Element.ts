@@ -20,7 +20,7 @@ namespace Renderer {
 				this.unscaledHeight = height;
 
 				const texture = new THREE.Texture();
-				texture.magFilter = TextureRepository.instance().filter;
+				texture.magFilter = TextureManager.instance().filter;
 				texture.generateMipmaps = false;
 				texture.colorSpace = THREE.SRGBColorSpace;
 				const material = new THREE.SpriteMaterial({
@@ -145,7 +145,7 @@ namespace Renderer {
 
 					if (w !== image.width || h !== image.height) {
 						const texture = new THREE.Texture();
-						texture.magFilter = TextureRepository.instance().filter;
+						texture.magFilter = TextureManager.instance().filter;
 						texture.generateMipmaps = false;
 						texture.colorSpace = THREE.SRGBColorSpace;
 
