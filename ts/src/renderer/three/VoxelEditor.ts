@@ -161,7 +161,11 @@ class VoxelEditor {
 		switch (dataType) {
 			case 'fill': {
 				const nowValue = dataValue as TileData<'fill'>['fill'];
-				const oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
+				let oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
+				if (oldTile === 0) {
+					oldTile = -1;
+				}
+				console.log(oldTile);
 				if (
 					taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' &&
 					taro.game.data.map.layers[nowValue.layer].data
@@ -291,6 +295,7 @@ class VoxelEditor {
 		const renderer = Renderer.Three.instance();
 		const voxelsMap = Renderer.Three.getVoxels().voxels[layer ?? this.currentLayerIndex];
 		let tileId = voxelsMap.get(Renderer.Three.getKeyFromPos(tileX + 0.5, tileY, tileZ + 0.5))?.type ?? -2;
+		console.log(tileX + 0.5, tileY, tileZ + 0.5, tileId);
 		return tileId + 1;
 	}
 
@@ -415,10 +420,11 @@ class VoxelEditor {
 
 			map = taro.game.data.map;
 			inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
-			const curTileId = this.getTile(nowPos.x, this.voxels.calcLayersHeight(layer), nowPos.y);
+			const curTileId = this.getTile(nowPos.x, this.voxels.calcLayersHeight(layer), nowPos.y, layer);
 			if (limits?.[nowPos.x]?.[nowPos.y]) {
 				continue;
 			}
+			console.log({ curTileId, oldTile });
 			if (curTileId !== oldTile) {
 				addToLimits?.({ x: nowPos.x, y: nowPos.y });
 				continue;
@@ -444,7 +450,6 @@ class VoxelEditor {
 		if (Object.keys(selectedTiles).length > 0) {
 			this.putTiles(0, 0, selectedTiles, 'fitContent', 'rectangle', layer, true);
 			if (!fromServer) {
-				console.log('send');
 				taro.network.send<'fill'>('editTile', {
 					fill: {
 						gid: newTile,
