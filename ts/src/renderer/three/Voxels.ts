@@ -93,7 +93,6 @@ namespace Renderer {
 			}
 
 			clearLayer(rawLayerIdx: number) {
-				console.log(rawLayerIdx);
 				this.voxels[rawLayerIdx] = new Map();
 				this.remove(this.meshes[rawLayerIdx]);
 			}

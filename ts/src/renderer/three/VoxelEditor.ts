@@ -145,7 +145,6 @@ class VoxelEditor {
 	}
 
 	edit<T extends MapEditToolEnum>(data: TileData<T>): void {
-		console.log('edit from server', data);
 		if (JSON.stringify(data) === '{}') {
 			throw 'receive: {}';
 		}
@@ -165,12 +164,10 @@ class VoxelEditor {
 				if (oldTile === 0) {
 					oldTile = -1;
 				}
-				console.log(oldTile);
 				if (
 					taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' &&
 					taro.game.data.map.layers[nowValue.layer].data
 				) {
-					console.log(nowValue);
 					this.floodFill(nowValue.layer, oldTile, nowValue.gid, nowValue.x, nowValue.y, true, nowValue.limits);
 				}
 				break;
@@ -295,7 +292,6 @@ class VoxelEditor {
 		const renderer = Renderer.Three.instance();
 		const voxelsMap = Renderer.Three.getVoxels().voxels[layer ?? this.currentLayerIndex];
 		let tileId = voxelsMap.get(Renderer.Three.getKeyFromPos(tileX + 0.5, tileY, tileZ + 0.5))?.type ?? -2;
-		console.log(tileX + 0.5, tileY, tileZ + 0.5, tileId);
 		return tileId + 1;
 	}
 
@@ -424,7 +420,6 @@ class VoxelEditor {
 			if (limits?.[nowPos.x]?.[nowPos.y]) {
 				continue;
 			}
-			console.log({ curTileId, oldTile });
 			if (curTileId !== oldTile) {
 				addToLimits?.({ x: nowPos.x, y: nowPos.y });
 				continue;
