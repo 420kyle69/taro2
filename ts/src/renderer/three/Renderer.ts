@@ -309,6 +309,17 @@ namespace Renderer {
 									true
 								);
 							});
+
+							break;
+						}
+						case 'clear': {
+							const nowValue = dataValue as TileData<'clear'>['clear'];
+							if (
+								taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' &&
+								taro.game.data.map.layers[nowValue.layer].data
+							) {
+								this.voxelEditor.clearLayer(nowValue.layer);
+							}
 						}
 					}
 				});
