@@ -23,7 +23,7 @@ namespace Renderer {
 			addMesh(x: number, y: number, z: number): THREE.Mesh {
 				const geometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
 				const material = new THREE.MeshBasicMaterial({
-					color: 0x880000,
+					color: 0xff0000,
 					opacity: 0.5,
 					transparent: true,
 				});
