@@ -37,7 +37,7 @@ namespace Renderer {
 
 			private sky: Sky;
 			private voxels: Voxels;
-			private particles: Particles;
+			private particleSystem: ParticleSystem;
 
 			private raycastIntervalSeconds = 0.1;
 			private timeSinceLastRaycast = 0;
@@ -410,7 +410,7 @@ namespace Renderer {
 			}
 
 			private setEntitiesVisible(visible: boolean) {
-				this.particles.visible = visible;
+				this.particleSystem.visible = visible;
 				this.entitiesLayer.visible = visible;
 			}
 
@@ -502,8 +502,8 @@ namespace Renderer {
 				this.scene.add(this.voxels);
 				this.scene.add(this.voxelEditor.voxelMarker);
 
-				this.particles = new Particles();
-				this.scene.add(this.particles);
+				this.particleSystem = new ParticleSystem();
+				this.scene.add(this.particleSystem);
 
 				this.entitiesLayer.position.y = 0.51;
 				this.scene.add(this.entitiesLayer);
@@ -524,7 +524,7 @@ namespace Renderer {
 
 					taroEntity.on('destroy', () => {
 						this.entityManager.destroy(entity);
-						this.particles.destroyEmittersWithTarget(entity);
+						this.particleSystem.destroyEmittersWithTarget(entity);
 					});
 
 					taroEntity.on('follow', () => {
@@ -570,7 +570,7 @@ namespace Renderer {
 				});
 
 				taro.client.on('create-particle-emitter', (particle: Particle) => {
-					const emitter = this.particles.createEmitter(particle);
+					const emitter = this.particleSystem.createEmitter(particle);
 					emitter.position.y += this.entitiesLayer.position.y;
 
 					if (particle.entityId) {
@@ -580,23 +580,23 @@ namespace Renderer {
 						}
 					}
 
-					this.particles.emit(emitter);
+					this.particleSystem.emit(emitter);
 				});
 
 				taro.client.on('start-emitting-particles', (data: { particleTypeId: string; entityId: string }) => {
-					const emitter = this.particles.emitters.find(({ particleTypeId, target }) => {
+					const emitter = this.particleSystem.emitters.find(({ particleTypeId, target }) => {
 						return particleTypeId === data.particleTypeId && target.taroId === data.entityId;
 					});
 
-					this.particles.startEmitter(emitter);
+					this.particleSystem.startEmitter(emitter);
 				});
 
 				taro.client.on('stop-emitting-particles', (data: { particleTypeId: string; entityId: string }) => {
-					const emitter = this.particles.emitters.find(({ particleTypeId, target }) => {
+					const emitter = this.particleSystem.emitters.find(({ particleTypeId, target }) => {
 						return particleTypeId === data.particleTypeId && target.taroId === data.entityId;
 					});
 
-					this.particles.stopEmitter(emitter);
+					this.particleSystem.stopEmitter(emitter);
 				});
 
 				taro.client.on('floating-text', (config: FloatingTextConfig) => {
@@ -633,7 +633,7 @@ namespace Renderer {
 				else if (dt >= 0.25) dt = 0.25;
 
 				this.entityManager.update(dt);
-				this.particles.update(dt, time, this.camera.instance);
+				this.particleSystem.update(dt, time, this.camera.instance);
 				this.camera.update();
 
 				if (this.camera.target) {

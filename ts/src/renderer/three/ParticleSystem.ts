@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Particles extends Node {
+		export class ParticleSystem extends Node {
 			emitters: Emitter[] = [];
 
 			private particles = [];
