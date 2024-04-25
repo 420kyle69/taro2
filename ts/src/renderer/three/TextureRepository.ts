@@ -6,7 +6,7 @@ namespace Renderer {
 			filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter = THREE.LinearFilter;
 
 			private textures = new Map<string, THREE.Texture>();
-			private textureSheets = new Map<string, Tileset>();
+			private textureSheets = new Map<string, TextureSheet>();
 			private loader = new THREE.TextureLoader();
 
 			static instance() {
@@ -40,7 +40,7 @@ namespace Renderer {
 				url: string,
 				cols: number,
 				rows: number,
-				cb?: (textureSheet: Tileset) => void
+				cb?: (textureSheet: TextureSheet) => void
 			) {
 				if (this.textureSheets.has(key)) {
 					if (cb) cb(this.textureSheets.get(key));
@@ -52,7 +52,7 @@ namespace Renderer {
 					tex.magFilter = this.filter;
 					const frameWidth = tex.image.width / cols;
 					const frameHeight = tex.image.height / rows;
-					const textureSheet = new Tileset(key, tex, frameWidth, frameHeight);
+					const textureSheet = new TextureSheet(key, tex, frameWidth, frameHeight);
 					this.textureSheets.set(key, textureSheet);
 
 					if (cb) cb(textureSheet);

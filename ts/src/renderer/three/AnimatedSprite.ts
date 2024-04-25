@@ -11,7 +11,7 @@ namespace Renderer {
 			private repeat = 0;
 			private cycle = 0;
 
-			constructor(spriteSheet: Tileset) {
+			constructor(spriteSheet: TextureSheet) {
 				super(spriteSheet.texture);
 
 				this.tileH = spriteSheet.width / spriteSheet.tileWidth;

@@ -10,8 +10,8 @@ namespace Renderer {
 			layerLookupTable: Record<number, number> = {};
 
 			constructor(
-				private topTileset: Tileset,
-				private sidesTileset: Tileset
+				private topTileset: TextureSheet,
+				private sidesTileset: TextureSheet
 			) {
 				super();
 				this.brushArea = new TileShape();
@@ -26,8 +26,8 @@ namespace Renderer {
 				const texMain = textureRepository.get(tilesetMain.image);
 				const texSide = textureRepository.get(tilesetSide.image);
 
-				const topTileset = new Tileset(tilesetMain.image, texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
-				const sidesTileset = new Tileset(tilesetSide.image, texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+				const topTileset = new TextureSheet(tilesetMain.image, texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
+				const sidesTileset = new TextureSheet(tilesetSide.image, texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
 
 				const voxels = new Voxels(topTileset, sidesTileset);
 				if (config) {
@@ -210,7 +210,7 @@ namespace Renderer {
 			return prunedVoxels;
 		}
 
-		function buildMeshDataFromCells(cells: Map<string, VoxelCell>, tileset: Tileset) {
+		function buildMeshDataFromCells(cells: Map<string, VoxelCell>, tileset: TextureSheet) {
 			const xStep = tileset.tileWidth / tileset.width;
 			const yStep = tileset.tileHeight / tileset.height;
 

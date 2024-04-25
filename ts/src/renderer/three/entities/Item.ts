@@ -7,7 +7,7 @@ namespace Renderer {
 			constructor(
 				public taroId: string,
 				public ownerId: string,
-				spriteSheet: Tileset,
+				spriteSheet: TextureSheet,
 				public taroEntity?: TaroEntityPhysics
 			) {
 				super(spriteSheet);

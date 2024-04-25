@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Tileset {
+		export class TextureSheet {
 			originalWidth: number;
 			originalHeight: number;
 			cols: number;

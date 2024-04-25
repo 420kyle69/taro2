@@ -126,7 +126,7 @@ var taroClientConfig = {
 		'renderer/three/Sprite.js',
 		'renderer/three/AnimatedSprite.js',
 		'renderer/three/Sky.js',
-		'renderer/three/Tileset.js',
+		'renderer/three/TextureSheet.js',
 		'renderer/three/Particles.js',
 		'renderer/three/VoxelEditor.js',
 		'renderer/three/VoxelMarker.js',
