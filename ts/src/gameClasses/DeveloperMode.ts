@@ -827,9 +827,9 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		if (taro.game.data.unitTypes[data.typeId]) {
-			if (data.newData.scripts) {
+			if (data.valueType === 'script') {
 				taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
-			} else {
+			} else if (data.valueType === 'property') {
 				const oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
 				taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
 				taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
@@ -900,9 +900,9 @@ class DeveloperMode {
 		// 2. force update its dimension/scale/layer/image
 		// 3. we may need to re-mount the item on unit
 		if (taro.game.data.itemTypes[data.typeId]) {
-			if (data.newData.scripts) {
+			if (data.valueType === 'script') {
 				taro.game.data.itemTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
-			} else {
+			} else if (data.valueType === 'property') {
 				const oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
 				taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
 				taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
@@ -947,9 +947,9 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		if (taro.game.data.projectileTypes[data.typeId]) {
-			if (data.newData.scripts) {
+			if (data.valueType === 'script') {
 				taro.game.data.projectileTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
-			} else {
+			} else if (data.valueType === 'property') {
 				const oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
 				taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
 				taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
@@ -1251,14 +1251,18 @@ interface RegionData {
 }
 
 interface EditEntityData {
+	action: string;
 	entityType: string;
 	typeId: string;
-	action: string;
+	valueType?: string;
 	newData?: any; //EntityStats,
 	playerId?: string;
 	position?: { x: number; y: number };
 	angle?: number;
 	clientId?: string;
+	extraData?: {
+		[key: string]: any;
+	}
 }
 
 type devModeTab = 'play' | 'map' | 'entities' | 'moderate' | 'debug';
