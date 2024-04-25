@@ -59,6 +59,16 @@ class VoxelEditor {
 			this.voxelMarker.updatePreview();
 		});
 
+		taro.client.on('clear', () => {
+			const data: TileData<'clear'> = {
+				clear: {
+					layer: this.currentLayerIndex,
+					layerName: taro.game.data.map.layers[this.currentLayerIndex].name,
+				},
+			};
+			inGameEditor.showClearLayerConfirmation(data);
+		});
+
 		taro.client.on('undo', () => {
 			this.commandController.undo();
 		});
@@ -391,6 +401,7 @@ class VoxelEditor {
 	}
 
 	clearLayer(layer: number): void {
+		console.log('clearLayer', layer);
 		const map = taro.game.data.map;
 		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
 		const width = map.width;
@@ -402,6 +413,29 @@ class VoxelEditor {
 				}
 			}
 		}
+
+		let emptyVoxels = new Map();
+		const layerWidth = map.width; // Example width
+		const layerHeight = map.height; // Example height
+		const layerIndex = layer; // Example layer index
+
+		for (let z = 0; z < layerHeight; z++) {
+			for (let x = 0; x < layerWidth; x++) {
+				const pos = { x: x + 0.5, y: 0, z: z + 0.5 }; // y can be set to any layer height you need
+				const key = Renderer.Three.getKeyFromPos(pos.x, pos.y, pos.z);
+				emptyVoxels.set(key, {
+					position: [pos.x, pos.y, pos.z],
+					type: -1, // Identifier for an empty voxel
+					visible: false,
+					hiddenFaces: [true, true, true, true, true, true],
+					isPreview: false,
+				});
+			}
+		}
+
+		// Now call updateLayer with the emptyVoxels map
+		//const voxelsInstance = new Renderer.Three.Voxels(/* parameters for constructor */);
+		this.voxels.updateLayer(emptyVoxels, layerIndex);
 	}
 
 	changeLayerOpacity(layer: number, opacity: number): void {
