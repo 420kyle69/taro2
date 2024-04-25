@@ -35,7 +35,7 @@ namespace Renderer {
 			private entitiesLayer = new THREE.Group();
 			private regionsLayer = new THREE.Group();
 
-			private sky: Sky;
+			private sky: Skybox;
 			private voxels: Voxels;
 			private particleSystem: ParticleSystem;
 
@@ -494,7 +494,7 @@ namespace Renderer {
 			}
 
 			private init() {
-				this.sky = new Sky();
+				this.sky = new Skybox();
 				this.scene.add(this.sky);
 
 				this.voxels = Voxels.create(taro.game.data.map.layers);

@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Sky extends Node {
+		export class Skybox extends Node {
 			constructor() {
 				super();
 
