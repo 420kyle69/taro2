@@ -19,7 +19,7 @@ namespace Renderer {
 				const textureMgr = TextureManager.instance();
 				const renderer = Three.instance();
 
-				let spriteSheet = textureMgr.getTextureSheet(taroEntity._stats.cellSheet.url);
+				let spriteSheet = textureMgr.getTextureSheetShallowCopy(taroEntity._stats.cellSheet.url);
 				const entity = new Item(taroEntity._id, taroEntity._stats.ownerId, spriteSheet, taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
 

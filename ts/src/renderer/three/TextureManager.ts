@@ -80,6 +80,14 @@ namespace Renderer {
 			getTextureSheet(key: string) {
 				return this.textureSheets.get(key);
 			}
+
+			getTextureSheetShallowCopy(key: string) {
+				const sheet = this.getTextureSheet(key);
+				if (sheet) {
+					sheet.texture = sheet.texture.clone();
+				}
+				return sheet;
+			}
 		}
 	}
 }
