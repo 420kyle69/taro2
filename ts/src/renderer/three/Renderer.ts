@@ -423,36 +423,63 @@ namespace Renderer {
 
 				data.map.tilesets.forEach((tileset) => {
 					const key = tileset.image;
-					textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key));
+					textureRepository.loadTextureFromUrl(key, Utils.patchAssetUrl(key));
 				});
 
-				const entityTypes = [
+				const taroEntities = [
 					...Object.values(data.unitTypes),
 					...Object.values(data.projectileTypes),
 					...Object.values(data.itemTypes),
 				];
 
-				for (const type of entityTypes) {
-					const cellSheet = type.cellSheet;
+				for (const taroEntity of taroEntities) {
+					const cellSheet = taroEntity.cellSheet;
 					if (!cellSheet) continue;
+
 					const key = cellSheet.url;
-					textureRepository.loadFromUrl(key, Utils.patchAssetUrl(key), () => {
-						AnimatedSprite.createAnimations(type);
+					const cols = cellSheet.columnCount;
+					const rows = cellSheet.rowCount;
+
+					textureRepository.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
+						for (let animationsKey in taroEntity.animations) {
+							const animation = taroEntity.animations[animationsKey];
+							const frames = animation.frames;
+							const animationFrames: number[] = [];
+
+							// Correction for 0-based indexing
+							for (let i = 0; i < frames.length; i++) {
+								animationFrames.push(+frames[i] - 1);
+							}
+
+							// Avoid crash by giving it frame 0 if no frame data provided
+							if (animationFrames.length === 0) {
+								animationFrames.push(0);
+							}
+
+							// Move defaults to AnimationManager.create?
+							AnimationManager.instance().create({
+								key: `${key}/${animationsKey}/${taroEntity.id}`,
+								textureSheetKey: key,
+								frames: animationFrames,
+								fps: +animation.framesPerSecond || 15,
+								repeat: +animation.loopCount - 1,
+							});
+						}
 					});
 				}
 
-				for (const type of Object.values(data.particleTypes)) {
-					const key = type.url;
-					textureRepository.loadFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
+				for (const taroEntity of Object.values(data.particleTypes)) {
+					const key = taroEntity.url;
+					textureRepository.loadTextureFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
 				}
 
 				const urls = taro.game.data.settings.skybox;
-				textureRepository.loadFromUrl('left', urls.left);
-				textureRepository.loadFromUrl('right', urls.right);
-				textureRepository.loadFromUrl('top', urls.top);
-				textureRepository.loadFromUrl('bottom', urls.bottom);
-				textureRepository.loadFromUrl('front', urls.front);
-				textureRepository.loadFromUrl('back', urls.back);
+				textureRepository.loadTextureFromUrl('left', urls.left);
+				textureRepository.loadTextureFromUrl('right', urls.right);
+				textureRepository.loadTextureFromUrl('top', urls.top);
+				textureRepository.loadTextureFromUrl('bottom', urls.bottom);
+				textureRepository.loadTextureFromUrl('front', urls.front);
+				textureRepository.loadTextureFromUrl('back', urls.back);
 
 				textureRepository.setLoadingManager(THREE.DefaultLoadingManager);
 			}

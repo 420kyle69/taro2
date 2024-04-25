@@ -26,8 +26,8 @@ namespace Renderer {
 				const texMain = textureRepository.get(tilesetMain.image);
 				const texSide = textureRepository.get(tilesetSide.image);
 
-				const topTileset = new Tileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
-				const sidesTileset = new Tileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+				const topTileset = new Tileset(tilesetMain.image, texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
+				const sidesTileset = new Tileset(tilesetSide.image, texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
 
 				const voxels = new Voxels(topTileset, sidesTileset);
 				if (config) {
@@ -270,8 +270,8 @@ namespace Renderer {
 					}
 					targetData.positions.push(...localPositions);
 
-					const xIdx = curCell.type % tileset.columns;
-					const yIdx = Math.floor(curCell.type / tileset.columns);
+					const xIdx = curCell.type % tileset.cols;
+					const yIdx = Math.floor(curCell.type / tileset.cols);
 
 					const singlePixelOffset = { x: xStep / tileset.tileWidth, y: yStep / tileset.tileHeight };
 					const halfPixelOffset = { x: singlePixelOffset.x / 2, y: singlePixelOffset.y / 2 };

@@ -6,6 +6,7 @@ namespace Renderer {
 			filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter = THREE.LinearFilter;
 
 			private textures = new Map<string, THREE.Texture>();
+			private textureSheets = new Map<string, Tileset>();
 			private loader = new THREE.TextureLoader();
 
 			static instance() {
@@ -20,12 +21,41 @@ namespace Renderer {
 				this.textures.set(key, texture);
 			}
 
-			loadFromUrl(key: string, url: string, cb?: (tex: THREE.Texture) => void) {
+			loadTextureFromUrl(key: string, url: string, cb?: (tex: THREE.Texture) => void) {
+				if (this.textures.has(key)) {
+					if (cb) cb(this.textures.get(key));
+					return;
+				}
+
 				this.loader.load(url, (tex) => {
 					tex.colorSpace = THREE.SRGBColorSpace;
 					tex.magFilter = this.filter;
 					this.textures.set(key, tex);
 					if (cb) cb(tex);
+				});
+			}
+
+			loadTextureSheetFromUrl(
+				key: string,
+				url: string,
+				cols: number,
+				rows: number,
+				cb?: (textureSheet: Tileset) => void
+			) {
+				if (this.textureSheets.has(key)) {
+					if (cb) cb(this.textureSheets.get(key));
+					return;
+				}
+
+				this.loader.load(url, (tex) => {
+					tex.colorSpace = THREE.SRGBColorSpace;
+					tex.magFilter = this.filter;
+					const frameWidth = tex.image.width / cols;
+					const frameHeight = tex.image.height / rows;
+					const textureSheet = new Tileset(key, tex, frameWidth, frameHeight);
+					this.textureSheets.set(key, textureSheet);
+
+					if (cb) cb(textureSheet);
 				});
 			}
 
@@ -45,6 +75,10 @@ namespace Renderer {
 					}
 				}
 				return textures;
+			}
+
+			getTextureSheet(key: string) {
+				return this.textureSheets.get(key);
 			}
 		}
 	}
