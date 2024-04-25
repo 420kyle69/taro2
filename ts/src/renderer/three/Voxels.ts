@@ -92,6 +92,11 @@ namespace Renderer {
 				return voxels;
 			}
 
+			clearLayer(rawLayerIdx: number) {
+				this.voxels[rawLayerIdx] = new Map();
+				this.remove(this.meshes[rawLayerIdx]);
+			}
+
 			updateLayer(voxels: Map<string, VoxelCell>, layerIdx: number, isPreview = false) {
 				const renderOrder = (layerIdx + 1) * 100;
 				const prunedVoxels = pruneCells(

@@ -468,18 +468,9 @@ class VoxelEditor {
 					//save tile change to taro.game.map.data
 					map.layers[layer].data[j * width + i] = 0;
 				}
-				const pos = { x: i + 0.5, y: 0, z: j + 0.5 }; // y can be set to any layer height you need
-				const key = Renderer.Three.getKeyFromPos(pos.x, pos.y, pos.z);
-				emptyVoxels.set(key, {
-					position: [pos.x, pos.y, pos.z],
-					type: -1, // Identifier for an empty voxel
-					visible: false,
-					hiddenFaces: [true, true, true, true, true, true],
-					isPreview: false,
-				});
 			}
 		}
-
+		this.voxels.clearLayer(layer);
 		this.voxels.updateLayer(emptyVoxels, layer);
 	}
 
