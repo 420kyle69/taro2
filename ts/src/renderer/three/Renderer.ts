@@ -97,6 +97,8 @@ namespace Renderer {
 							case 'cursor': {
 								break;
 							}
+							case 'fill': {
+							}
 							case 'eraser': {
 							}
 							case 'brush': {
@@ -117,6 +119,8 @@ namespace Renderer {
 
 				// TODO: add undo/redo
 				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
+
+				let rightClickPos: { x: number; y: number } = undefined;
 
 				renderer.domElement.addEventListener('mousedown', (event: MouseEvent) => {
 					if (this.mode === Mode.Map) {
@@ -172,13 +176,22 @@ namespace Renderer {
 									}
 									case 'eraser': {
 									}
+									case 'fill': {
+									}
 									case 'brush': {
 										this.voxelEditor.handleMapToolEdit();
 										break;
 									}
 								}
-							} else if (Utils.isRightButton(event.buttons) && developerMode.activeButton === 'brush') {
-								this.voxelEditor.handleMapToolCopy();
+							} else if (
+								Utils.isRightButton(event.buttons) &&
+								(developerMode.activeButton === 'brush' || developerMode.activeButton === 'fill')
+							) {
+								const intersect = this.raycastFloor();
+								if (!intersect) {
+									return;
+								}
+								rightClickPos = { x: intersect.x, y: intersect.z };
 							}
 						}
 					}
@@ -207,10 +220,11 @@ namespace Renderer {
 					}
 				});
 
-				window.addEventListener('mouseup', () => {
+				window.addEventListener('mouseup', (event: MouseEvent) => {
+					const developerMode = taro.developerMode;
 					this.voxelEditor.leftButtonDown = false;
-					if (taro.developerMode.regionTool) {
-						taro.developerMode.regionTool = false;
+					if (developerMode.regionTool) {
+						developerMode.regionTool = false;
 						this.camera.controls.enablePan = true;
 						this.camera.controls.enableRotate = true;
 						this.camera.controls.enableZoom = true;
@@ -240,6 +254,25 @@ namespace Renderer {
 							});
 
 						this.regionDrawStart = null;
+					} else if (
+						developerMode.active &&
+						developerMode.activeTab === 'map' &&
+						Utils.isRightButton(event.button) &&
+						(developerMode.activeButton === 'brush' || developerMode.activeButton === 'fill')
+					) {
+						const intersect = this.raycastFloor();
+						if (!intersect) {
+							return;
+						}
+						const newRightClickPos = { x: intersect.x, y: intersect.z };
+						if (
+							rightClickPos &&
+							Math.abs(newRightClickPos.x - rightClickPos.x) < 0.01 &&
+							Math.abs(newRightClickPos.y - rightClickPos.y) < 0.01
+						) {
+							this.voxelEditor.handleMapToolCopy();
+						}
+						rightClickPos = undefined;
 					}
 				});
 
@@ -286,41 +319,6 @@ namespace Renderer {
 					if (region) {
 						region.name = data.newName;
 						region.updateLabel(data.newName);
-					}
-				});
-
-				taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
-					const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
-						const dataType = k as MapEditToolEnum;
-						const dataValue = v as any;
-						return { dataType, dataValue };
-					})[0];
-					switch (dataType) {
-						case 'edit': {
-							const nowValue = dataValue as TileData<'edit'>['edit'];
-							nowValue.selectedTiles.map((v, idx) => {
-								this.voxelEditor.putTiles(
-									nowValue.x,
-									nowValue.y,
-									v,
-									nowValue.size,
-									nowValue.shape,
-									nowValue.layer[idx],
-									true
-								);
-							});
-
-							break;
-						}
-						case 'clear': {
-							const nowValue = dataValue as TileData<'clear'>['clear'];
-							if (
-								taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' &&
-								taro.game.data.map.layers[nowValue.layer].data
-							) {
-								this.voxelEditor.clearLayer(nowValue.layer);
-							}
-						}
 					}
 				});
 			}
