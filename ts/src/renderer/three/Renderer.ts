@@ -183,7 +183,10 @@ namespace Renderer {
 										break;
 									}
 								}
-							} else if (Utils.isRightButton(event.buttons) && developerMode.activeButton === 'brush') {
+							} else if (
+								Utils.isRightButton(event.buttons) &&
+								(developerMode.activeButton === 'brush' || developerMode.activeButton === 'fill')
+							) {
 								const intersect = this.raycastFloor();
 								if (!intersect) {
 									return;
@@ -255,7 +258,7 @@ namespace Renderer {
 						developerMode.active &&
 						developerMode.activeTab === 'map' &&
 						Utils.isRightButton(event.button) &&
-						developerMode.activeButton === 'brush'
+						(developerMode.activeButton === 'brush' || developerMode.activeButton === 'fill')
 					) {
 						const intersect = this.raycastFloor();
 						if (!intersect) {

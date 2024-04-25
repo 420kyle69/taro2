@@ -381,6 +381,7 @@ class VoxelEditor {
 		if (taroMap.layers[this.currentLayerIndex].data[_y * taroMap.width + _x] !== 0) {
 			renderer.tmp_tileId = taroMap.layers[this.currentLayerIndex].data[_y * taroMap.width + _x];
 		}
+		this.voxels.updateLayer(new Map(), this.currentLayerIndex);
 	}
 
 	floodFill(
