@@ -97,6 +97,8 @@ namespace Renderer {
 							case 'cursor': {
 								break;
 							}
+							case 'fill': {
+							}
 							case 'eraser': {
 							}
 							case 'brush': {
@@ -171,6 +173,8 @@ namespace Renderer {
 										break;
 									}
 									case 'eraser': {
+									}
+									case 'fill': {
 									}
 									case 'brush': {
 										this.voxelEditor.handleMapToolEdit();
@@ -286,30 +290,6 @@ namespace Renderer {
 					if (region) {
 						region.name = data.newName;
 						region.updateLabel(data.newName);
-					}
-				});
-
-				taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
-					const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
-						const dataType = k as MapEditToolEnum;
-						const dataValue = v as any;
-						return { dataType, dataValue };
-					})[0];
-					switch (dataType) {
-						case 'edit': {
-							const nowValue = dataValue as TileData<'edit'>['edit'];
-							nowValue.selectedTiles.map((v, idx) => {
-								this.voxelEditor.putTiles(
-									nowValue.x,
-									nowValue.y,
-									v,
-									nowValue.size,
-									nowValue.shape,
-									nowValue.layer[idx],
-									true
-								);
-							});
-						}
 					}
 				});
 			}
