@@ -64,6 +64,16 @@ class VoxelEditor {
 			this.voxelMarker.updatePreview(true, true);
 		});
 
+		taro.client.on('clear', () => {
+			const data: TileData<'clear'> = {
+				clear: {
+					layer: this.currentLayerIndex,
+					layerName: taro.game.data.map.layers[this.currentLayerIndex].name,
+				},
+			};
+			inGameEditor.showClearLayerConfirmation(data);
+		});
+
 		taro.client.on('undo', () => {
 			this.commandController.undo();
 		});
@@ -91,39 +101,38 @@ class VoxelEditor {
 			this.tileSize = gameMap.tilewidth;
 		}
 
-		// taro.clearLayer = (payload: TileData<'clear'>) => {
-		// 	const map = taro.game.data.map;
-		// 	const nowLayerData = {};
-		// 	for (let x = 0; x < taro.map.data.width; x++) {
-		// 		for (let y = 0; y < taro.map.data.height; y++) {
-		// 			if (nowLayerData[x] === undefined) {
-		// 				nowLayerData[x] = {};
-		// 			}
-		// 			nowLayerData[x][y] = map.layers[payload.clear.layer].data[x + y * taro.map.data.width];
-		// 		}
-		// 	}
-		// 	const nowTileMapLayerData = tileMap.getLayer(payload.clear.layer).data;
-		// 	commandController.addCommand(
-		// 		{
-		// 			func: () => {
-		// 				taro.network.send<'clear'>('editTile', payload);
-		// 			},
-		// 			undo: () => {
-		// 				taro.network.send<'edit'>('editTile', {
-		// 					edit: {
-		// 						selectedTiles: [nowLayerData],
-		// 						size: 'fitContent',
-		// 						shape: 'rectangle',
-		// 						layer: [payload.clear.layer],
-		// 						x: 0,
-		// 						y: 0,
-		// 					},
-		// 				});
-		// 			},
-		// 		},
-		// 		true
-		// 	);
-		// };
+		taro.clearLayer = (payload: TileData<'clear'>) => {
+			const map = taro.game.data.map;
+			const nowLayerData = {};
+			for (let x = 0; x < taro.map.data.width; x++) {
+				for (let y = 0; y < taro.map.data.height; y++) {
+					if (nowLayerData[x] === undefined) {
+						nowLayerData[x] = {};
+					}
+					nowLayerData[x][y] = map.layers[payload.clear.layer].data[x + y * taro.map.data.width];
+				}
+			}
+			this.commandController.addCommand(
+				{
+					func: () => {
+						taro.network.send<'clear'>('editTile', payload);
+					},
+					undo: () => {
+						taro.network.send<'edit'>('editTile', {
+							edit: {
+								selectedTiles: [nowLayerData],
+								size: 'fitContent',
+								shape: 'rectangle',
+								layer: [payload.clear.layer],
+								x: 0,
+								y: 0,
+							},
+						});
+					},
+				},
+				true
+			);
+		};
 	}
 
 	removePreview() {
@@ -136,6 +145,7 @@ class VoxelEditor {
 	}
 
 	edit<T extends MapEditToolEnum>(data: TileData<T>): void {
+		console.log('edit from server', data);
 		if (JSON.stringify(data) === '{}') {
 			throw 'receive: {}';
 		}
@@ -448,6 +458,7 @@ class VoxelEditor {
 	}
 
 	clearLayer(layer: number): void {
+		let emptyVoxels = new Map();
 		const map = taro.game.data.map;
 		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
 		const width = map.width;
@@ -457,8 +468,19 @@ class VoxelEditor {
 					//save tile change to taro.game.map.data
 					map.layers[layer].data[j * width + i] = 0;
 				}
+				const pos = { x: i + 0.5, y: 0, z: j + 0.5 }; // y can be set to any layer height you need
+				const key = Renderer.Three.getKeyFromPos(pos.x, pos.y, pos.z);
+				emptyVoxels.set(key, {
+					position: [pos.x, pos.y, pos.z],
+					type: -1, // Identifier for an empty voxel
+					visible: false,
+					hiddenFaces: [true, true, true, true, true, true],
+					isPreview: false,
+				});
 			}
 		}
+
+		this.voxels.updateLayer(emptyVoxels, layer);
 	}
 
 	changeLayerOpacity(layer: number, opacity: number): void {

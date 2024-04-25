@@ -120,6 +120,8 @@ namespace Renderer {
 				// TODO: add undo/redo
 				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
 
+				let rightClickPos: { x: number; y: number } = undefined;
+
 				renderer.domElement.addEventListener('mousedown', (event: MouseEvent) => {
 					if (this.mode === Mode.Map) {
 						const developerMode = taro.developerMode;
@@ -182,7 +184,11 @@ namespace Renderer {
 									}
 								}
 							} else if (Utils.isRightButton(event.buttons) && developerMode.activeButton === 'brush') {
-								this.voxelEditor.handleMapToolCopy();
+								const intersect = this.raycastFloor();
+								if (!intersect) {
+									return;
+								}
+								rightClickPos = { x: intersect.x, y: intersect.z };
 							}
 						}
 					}
@@ -211,10 +217,11 @@ namespace Renderer {
 					}
 				});
 
-				window.addEventListener('mouseup', () => {
+				window.addEventListener('mouseup', (event: MouseEvent) => {
+					const developerMode = taro.developerMode;
 					this.voxelEditor.leftButtonDown = false;
-					if (taro.developerMode.regionTool) {
-						taro.developerMode.regionTool = false;
+					if (developerMode.regionTool) {
+						developerMode.regionTool = false;
 						this.camera.controls.enablePan = true;
 						this.camera.controls.enableRotate = true;
 						this.camera.controls.enableZoom = true;
@@ -244,6 +251,25 @@ namespace Renderer {
 							});
 
 						this.regionDrawStart = null;
+					} else if (
+						developerMode.active &&
+						developerMode.activeTab === 'map' &&
+						Utils.isRightButton(event.button) &&
+						developerMode.activeButton === 'brush'
+					) {
+						const intersect = this.raycastFloor();
+						if (!intersect) {
+							return;
+						}
+						const newRightClickPos = { x: intersect.x, y: intersect.z };
+						if (
+							rightClickPos &&
+							Math.abs(newRightClickPos.x - rightClickPos.x) < 0.01 &&
+							Math.abs(newRightClickPos.y - rightClickPos.y) < 0.01
+						) {
+							this.voxelEditor.handleMapToolCopy();
+						}
+						rightClickPos = undefined;
 					}
 				});
 
