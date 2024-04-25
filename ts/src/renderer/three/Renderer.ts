@@ -97,6 +97,8 @@ namespace Renderer {
 							case 'cursor': {
 								break;
 							}
+							case 'fill': {
+							}
 							case 'eraser': {
 							}
 							case 'brush': {
@@ -174,12 +176,17 @@ namespace Renderer {
 									}
 									case 'eraser': {
 									}
+									case 'fill': {
+									}
 									case 'brush': {
 										this.voxelEditor.handleMapToolEdit();
 										break;
 									}
 								}
-							} else if (Utils.isRightButton(event.buttons) && developerMode.activeButton === 'brush') {
+							} else if (
+								Utils.isRightButton(event.buttons) &&
+								(developerMode.activeButton === 'brush' || developerMode.activeButton === 'fill')
+							) {
 								const intersect = this.raycastFloor();
 								if (!intersect) {
 									return;
@@ -251,7 +258,7 @@ namespace Renderer {
 						developerMode.active &&
 						developerMode.activeTab === 'map' &&
 						Utils.isRightButton(event.button) &&
-						developerMode.activeButton === 'brush'
+						(developerMode.activeButton === 'brush' || developerMode.activeButton === 'fill')
 					) {
 						const intersect = this.raycastFloor();
 						if (!intersect) {
@@ -312,41 +319,6 @@ namespace Renderer {
 					if (region) {
 						region.name = data.newName;
 						region.updateLabel(data.newName);
-					}
-				});
-
-				taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
-					const { dataType, dataValue } = Object.entries(data).map(([k, v]) => {
-						const dataType = k as MapEditToolEnum;
-						const dataValue = v as any;
-						return { dataType, dataValue };
-					})[0];
-					switch (dataType) {
-						case 'edit': {
-							const nowValue = dataValue as TileData<'edit'>['edit'];
-							nowValue.selectedTiles.map((v, idx) => {
-								this.voxelEditor.putTiles(
-									nowValue.x,
-									nowValue.y,
-									v,
-									nowValue.size,
-									nowValue.shape,
-									nowValue.layer[idx],
-									true
-								);
-							});
-
-							break;
-						}
-						case 'clear': {
-							const nowValue = dataValue as TileData<'clear'>['clear'];
-							if (
-								taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' &&
-								taro.game.data.map.layers[nowValue.layer].data
-							) {
-								this.voxelEditor.clearLayer(nowValue.layer);
-							}
-						}
 					}
 				});
 			}
