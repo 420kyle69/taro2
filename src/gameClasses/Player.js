@@ -214,7 +214,7 @@ var Player = TaroEntity.extend({
 			if (unit && unit._category == 'unit' && unit.getOwner() == this) {
 				self._stats.selectedUnitId = unitId;
 				self.streamUpdateData([{ selectedUnitId: unitId }]);
-				unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]); // send item inventory data for the newly selected unit
+				unit.streamUpdateData([{ itemIds: unit._stats.itemIds }], self._stats.clientId); // send item inventory data for the newly selected unit
 			} else if (unitId === null) {
 				self.control.releaseAllKeys();
 				self._stats.selectedUnitId = null;
@@ -513,11 +513,6 @@ var Player = TaroEntity.extend({
 			if (taro.isServer) {
 				const i = taro.server.developerClientIds.indexOf(this._stats.clientId);
 				if (i != -1) taro.server.developerClientIds.splice(i, 1);
-			}
-
-			if (autoSavePlayerData && taro.workerComponent && this._stats.userId) {
-				// auto save player data
-				taro.workerComponent.savePlayerData(this._stats.userId, null, 'playerLeavesGame');
 			}
 
 			taro.script.trigger('playerLeavesGame', { playerId: this.id() });

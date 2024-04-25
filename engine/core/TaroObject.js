@@ -17,6 +17,7 @@ var TaroObject = TaroEventingClass.extend({
 		this._serverStream = [];
 		this._inView = true;
 		this._managed = 1;
+		this._stats = {};
 
 		this._specialProp = ['_id', '_parent', '_children'];
 
@@ -1631,7 +1632,7 @@ var TaroObject = TaroEventingClass.extend({
 								// render child if its depth is below units depth
 								if (childLayer <= parentLayer && childDepth < parentDepth) {
 									renderChild = true;
-									if (!arr[arrCount]._hidden) {
+									if (!arr[arrCount]._stats.isHidden) {
 										arr[arrCount]._renderBelowUnit = true;
 									}
 								}
@@ -1676,7 +1677,7 @@ var TaroObject = TaroEventingClass.extend({
 								// render child if its depth is below units depth
 								if (childLayer <= parentLayer && childDepth < parentDepth) {
 									renderChild = true;
-									if (!arr[arrCount]._hidden) {
+									if (!arr[arrCount]._stats.isHidden) {
 										arr[arrCount]._renderBelowUnit = true;
 									}
 								}

@@ -156,7 +156,11 @@ var ActionComponent = TaroEntity.extend({
 										// ask client to reload game
 										taro.network.send(
 											'sendPlayerToMap',
-											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											{
+												type: 'sendPlayerToMap',
+												gameSlug: res.gameSlug,
+												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+											},
 											player._stats.clientId
 										);
 									}
@@ -174,7 +178,7 @@ var ActionComponent = TaroEntity.extend({
 							let userIds = [];
 							for (var l = 0; l < players.length; l++) {
 								var player = players[l];
-								console.log('player', player._stats.clientId, player._stats.userId );
+								console.log('player', player._stats.clientId, player._stats.userId);
 								if (player && player._stats && player._stats.clientId) {
 									userIds.push(player._stats.userId || 'guest');
 								}
@@ -188,7 +192,11 @@ var ActionComponent = TaroEntity.extend({
 										// ask client to reload game
 										taro.network.send(
 											'sendPlayerToMap',
-											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											{
+												type: 'sendPlayerToMap',
+												gameSlug: res.gameSlug,
+												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+											},
 											player._stats.clientId
 										);
 									}
@@ -197,7 +205,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
-					
+
 					case 'sendPlayerToSpawningMap':
 						if (taro.isServer) {
 							var player = self._script.param.getValue(action.player, vars);
@@ -209,7 +217,11 @@ var ActionComponent = TaroEntity.extend({
 										// ask client to reload game
 										taro.network.send(
 											'sendPlayerToMap',
-											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											{
+												type: 'sendPlayerToMap',
+												gameSlug: res.gameSlug,
+												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+											},
 											player._stats.clientId
 										);
 									}
@@ -1635,6 +1647,7 @@ var ActionComponent = TaroEntity.extend({
 									translate: spawnPosition,
 									rotate: facingAngle,
 								},
+								isHidden: false,
 							});
 
 							var unit = player.createUnit(data);
@@ -2218,7 +2231,7 @@ var ActionComponent = TaroEntity.extend({
 							entity.show();
 						}
 						break;
-					
+
 					case 'makeUnitInvisibleToNeutralPlayers':
 						if (entity && entity._category == 'unit') {
 							entity.streamUpdateData([{ isInvisibleToNeutral: true }, { isNameLabelHiddenToNeutral: true }]);

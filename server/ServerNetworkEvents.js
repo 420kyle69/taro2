@@ -104,7 +104,7 @@ var ServerNetworkEvents = {
 				isAdBlockEnabled: data.isAdBlockEnabled,
 				isMobile: data.isMobile,
 			});
-			
+
 			if (player) {
 				player.joinGame();
 			}
@@ -426,8 +426,8 @@ var ServerNetworkEvents = {
 									toItem._stats.controls.backpackAllowed == undefined ||
 									toItem._stats.controls.backpackAllowed == null))) // any item can be moved into backpack slots if the backpackAllowed property is true
 					) {
-						fromItem.streamUpdateData([{ slotIndex: parseInt(data.to) }]);
-						toItem.streamUpdateData([{ slotIndex: parseInt(data.from) }]);
+						fromItem.changeSlotIndex(parseInt(data.to));
+						toItem.changeSlotIndex(parseInt(data.from));
 
 						if (
 							fromItem._stats.bonus &&
@@ -476,7 +476,7 @@ var ServerNetworkEvents = {
 								fromItem._stats.controls.backpackAllowed == undefined ||
 								fromItem._stats.controls.backpackAllowed == null))) // any item can be moved into backpack slots if the backpackAllowed property is true
 				) {
-					fromItem.streamUpdateData([{ slotIndex: parseInt(data.to) }]);
+					fromItem.changeSlotIndex(parseInt(data.to));
 
 					if (
 						fromItem._stats.bonus &&
@@ -494,7 +494,7 @@ var ServerNetworkEvents = {
 					itemIds[data.from] = undefined;
 				}
 
-				unit.streamUpdateData([{ itemIds: itemIds }]);
+				unit.streamUpdateData([{ itemIds: itemIds }], clientId);
 				unit.changeItem(unit._stats.currentItemIndex);
 			}
 		}

@@ -355,24 +355,35 @@ class DeveloperMode {
 
 	changeTab(tab: devModeTab) {
 		if (tab === 'map') {
-			taro.client.emit('enterMapTab');
-		} else {
+			if (this.activeTab !== 'map') {
+				taro.client.emit('enterMapTab');
+			}
+		} else if (this.activeTab === 'map') {
 			taro.client.emit('leaveMapTab');
 		}
+
 		if (tab === 'play') {
-			taro.client.emit('lockCamera');
-			taro.menuUi.toggleCustomIngameUi(true);
-		} else {
-			taro.menuUi.toggleCustomIngameUi(false);
-			if (this.activeTab === 'play') {
-				taro.client.emit('unlockCamera');
+			if (this.activeTab !== 'play') {
+				taro.client.emit('enterPlayTab');
+
+				taro.client.emit('lockCamera');
+				taro.menuUi.toggleCustomIngameUi(true);
 			}
+		} else if (this.activeTab === 'play') {
+			taro.client.emit('leavePlayTab');
+
+			taro.client.emit('unlockCamera');
+			taro.menuUi.toggleCustomIngameUi(false);
 		}
+
 		if (tab === 'entities') {
-			taro.client.emit('enterEntitiesTab');
-		} else {
+			if (this.activeTab !== 'entities') {
+				taro.client.emit('enterEntitiesTab');
+			}
+		} else if (this.activeTab === 'entities') {
 			taro.client.emit('leaveEntitiesTab');
 		}
+
 		this.activeTab = tab;
 	}
 
