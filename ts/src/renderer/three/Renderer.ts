@@ -447,30 +447,7 @@ namespace Renderer {
 					const rows = cellSheet.rowCount;
 
 					textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
-						for (let animationsKey in taroEntity.animations) {
-							const animation = taroEntity.animations[animationsKey];
-							const frames = animation.frames;
-							const animationFrames: number[] = [];
-
-							// Correction for 0-based indexing
-							for (let i = 0; i < frames.length; i++) {
-								animationFrames.push(+frames[i] - 1);
-							}
-
-							// Avoid crash by giving it frame 0 if no frame data provided
-							if (animationFrames.length === 0) {
-								animationFrames.push(0);
-							}
-
-							// Move defaults to AnimationManager.create?
-							AnimationManager.instance().create({
-								key: `${key}/${animationsKey}/${taroEntity.id}`,
-								textureSheetKey: key,
-								frames: animationFrames,
-								fps: +animation.framesPerSecond || 15,
-								repeat: +animation.loopCount - 1,
-							});
-						}
+						AnimationManager.instance().createAnimationsFromTaroData(key, taroEntity);
 					});
 				}
 
