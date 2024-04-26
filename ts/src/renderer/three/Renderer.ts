@@ -468,7 +468,7 @@ namespace Renderer {
 								textureSheetKey: key,
 								frames: animationFrames,
 								fps: +animation.framesPerSecond || 15,
-								repeat: +animation.loopCount - 1,
+								repeat: +animation.loopCount,
 							});
 						}
 					});

@@ -11,16 +11,14 @@ namespace Renderer {
 			private repeat = 0;
 			private cycle = 0;
 
-			constructor(spriteSheet: TextureSheet) {
+			constructor(private spriteSheet: TextureSheet) {
 				super(spriteSheet.texture);
 
-				this.tileH = spriteSheet.width / spriteSheet.tileWidth;
-				this.tileV = spriteSheet.height / spriteSheet.tileHeight;
+				this.tileH = 1 / (spriteSheet.width / spriteSheet.tileWidth);
+				this.tileV = 1 / (spriteSheet.height / spriteSheet.tileHeight);
+				spriteSheet.texture.repeat.set(this.tileH, this.tileV);
 
-				spriteSheet.texture.repeat.set(1 / this.tileH, 1 / this.tileV);
-				const offsetX = (this.currentTile % this.tileH) / this.tileH;
-				const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
-				spriteSheet.texture.offset.set(offsetX, offsetY);
+				this.setUvOffset(0);
 			}
 
 			loop(playSpriteIndices: number[], fps: number, repeat = 0) {
@@ -31,50 +29,48 @@ namespace Renderer {
 				this.repeat = repeat;
 				this.cycle = 0;
 				this.elapsedTime = 0;
-				const offsetX = (this.currentTile % this.tileH) / this.tileH;
-				const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
-				this.tex.offset.set(offsetX, offsetY);
+				this.setUvOffset(this.currentTile);
 			}
 
 			update(dt: number) {
 				super.update(dt);
 
-				this.elapsedTime += dt;
-
-				if (this.repeat !== -1 && this.cycle >= this.repeat + 1) {
+				if (this.repeat !== 0 && this.cycle >= this.repeat) {
 					return;
 				}
 
-				if (this.maxDisplayTime > 0 && this.elapsedTime >= this.maxDisplayTime) {
-					this.elapsedTime = 0;
-					this.runningTileArrayIndex = (this.runningTileArrayIndex + 1) % this.playSpriteIndices.length;
+				this.elapsedTime += dt;
+
+				if (this.elapsedTime >= this.maxDisplayTime && this.maxDisplayTime > 0) {
+					this.elapsedTime -= this.maxDisplayTime;
+
 					this.currentTile = this.playSpriteIndices[this.runningTileArrayIndex];
+					this.setUvOffset(this.currentTile);
 
+					this.runningTileArrayIndex = (this.runningTileArrayIndex + 1) % this.playSpriteIndices.length;
 					if (this.runningTileArrayIndex === 0) {
-						this.cycle += 1;
-						if (this.cycle === this.repeat + 1) return;
+						this.cycle++;
 					}
-
-					const offsetX = (this.currentTile % this.tileH) / this.tileH;
-					const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
-					this.tex.offset.set(offsetX, offsetY);
 				}
 			}
 
 			setTexture(tex: THREE.Texture) {
-				super.setTexture(tex);
+				// super.setTexture(tex);
+				// this.tex = tex;
+				// if (tex.userData.numColumns && tex.userData.numRows) {
+				// 	this.tileH = tex.userData.numColumns;
+				// 	this.tileV = tex.userData.numRows;
+				// }
+				// tex.repeat.set(1 / this.tileH, 1 / this.tileV);
+				// const offsetX = (this.currentTile % this.tileH) / this.tileH;
+				// const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
+				// tex.offset.set(offsetX, offsetY);
+			}
 
-				this.tex = tex;
-
-				if (tex.userData.numColumns && tex.userData.numRows) {
-					this.tileH = tex.userData.numColumns;
-					this.tileV = tex.userData.numRows;
-				}
-
-				tex.repeat.set(1 / this.tileH, 1 / this.tileV);
-				const offsetX = (this.currentTile % this.tileH) / this.tileH;
-				const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
-				tex.offset.set(offsetX, offsetY);
+			private setUvOffset(tileIndex: number) {
+				const x = tileIndex % this.spriteSheet.cols;
+				const y = Math.floor(tileIndex / this.spriteSheet.cols);
+				this.tex.offset.set(this.tileH * x, 1 - this.tileV * (y + 1));
 			}
 		}
 	}
