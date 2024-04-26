@@ -3618,7 +3618,6 @@ var ActionComponent = TaroEntity.extend({
 						var key = self._script.param.getValue(action.key, vars);
 						var value = self._script.param.getValue(action.value, vars);
 						var object = self._script.param.getValue(action.object, vars);
-
 						if (object && key && value) {
 							object[key] = value;
 						}
@@ -3630,7 +3629,7 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.param.getValue(action.value, vars);
 						var object = self._script.param.getValue(action.object, vars);
 
-						if (object && key && value) {
+						if (object && key && (value || value === 0)) {
 							object[key] = parseFloat(value);
 						}
 
