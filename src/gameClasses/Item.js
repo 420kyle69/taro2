@@ -125,19 +125,20 @@ var Item = TaroEntityPhysics.extend({
 			}
 		}
 		// if body exists and item is not hidden, show
-		if (body && body.type != 'none' && !this._stats.isHidden) {
+		if (body && body.type != 'none') {
 			TaroEntityPhysics.prototype.updateBody.call(self, initTransform);
 
-			self.show();
 			if (taro.isClient) {
 				self.updateTexture();
+			} else {
+				self.show();
 			}
 		} else {
 			taro.devLog('hide & destroyBody.');
-			self.hide();
 
 			self.destroyBody();
 			if (taro.isServer) {
+				self.hide();
 				this.streamMode(2);
 			}
 		}
@@ -192,12 +193,10 @@ var Item = TaroEntityPhysics.extend({
 			var hasBody = self._stats.currentBody && self._stats.currentBody.type !== 'none';
 
 			if (isInvisible || !hasBody) {
-				self.hide();
 				return;
 			}
 		}
 
-		self.show();
 		// leave because it is taro not renderer
 		self.updateLayer();
 		// leave because it updates state for animation

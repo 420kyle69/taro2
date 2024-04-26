@@ -1291,6 +1291,7 @@ var Unit = TaroEntityPhysics.extend({
 					} else {
 						item.setState('unselected');
 					}
+					self.inventory.insertItem(item, availableSlot - 1);
 
 					// Unit
 					self.streamUpdateData([{ itemIds: self._stats.itemIds }], self._stats.clientId);
