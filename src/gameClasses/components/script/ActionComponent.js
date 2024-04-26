@@ -337,7 +337,10 @@ var ActionComponent = TaroEntity.extend({
 					case 'runScript':
 						let previousScriptId = self._script.currentScriptId;
 						let previousAcionBlockIdx = self._script.currentActionLineNumber;
-						self._script.runScript(action.scriptName, vars);
+
+						const scriptParams = { ...vars, triggeredFrom: vars.isWorldScript ? 'world' : 'map' };
+						self._script.runScript(action.scriptName, scriptParams);
+
 						self._script.currentScriptId = previousScriptId;
 						self._script.currentActionLineNumber = previousAcionBlockIdx;
 						break;
@@ -618,10 +621,22 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'setPlayerAttribute':
 						var attrId = self._script.param.getValue(action.attribute, vars);
-						var player = self._script.param.getValue(action.entity, vars);
+						var player = self._script.param.getValue(action.entity, vars);						
+
 						if (player && player._category == 'player' && player._stats.attributes) {
 							var attribute = player._stats.attributes[attrId];
 							if (attribute != undefined) {
+								
+								var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
+								const isWorldPlayerAttribute = playerType && playerType.isWorld;
+
+								const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
+								if (taro.game.isWorld && !vars.isWorldScript && isWorldPlayerAttribute && !canBeUpdatedByMap) {
+									self._script.errorLog('can not update world player attribute from map');
+									console.log('can not update world player attribute from map', path, attrId);
+									break;
+								}
+								
 								var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
 								var value = parseFloat(self._script.param.getValue(action.value, vars)).toFixed(decimalPlace);
 								player.attribute.update(attrId, value); // update attribute, and check for attribute becoming 0
@@ -727,9 +742,19 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 						var variable = self._script.param.getValue(action.variable, vars);
 						var value = self._script.param.getValue(action.value, vars);
-
+						
 						if (variable) {
 							var variableId = variable.key;
+
+							var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
+							const isWorldPlayerVariable = playerType && playerType.isWorld;
+							const canBeUpdatedByMap = variable.canBeUpdatedByMap;
+							if (taro.game.isWorld && !vars.isWorldScript && isWorldPlayerVariable && !canBeUpdatedByMap) {
+								self._script.errorLog('can not update world player variable from map');
+								console.log('can not update world player variable from map', path, variableId);
+								break;
+							}
+
 							player.variable.update(variableId, value);
 						}
 
@@ -2988,6 +3013,14 @@ var ActionComponent = TaroEntity.extend({
 							var isAttributeVisible = false;
 							var attribute = entity._stats.attributes[attrId];
 
+							const isWorldEntityAttribute = entity._stats.isWorld;
+							const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
+							if (taro.game.isWorld && !vars.isWorldScript && isWorldEntityAttribute && !canBeUpdatedByMap) {
+								self._script.errorLog('can not update world entity attribute from map');
+								console.log('can not update world entity attribute from map', path, attrId);
+								break;
+							}
+
 							if (entity._category === 'player') {
 								isAttributeVisible = !!attribute.isVisible;
 							} else {
@@ -3161,8 +3194,18 @@ var ActionComponent = TaroEntity.extend({
 						var entity = self._script.param.getValue(action.entity, vars);
 						var variable = self._script.param.getValue(action.variable, vars);
 						var value = self._script.param.getValue(action.value, vars);
+
 						if (variable && entity?.variables) {
 							var variableId = variable.key;
+
+							const isWorldEntityVariable = entity._stats.isWorld;
+							const canBeUpdatedByMap = variable.canBeUpdatedByMap;
+							if (taro.game.isWorld && !vars.isWorldScript && isWorldEntityVariable && !canBeUpdatedByMap) {
+								self._script.errorLog('can not update world entity variable from map');
+								console.log('can not update world entity variable from map', path, variableId);
+								break;
+							}
+
 							entity.variable.update(variableId, value);
 						}
 
