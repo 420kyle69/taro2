@@ -601,6 +601,9 @@ var PlayerUiComponent = TaroEntity.extend({
 				case 'removeClass':
 					document.getElementById(data.elementId).classList.remove(data.className);
 					break;
+				case 'setUIElementProperty':
+					document.getElementById(data.elementId)[data.key] = data.value;
+					break;
 				default:
 					break;
 			}

@@ -646,6 +646,15 @@ var ServerNetworkEvents = {
 			taro.script.trigger('playerCustomInput', { playerId: player.id() });
 		}
 	},
+
+	_onSendDataFromClient: function (data, clientId) {
+		var player = taro.game.getPlayerByClientId(clientId);
+		if (player && data) {
+			player.lastClientReceivedData = data.data;
+			taro.script.trigger('whenDataReceivedFromClient', { playerId: player.id() });
+		}
+	},
+
 	_onPlayerAbsoluteAngle: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player) {
