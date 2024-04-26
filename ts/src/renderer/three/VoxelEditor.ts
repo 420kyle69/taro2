@@ -506,208 +506,50 @@ class VoxelEditor {
 	}
 
 	update(): void {
-		// TODO
-		// if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-		// 	const devModeScene = this.devModeTools.scene;
-		// 	const palette = this.tilePalette;
-		// 	const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		// 	const paletteMap = palette.map;
-		// 	const worldPoint = this.gameScene.cameras.main.getWorldPoint(
-		// 		this.gameScene.input.activePointer.x,
-		// 		this.gameScene.input.activePointer.y
-		// 	);
-		// 	const palettePoint = devModeScene.cameras
-		// 		.getCamera('palette')
-		// 		.getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
-		// 	const marker = this.marker;
-		// 	const paletteMarker = this.paletteMarker;
-		// 	paletteMarker.graphics.setVisible(true);
-		// 	marker.graphics.setVisible(false);
-		// 	marker.showPreview(false);
-		// 	// Rounds down to nearest tile
-		// 	const palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
-		// 	const palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
-		// 	if (palette.visible && devModeScene.pointerInsidePalette()) {
-		// 		devModeScene.regionEditor.cancelDrawRegion();
-		// 		marker.graphics.setVisible(false);
-		// 		marker.showPreview(false);
-		// 		// Snap to tile coordinates, but in world space
-		// 		paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
-		// 		paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
-		// 	} else if (
-		// 		(!devModeScene.pointerInsidePalette() || !palette.visible) &&
-		// 		!devModeScene.pointerInsideButtons &&
-		// 		!devModeScene.pointerInsideWidgets() &&
-		// 		map.currentLayerIndex >= 0
-		// 	) {
-		// 		taro.client.emit('update-tooltip', {
-		// 			label: 'Position',
-		// 			text:
-		// 				`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  \n` +
-		// 				`Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}`,
-		// 		});
-		// 		if (marker.active) {
-		// 			paletteMarker.graphics.setVisible(false);
-		// 			marker.graphics.setVisible(true);
-		// 			marker.showPreview(true);
-		// 			// Rounds down to nearest tile
-		// 			const pointerTileX = map.worldToTileX(
-		// 				worldPoint.x - ((marker.graphics.scaleSidesX - 1) * this.tileSize) / 2,
-		// 				true
-		// 			);
-		// 			const pointerTileY = map.worldToTileY(
-		// 				worldPoint.y - ((marker.graphics.scaleSidesY - 1) * this.tileSize) / 2,
-		// 				true
-		// 			);
-		// 			// Snap to tile coordinates, but in world space
-		// 			marker.graphics.x = map.tileToWorldX(pointerTileX);
-		// 			marker.graphics.y = map.tileToWorldY(pointerTileY);
-		// 			marker.preview.x = map.tileToWorldX(pointerTileX);
-		// 			marker.preview.y = map.tileToWorldY(pointerTileY);
-		// 			if (
-		// 				map?.getTileAt(pointerTileX, pointerTileY)?.index &&
-		// 				map?.getTileAt(pointerTileX, pointerTileY)?.index !== -1 &&
-		// 				map?.getTileAt(pointerTileX, pointerTileY)?.index !== 0
-		// 			) {
-		// 				taro.client.emit('update-tooltip', {
-		// 					label: 'Position',
-		// 					text:
-		// 						`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  \n` +
-		// 						`Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  ` +
-		// 						`Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`,
-		// 				});
-		// 			}
-		// 			if (devModeScene.input.manager.activePointer.leftButtonDown()) {
-		// 				if (this.devModeTools.activeButton === 'brush' || this.devModeTools.activeButton === 'eraser') {
-		// 					const originTileArea = {};
-		// 					const nowBrushSize = JSON.parse(JSON.stringify(this.brushArea.size)) as Vector2D;
-		// 					const nowBrushShape = JSON.parse(JSON.stringify(this.brushArea.shape)) as Shape;
-		// 					const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
-		// 					const selectedTiles = JSON.parse(JSON.stringify(this.selectedTileArea));
-		// 					const nowLayer = map.currentLayerIndex;
-		// 					if (
-		// 						taro.game.data.map.layers[nowLayer].type === 'tilelayer' &&
-		// 						taro.game.data.map.layers[nowLayer].data
-		// 					) {
-		// 						Object.entries(sample).map(([x, obj]) => {
-		// 							Object.entries(obj).map(([y, value]) => {
-		// 								if (!originTileArea[x]) {
-		// 									originTileArea[x] = {};
-		// 								}
-		// 								originTileArea[x][y] = this.getTile(pointerTileX + parseInt(x), pointerTileY + parseInt(y), map);
-		// 							});
-		// 						});
-		// 						this.commandController.addCommand({
-		// 							func: () => {
-		// 								this.putTiles(
-		// 									pointerTileX,
-		// 									pointerTileY,
-		// 									selectedTiles,
-		// 									nowBrushSize,
-		// 									nowBrushShape,
-		// 									nowLayer,
-		// 									false
-		// 								);
-		// 							},
-		// 							undo: () => {
-		// 								this.putTiles(
-		// 									pointerTileX,
-		// 									pointerTileY,
-		// 									originTileArea,
-		// 									nowBrushSize,
-		// 									nowBrushShape,
-		// 									nowLayer,
-		// 									false
-		// 								);
-		// 							},
-		// 						});
-		// 					}
-		// 				} else if (this.devModeTools.activeButton === 'fill') {
-		// 					const targetTile = this.getTile(pointerTileX, pointerTileY, map);
-		// 					const selectedTile = Object.values(Object.values(this.selectedTileArea)?.[0] || {})?.[0];
-		// 					if (
-		// 						selectedTile &&
-		// 						targetTile !== selectedTile &&
-		// 						(targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)
-		// 					) {
-		// 						const nowCommandCount = this.commandController.nowInsertIndex;
-		// 						const addToLimits = (v2d: Vector2D) => {
-		// 							setTimeout(() => {
-		// 								const cache = this.commandController.commands[nowCommandCount - this.commandController.offset]
-		// 									.cache as Record<number, Record<number, number>>;
-		// 								if (!cache[v2d.x]) {
-		// 									cache[v2d.x] = {};
-		// 								}
-		// 								cache[v2d.x][v2d.y] = 1;
-		// 							}, 0);
-		// 						};
-		// 						const nowLayer = map.currentLayerIndex;
-		// 						if (
-		// 							taro.game.data.map.layers[nowLayer].type === 'tilelayer' &&
-		// 							taro.game.data.map.layers[nowLayer].data
-		// 						) {
-		// 							this.commandController.addCommand(
-		// 								{
-		// 									func: () => {
-		// 										this.floodFill(
-		// 											nowLayer,
-		// 											targetTile,
-		// 											selectedTile,
-		// 											pointerTileX,
-		// 											pointerTileY,
-		// 											false,
-		// 											{},
-		// 											addToLimits
-		// 										);
-		// 										taro.network.send<'fill'>('editTile', {
-		// 											fill: {
-		// 												gid: selectedTile,
-		// 												layer: nowLayer,
-		// 												x: pointerTileX,
-		// 												y: pointerTileY,
-		// 											},
-		// 										});
-		// 									},
-		// 									undo: () => {
-		// 										this.floodFill(
-		// 											nowLayer,
-		// 											selectedTile,
-		// 											targetTile,
-		// 											pointerTileX,
-		// 											pointerTileY,
-		// 											false,
-		// 											this.commandController.commands[nowCommandCount - this.commandController.offset].cache
-		// 										);
-		// 										taro.network.send<'fill'>('editTile', {
-		// 											fill: {
-		// 												gid: targetTile,
-		// 												layer: nowLayer,
-		// 												x: pointerTileX,
-		// 												y: pointerTileY,
-		// 												limits:
-		// 													this.commandController.commands[nowCommandCount - this.commandController.offset].cache,
-		// 											},
-		// 										});
-		// 									},
-		// 									cache: {},
-		// 								},
-		// 								true
-		// 							);
-		// 						}
-		// 					}
-		// 				}
-		// 			}
-		// 		} else if (this.devModeTools.entityEditor.selectedEntityImage) {
-		// 			taro.client.emit('update-tooltip', {
-		// 				label: 'Entity Position',
-		// 				text: `X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`,
-		// 			});
-		// 		}
-		// 	} else {
-		// 		this.showMarkers(false);
-		// 	}
-		// } else {
-		// 	this.showMarkers(false);
-		// }
+		const renderer = Renderer.Three.instance();
+		const raycaster = new THREE.Raycaster();
+
+		raycaster.setFromCamera(Renderer.Three.getPointer(), renderer.camera.instance);
+		const intersect = renderer.raycastFloor();
+
+		if (!intersect) {
+			return;
+		}
+		const x = Math.floor(Renderer.Three.Utils.worldToPixel(intersect.x));
+		const y = Math.floor(Renderer.Three.Utils.worldToPixel(intersect.z));
+
+		const tileX = Math.floor(x / taro.scaleMapDetails.tileWidth);
+		const tileY = Math.floor(y / taro.scaleMapDetails.tileHeight);
+
+		if (
+			taro.developerMode.activeButton === 'brush' ||
+			taro.developerMode.activeButton === 'eraser' ||
+			taro.developerMode.activeButton === 'fill'
+		) {
+			//if brush tool selected
+			const taroMap = taro.game.data.map;
+			const tileId = taroMap.layers[this.currentLayerIndex].data[tileY * taroMap.width + tileX];
+			taro.client.emit('update-tooltip', {
+				label: 'Position',
+				text:
+					`X: ${x.toString()}, Y: ${y.toString()}  \n` +
+					`Tile X: ${tileX.toString()}, Tile Y: ${tileY.toString()}  |  ` +
+					`Tile id: ${tileId}`,
+			});
+		} else {
+			//if cursor tool selected
+			taro.client.emit('update-tooltip', {
+				label: 'Position',
+				text:
+					`X: ${x.toString()}, Y: ${Math.floor(Renderer.Three.Utils.worldToPixel(intersect.z)).toString()}  \n` +
+					`Tile X: ${tileX.toString()}, Tile Y: ${tileY.toString()}`,
+			});
+		}
+
+		// if entity image is selected
+		/*taro.client.emit('update-tooltip', {
+			label: 'Entity Position',
+			text: `X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`,
+		});*/
 	}
 }

@@ -3618,7 +3618,6 @@ var ActionComponent = TaroEntity.extend({
 						var key = self._script.param.getValue(action.key, vars);
 						var value = self._script.param.getValue(action.value, vars);
 						var object = self._script.param.getValue(action.object, vars);
-
 						if (object && key && value) {
 							object[key] = value;
 						}
@@ -3630,7 +3629,7 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.param.getValue(action.value, vars);
 						var object = self._script.param.getValue(action.object, vars);
 
-						if (object && key && value) {
+						if (object && key && (value || value === 0)) {
 							object[key] = parseFloat(value);
 						}
 
@@ -3834,6 +3833,44 @@ var ActionComponent = TaroEntity.extend({
 							);
 						}
 						break;
+
+					case 'setUIElementProperty': {
+						let player = self._script.param.getValue(action.player, vars);
+						let elementId = self._script.param.getValue(action.elementId, vars);
+						let value = self._script.param.getValue(action.value, vars);
+						let key = self._script.param.getValue(action.key, vars);
+						const sanitizerFunction = taro.isClient ? taro.clientSanitizer : taro.sanitizer;
+
+						if (typeof key === 'string') {
+							const data = {
+								command: 'updateUiElement',
+								elementId,
+								action: 'setUIElementProperty',
+								value: typeof value === 'string' ? sanitizerFunction(value) : '',
+								key
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
+						}
+						break;
+					}
+					
+					case 'sendDataFromClientToServer': {
+						if (taro.isClient) {
+							const player = self._script.param.getValue(action.player, vars);
+							const data = self._script.param.getValue(action.data, vars);
+
+							if (player && player._stats.clientId === taro.network.id()) {
+								taro.network.send('sendDataFromClient', { 
+									data
+								});
+							}
+						}
+						break;
+					}
 
 					case 'comment':
 						break;

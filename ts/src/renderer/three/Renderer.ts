@@ -205,16 +205,24 @@ namespace Renderer {
 						raycaster.setFromCamera(this.pointer, this.camera.instance);
 
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
-						if (intersects.length > 0) {
-							const closest = intersects[0].object as THREE.Mesh;
-							const unit = this.entityManager.entities.find((e) => e instanceof Unit && e.sprite === closest);
+						for (const intersect of intersects) {
+							const closest = intersect.object as THREE.Mesh;
+							const unit = this.entityManager.units.find((unit) => unit.sprite === closest);
 							if (unit) {
-								const ownerPlayer = taro.$(unit.ownerId);
-								if (ownerPlayer?._stats?.controlledBy === 'human') {
+								const clientUnit = taro.client.selectedUnit;
+								const otherUnit = taro.$(unit.ownerId);
+
+								if (clientUnit === otherUnit) {
+									break;
+								}
+
+								if (otherUnit?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}
+
+								break;
 							}
 						}
 					}
@@ -633,6 +641,7 @@ namespace Renderer {
 				this.entityManager.update(dt);
 				this.particleSystem.update(dt, time, this.camera.instance);
 				this.camera.update();
+				this.voxelEditor.update();
 
 				if (this.camera.target) {
 					this.sky.position.copy(this.camera.target.position);
