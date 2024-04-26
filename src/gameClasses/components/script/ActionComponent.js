@@ -731,6 +731,11 @@ var ActionComponent = TaroEntity.extend({
 					case 'assignPlayerType':
 						var playerTypeId = self._script.param.getValue(action.playerType, vars);
 
+						// map scripts not allowed to assign player type
+						if (taro.game.isWorld && !vars.isWorldScript) {
+							break;
+						}
+
 						if (entity && entity._category == 'player') {
 							var player = entity;
 							player.streamUpdateData([{ playerTypeId: playerTypeId }]);
