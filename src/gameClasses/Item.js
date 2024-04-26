@@ -260,7 +260,6 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	hide: function () {
-		console.log(`${this.id()} HIDE`);
 		if (taro.isServer) {
 			this.streamUpdateData([{ isHidden: true }]);
 		}
@@ -270,7 +269,6 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	show: function () {
-		console.log(`${this.id()} SHOW`);
 		if (taro.isServer) {
 			this.streamUpdateData([{ isHidden: false }]);
 		}

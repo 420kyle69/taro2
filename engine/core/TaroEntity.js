@@ -167,14 +167,7 @@ var TaroEntity = TaroObject.extend({
 					this.emit('dynamic', true);
 				}
 			}
-			///
 		}
-
-		// if (this._stats.slotIndex >= owner._stats.inventorySize) {
-		// 	this.hide();
-		// } else if (this._stats.slotIndex < owner._stats.inventorySize) {
-		// 	this.show();
-		// }
 
 		this.script?.trigger('entityStateChanged');
 
