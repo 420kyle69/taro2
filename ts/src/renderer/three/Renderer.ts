@@ -633,6 +633,7 @@ namespace Renderer {
 				this.entityManager.update(dt);
 				this.particleSystem.update(dt, time, this.camera.instance);
 				this.camera.update();
+				this.voxelEditor.update();
 
 				if (this.camera.target) {
 					this.sky.position.copy(this.camera.target.position);
