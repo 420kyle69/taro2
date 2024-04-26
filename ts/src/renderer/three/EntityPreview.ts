@@ -1,8 +1,6 @@
 namespace Renderer {
 	export namespace Three {
 		export class EntityPreview {
-			private scene: Phaser.Scene;
-			devModeTools: DevModeTools;
 			entityEditor: EntityEditor;
 			action: ActionData;
 			editedAction: ActionData;
@@ -23,19 +21,16 @@ namespace Renderer {
 			y: number;
 
 			constructor(
-				scene,
 				devModeTools: DevModeTools,
 				entityImages: (Renderer.Three.AnimatedSprite & { entity: EntityPreview })[],
 				action: ActionData,
 				type?: string
 			) {
-				this.scene = scene;
-				this.devModeTools = devModeTools;
 				const entityEditor = (this.entityEditor = devModeTools.entityEditor);
 				this.action = action;
 
-				let key;
-				let entityTypeData;
+				let key: string;
+				let entityTypeData: Record<string, any>;
 
 				for (let typeName of ['unit', 'item', 'projectile'].values()) {
 					const iterTypes = `${typeName}Types`;
@@ -46,36 +41,11 @@ namespace Renderer {
 						key = `${typeName}/${entityTypeData.cellSheet.url}`;
 					}
 				}
-				if (action.entityType === 'unitTypes') {
-					entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
-					if (!entityTypeData) return;
-					key = `unit/${entityTypeData.cellSheet.url}`;
-				} else if (type === 'unit') {
-					entityTypeData = taro.game.data['unitTypes'] && taro.game.data['unitTypes'][action.unitType];
-					if (!entityTypeData) return;
-					key = `unit/${entityTypeData.cellSheet.url}`;
-				} else if (action.entityType === 'itemTypes') {
-					entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
-					if (!entityTypeData) return;
-					key = `item/${entityTypeData.cellSheet.url}`;
-				} else if (type === 'item') {
-					entityTypeData = taro.game.data['itemTypes'] && taro.game.data['itemTypes'][action.itemType];
-					if (!entityTypeData) return;
-					key = `item/${entityTypeData.cellSheet.url}`;
-				} else if (action.entityType === 'projectileTypes') {
-					entityTypeData = taro.game.data[action.entityType] && taro.game.data[action.entityType][action.entity];
-					if (!entityTypeData) return;
-					key = `projectile/${entityTypeData.cellSheet.url}`;
-				} else if (type === 'projectile') {
-					entityTypeData =
-						taro.game.data['projectileTypes'] && taro.game.data['projectileTypes'][action.projectileType];
-					if (!entityTypeData) return;
-					key = `projectile/${entityTypeData.cellSheet.url}`;
-				}
 
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
 
+				// TODO: add preview here
 				const image = (this.image = scene.add.image(action.position?.x, action.position?.y, key));
 				if (!isNaN(action.angle)) image.angle = action.angle;
 				if (!isNaN(action.width) && !isNaN(action.height)) image.setDisplaySize(action.width, action.height);
@@ -90,54 +60,56 @@ namespace Renderer {
 
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });
-				image.on('pointerdown', () => {
-					if (this.devModeTools.activeButton !== 'cursor') return;
-					if (entityEditor.selectedEntityImage !== this) {
-						entityEditor.selectEntityImage(this);
-					}
 
-					//double click
-					let clickDelay = taro._currentTime - lastTime;
-					lastTime = taro._currentTime;
-					if (clickDelay < 350) {
-						if (inGameEditor && inGameEditor.showScriptForEntity) {
-							inGameEditor.showScriptForEntity(action.actionId);
-						}
-					}
+				//TODO: add select here
+			// 	image.on('pointerdown', () => {
+			// 		if (this.devModeTools.activeButton !== 'cursor') return;
+			// 		if (entityEditor.selectedEntityImage !== this) {
+			// 			entityEditor.selectEntityImage(this);
+			// 		}
 
-					this.startDragX = image.x;
-					this.startDragY = image.y;
-					this.scale = image.scale;
-					if (!devModeTools.altKey.isDown && !devModeTools.shiftKey.isDown) {
-						this.dragMode = 'position';
-					} else if (devModeTools.altKey.isDown) {
-						this.dragMode = 'angle';
-						image.rotation = 0;
-						editedAction.angle = image.angle;
-					} else if (devModeTools.shiftKey.isDown) {
-						this.dragMode = 'scale';
-						if (!isNaN(this.defaultWidth) && !isNaN(this.defaultHeight)) {
-							image.setDisplaySize(this.defaultWidth, this.defaultHeight);
-							editedAction.width = this.defaultWidth;
-							editedAction.height = this.defaultHeight;
-						}
-					}
-					this.updateOutline();
-				});
+			// 		//double click
+			// 		let clickDelay = taro._currentTime - lastTime;
+			// 		lastTime = taro._currentTime;
+			// 		if (clickDelay < 350) {
+			// 			if (inGameEditor && inGameEditor.showScriptForEntity) {
+			// 				inGameEditor.showScriptForEntity(action.actionId);
+			// 			}
+			// 		}
 
-				const outlineHover = entityEditor.outlineHover;
+			// 		this.startDragX = image.x;
+			// 		this.startDragY = image.y;
+			// 		this.scale = image.scale;
+			// 		if (!devModeTools.altKey.isDown && !devModeTools.shiftKey.isDown) {
+			// 			this.dragMode = 'position';
+			// 		} else if (devModeTools.altKey.isDown) {
+			// 			this.dragMode = 'angle';
+			// 			image.rotation = 0;
+			// 			editedAction.angle = image.angle;
+			// 		} else if (devModeTools.shiftKey.isDown) {
+			// 			this.dragMode = 'scale';
+			// 			if (!isNaN(this.defaultWidth) && !isNaN(this.defaultHeight)) {
+			// 				image.setDisplaySize(this.defaultWidth, this.defaultHeight);
+			// 				editedAction.width = this.defaultWidth;
+			// 				editedAction.height = this.defaultHeight;
+			// 			}
+			// 		}
+			// 		this.updateOutline();
+			// 	});
 
-				image.on('pointerover', () => {
-					scene.input.setTopOnly(true);
-					if (this.devModeTools.activeButton !== 'cursor' || entityEditor.activeHandler) return;
-					this.updateOutline();
-				});
+			// 	const outlineHover = entityEditor.outlineHover;
 
-				image.on('pointerout', () => {
-					if (entityEditor.selectedEntityImage === this) return;
-					outlineHover.clear();
-				});
-			}
+			// 	image.on('pointerover', () => {
+			// 		scene.input.setTopOnly(true);
+			// 		if (this.devModeTools.activeButton !== 'cursor' || entityEditor.activeHandler) return;
+			// 		this.updateOutline();
+			// 	});
+
+			// 	image.on('pointerout', () => {
+			// 		if (entityEditor.selectedEntityImage === this) return;
+			// 		outlineHover.clear();
+			// 	});
+			// }
 
 			edit(action: ActionData): void {
 				if (!this.action.wasEdited || !action.wasEdited) {
