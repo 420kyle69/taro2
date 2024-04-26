@@ -210,7 +210,7 @@ namespace Renderer {
 							const unit = this.entityManager.units.find((unit) => unit.sprite === closest);
 							if (unit) {
 								const clientUnit = taro.client.selectedUnit;
-								const otherUnit = taro.$(unit.ownerId);
+								const otherUnit = taro.$(unit.taroId);
 
 								if (clientUnit === otherUnit) {
 									break;
