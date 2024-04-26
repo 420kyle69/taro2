@@ -108,6 +108,7 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_show: function () {
+		this._stats.isHidden = false;
 		if (taro.isClient) {
 			this.emit('show');
 		}
@@ -122,6 +123,7 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_hide: function () {
+		this._stats.isHidden = true;
 		if (taro.isClient) {
 			this.emit('hide');
 		}
@@ -4476,7 +4478,6 @@ var TaroEntity = TaroObject.extend({
 								break;
 
 							case 'isHidden':
-								this._stats[attrName] = newValue;
 								if (newValue == true) {
 									this.hide();
 								} else {
