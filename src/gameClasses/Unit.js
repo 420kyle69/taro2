@@ -1285,12 +1285,12 @@ var Unit = TaroEntityPhysics.extend({
 					// { slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
 					item.streamUpdateData([{ quantity: itemData.quantity }]);
 
-					self.inventory.insertItem(item, availableSlot - 1);
 					if (slotIndex == self._stats.currentItemIndex) {
 						item.setState('selected');
 					} else {
 						item.setState('unselected');
 					}
+					self.inventory.insertItem(item, availableSlot - 1);
 
 					// Unit
 					self.streamUpdateData([{ itemIds: self._stats.itemIds }], self._stats.clientId);
