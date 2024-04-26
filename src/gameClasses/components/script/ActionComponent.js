@@ -3835,6 +3835,41 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 
+					case 'setUIElementProperty': {
+						let player = self._script.param.getValue(action.player, vars);
+						let elementId = self._script.param.getValue(action.elementId, vars);
+						let value = self._script.param.getValue(action.value, vars);
+						let key = self._script.param.getValue(action.key, vars);
+
+						const data = {
+							command: 'updateUiElement',
+							elementId,
+							action: 'setUIElementProperty',
+							value,
+							key
+						};
+						if (taro.isServer) {
+							taro.network.send('ui', data, player._stats.clientId);
+						} else if (player._stats.clientId === taro.network.id()) {
+							taro.playerUi.updateUiElement(data);
+						}
+						break;
+					}
+					
+					case 'sendDataFromClientToServer': {
+						if (taro.isClient) {
+							const player = self._script.param.getValue(action.player, vars);
+							const data = self._script.param.getValue(action.data, vars);
+
+							if (player && player._stats.clientId === taro.network.id()) {
+								taro.network.send('sendDataFromClient', { 
+									data
+								});
+							}
+						}
+						break;
+					}
+
 					case 'comment':
 						break;
 					default:
