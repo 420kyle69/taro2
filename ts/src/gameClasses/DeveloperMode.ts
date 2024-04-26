@@ -268,6 +268,10 @@ class DeveloperMode {
 			this.activeButton = 'draw-region';
 			this.regionTool = true;
 		});
+		taro.client.on('add-entities', () => {
+			//this.addEntities();
+			this.activeButton = 'add-entities';
+		});
 		taro.client.on('brush', () => {
 			//this.brush();
 			this.activeButton = 'brush';

@@ -46,6 +46,7 @@ namespace Renderer {
 			// TODO: decouple this to the voxelEditor
 			public tmp_tileId = 7;
 			public voxelEditor: VoxelEditor;
+			public entityEditor: EntityEditor;
 
 			private regionDrawStart: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -508,6 +509,8 @@ namespace Renderer {
 				this.voxelEditor = new VoxelEditor(this.voxels);
 				this.scene.add(this.voxels);
 				this.scene.add(this.voxelEditor.voxelMarker);
+
+				this.entityEditor = new EntityEditor();
 
 				this.particleSystem = new ParticleSystem();
 				this.scene.add(this.particleSystem);
