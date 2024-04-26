@@ -124,7 +124,7 @@ var Item = TaroEntityPhysics.extend({
 				}
 			}
 		}
-		//
+		// if body exists and item is not hidden, show
 		if (body && body.type != 'none' && !this._stats.isHidden) {
 			TaroEntityPhysics.prototype.updateBody.call(self, initTransform);
 
