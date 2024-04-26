@@ -2418,6 +2418,29 @@ var ActionComponent = TaroEntity.extend({
 							quantity = null;
 						}
 
+						if (taro.game.isWorld && !vars.isWorldScript) {
+							let itemAttributes = [];
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.unitAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []);
+
+							let itemGivesBonuses = false;
+							for (const itemAttribute of itemAttributes) {
+								var attributeData = taro.game.getAsset('attributeTypes', itemAttribute);
+								if (attributeData.isWorld) {
+									itemGivesBonuses = true;
+									break;
+								}
+							}
+
+							if (itemGivesBonuses) {
+								self._script.errorLog('can not create item that gives world attribute bonuses from map');
+								console.log('can not create item that gives world attribute bonuses from map', path, itemTypeId);
+								break;
+							}
+						}
+
 						if (itemData) {
 							itemData.itemTypeId = itemTypeId;
 							itemData.isHidden = false;
@@ -2445,6 +2468,29 @@ var ActionComponent = TaroEntity.extend({
 							quantity = null;
 						}
 
+						if (taro.game.isWorld && !vars.isWorldScript) {
+							let itemAttributes = [];
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.unitAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []);
+
+							let itemGivesBonuses = false;
+							for (const itemAttribute of itemAttributes) {
+								var attributeData = taro.game.getAsset('attributeTypes', itemAttribute);
+								if (attributeData.isWorld) {
+									itemGivesBonuses = true;
+									break;
+								}
+							}
+
+							if (itemGivesBonuses) {
+								self._script.errorLog('can not create item that gives world attribute bonuses from map');
+								console.log('can not create item that gives world attribute bonuses from map', path, itemTypeId);
+								break;
+							}
+						}
+
 						if (itemData) {
 							itemData.itemTypeId = itemTypeId;
 							itemData.isHidden = false;
@@ -2467,6 +2513,29 @@ var ActionComponent = TaroEntity.extend({
 						var itemTypeId = self._script.param.getValue(action.itemType, vars);
 						var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 						var position = self._script.param.getValue(action.position, vars);
+
+						if (taro.game.isWorld && !vars.isWorldScript) {
+							let itemAttributes = [];
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.unitAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []);
+
+							let itemGivesBonuses = false;
+							for (const itemAttribute of itemAttributes) {
+								var attributeData = taro.game.getAsset('attributeTypes', itemAttribute);
+								if (attributeData.isWorld) {
+									itemGivesBonuses = true;
+									break;
+								}
+							}
+
+							if (itemGivesBonuses) {
+								self._script.errorLog('can not create item that gives world attribute bonuses from map');
+								console.log('can not create item that gives world attribute bonuses from map', path, itemTypeId);
+								break;
+							}
+						}
 
 						if (itemData) {
 							itemData.itemTypeId = itemTypeId;
@@ -2916,6 +2985,30 @@ var ActionComponent = TaroEntity.extend({
 							let createdEntity = null;
 
 							if (entityType === 'itemTypes') {
+
+								if (taro.game.isWorld && !vars.isWorldScript) {
+									let itemAttributes = [];
+									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.consume?.unitAttribute || {}) || []);
+									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.consume?.playerAttribute || {}) || []);
+									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.passive?.unitAttribute || {}) || []);
+									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.passive?.playerAttribute || {}) || []);
+
+									let itemGivesBonuses = false;
+									for (const itemAttribute of itemAttributes) {
+										var attributeData = taro.game.getAsset('attributeTypes', itemAttribute);
+										if (attributeData.isWorld) {
+											itemGivesBonuses = true;
+											break;
+										}
+									}
+
+									if (itemGivesBonuses) {
+										self._script.errorLog('can not create item that gives world attribute bonuses from map');
+										console.log('can not create item that gives world attribute bonuses from map', path);
+										break;
+									}
+								}
+
 								data.itemTypeId = entityToCreate;
 								data.isHidden = false;
 								data.stateId = 'dropped';
