@@ -8,11 +8,43 @@ namespace Renderer {
 			}
 
 			destroy() {
-				for (const node of this.children) {
-					if (node instanceof Node) node.destroy();
-				}
-				this.onDestroy();
 				this.removeFromParent();
+
+				const cleanMaterial = (material) => {
+					material.dispose();
+					for (const key of Object.keys(material)) {
+						const value = material[key];
+						if (value && typeof value.dispose === 'function') {
+							value.dispose();
+						}
+					}
+				};
+
+				this.traverse((object) => {
+					if (!(object as THREE.Mesh).isMesh && !(object as THREE.Sprite).isSprite) return;
+
+					const obj = object as THREE.Mesh | THREE.Sprite;
+
+					if ((obj as THREE.Mesh).isMesh) {
+						obj.geometry.dispose();
+					}
+
+					const material = obj.material as THREE.Material;
+
+					if (material.isMaterial) {
+						cleanMaterial(obj.material);
+					} else {
+						for (const material of obj.material as THREE.Material[]) {
+							cleanMaterial(material);
+						}
+					}
+				});
+
+				for (const node of this.children) {
+					if (node instanceof Node) node.onDestroy();
+				}
+
+				this.onDestroy();
 			}
 
 			onDestroy() {}

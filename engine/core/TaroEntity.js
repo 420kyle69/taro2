@@ -56,7 +56,6 @@ var TaroEntity = TaroObject.extend({
 		this._lastSeenBy = {};
 
 		this._inView = true;
-		this._hidden = false;
 
 		this._stats = {};
 		this._streamDataQueued = {};
@@ -109,11 +108,8 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_show: function () {
-		if (this._hidden) {
-			this._hidden = false;
-			if (taro.isClient) {
-				this.emit('show');
-			}
+		if (taro.isClient) {
+			this.emit('show');
 		}
 		return this;
 	},
@@ -126,12 +122,8 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_hide: function () {
-		if (!this._hidden) {
-			this._hidden = true;
-			if (taro.isClient) {
-				this.emit('hide');
-				this.texture('');
-			}
+		if (taro.isClient) {
+			this.emit('hide');
 		}
 		return this;
 	},
@@ -2222,14 +2214,11 @@ var TaroEntity = TaroObject.extend({
 	},
 
 	flip: function (isFlipping) {
-		if (this._stats.flip !== isFlipping) {
-			if (taro.isServer) {
-				this.streamUpdateData([{ flip: isFlipping }]);
-			} else if (taro.isClient) {
-				this.emit('flip', [isFlipping]);
-			}
+		if (taro.isServer && this._stats.flip !== isFlipping) {
+			this.streamUpdateData([{ flip: isFlipping }]);
+		} else if (taro.isClient) {
+			this.emit('flip', [isFlipping]);
 		}
-
 		this._stats.flip = isFlipping;
 	},
 
@@ -4360,7 +4349,7 @@ var TaroEntity = TaroObject.extend({
 
 						case 'ownerId':
 							this._stats[attrName] = newValue;
-							this.oldOwnerId = this._stats[attrName];
+							this.oldOwnerId = this._stats[attrName]; // should this not be placed above the line above?
 							break;
 
 						case 'rotate':
@@ -4487,6 +4476,7 @@ var TaroEntity = TaroObject.extend({
 								break;
 
 							case 'isHidden':
+								this._stats[attrName] = newValue;
 								if (newValue == true) {
 									this.hide();
 								} else {
@@ -4685,7 +4675,7 @@ var TaroEntity = TaroObject.extend({
 						}
 					}
 				} else {
-					return String(this._hidden);
+					return String(this._stats.isHidden);
 				}
 				break;
 
@@ -4952,6 +4942,7 @@ var TaroEntity = TaroObject.extend({
 						'width',
 						'height',
 						'scaleDimensions',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
@@ -4965,6 +4956,7 @@ var TaroEntity = TaroObject.extend({
 						'itemTypeId',
 						'anim',
 						'stateId',
+						'oldOwnerUnitId',
 						'ownerUnitId',
 						'quantity',
 						'currentBody',
@@ -4974,6 +4966,8 @@ var TaroEntity = TaroObject.extend({
 						'height',
 						'scaleDimensions',
 						'description',
+						'slotIndex',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
@@ -4992,6 +4986,7 @@ var TaroEntity = TaroObject.extend({
 						'scaleDimensions',
 						'sourceItemId',
 						'streamMode',
+						'isHidden',
 					];
 					data = {
 						attributes: {},
@@ -5016,6 +5011,7 @@ var TaroEntity = TaroObject.extend({
 						'username',
 						'profilePicture',
 						'roleIds',
+						'isHidden',
 					];
 					data = {
 						attributes: {},

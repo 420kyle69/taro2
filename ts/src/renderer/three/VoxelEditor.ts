@@ -1,59 +1,91 @@
 class VoxelEditor {
-	tilePalette: TilePalette;
-
-	marker: TileMarker;
-	paletteMarker: TileMarker;
-
 	paletteArea: Vector2D;
 	brushArea: TileShape;
 	currentLayerIndex: number;
 	selectedTileArea: Record<number, Record<number, number>>;
 	lastSelectedTileArea: Record<number, Record<number, number>>;
-	commandController: CommandController;
 	startDragIn: string;
 	voxels: Renderer.Three.Voxels;
 	voxelMarker: Renderer.Three.VoxelMarker;
 	tileSize: number;
 	prevData: { edit: MapEditTool['edit'] } | undefined;
+	commandController: CommandController = new CommandController({
+		increaseBrushSize: () => {},
+		decreaseBrushSize: () => {},
+	});
+	leftButtonDown: boolean;
 
-	constructor(voxels: Renderer.Three.Voxels, commandController: CommandController) {
+	constructor(voxels: Renderer.Three.Voxels) {
 		const gameMap = taro.game.data.map;
 		this.voxels = voxels;
+		const renderer = Renderer.Three.instance();
 		this.currentLayerIndex = 0;
-		this.voxelMarker = new Renderer.Three.VoxelMarker(commandController);
+		this.voxelMarker = new Renderer.Three.VoxelMarker(this.commandController);
 		taro.client.on('switch-layer', (value) => {
-			this.currentLayerIndex = value;
+			if (value !== this.currentLayerIndex) {
+				this.voxels.updateLayer(new Map(), this.currentLayerIndex);
+				this.switchLayer(value);
+				renderer.voxelEditor.voxelMarker.updatePreview();
+			}
 		});
+
 		taro.client.on('updateMap', () => {
 			let numTileLayers = 0;
+			this.voxels.voxels = [];
 			for (const [idx, layer] of taro.game.data.map.layers.entries()) {
 				if (layer.type === 'tilelayer' && layer.data) {
 					const voxels = Renderer.Three.Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-					this.voxels.addLayer(voxels, idx, true);
+					this.voxels.updateLayer(voxels, idx);
 					this.voxels.setLayerLookupTable(idx, numTileLayers);
 					numTileLayers++;
 				}
 			}
 		});
+
+		taro.client.on('editTile', (data: TileData<MapEditToolEnum>) => {
+			this.edit(data);
+		});
+
 		taro.client.on('cursor', () => {
-			this.voxelMarker.removeMeshes();
+			this.removePreview();
 		});
+
 		taro.client.on('draw-region', () => {
-			this.voxelMarker.removeMeshes();
+			this.removePreview();
 		});
-		taro.client.on('brush', () => {});
-		taro.client.on('empty-tile', () => {});
-		//TODO
-		// this.marker = new TileMarker(this.gameScene, devModeScene, gameMap, false, 2, commandController);
-		// this.paletteMarker = new TileMarker(
-		// 	this.devModeTools.scene,
-		// 	devModeScene,
-		// 	this.tilePalette.map,
-		// 	true,
-		// 	1,
-		// 	commandController
-		// );
-		this.commandController = commandController;
+
+		taro.client.on('brush', () => {
+			this.voxels.updateLayer(new Map(), this.currentLayerIndex);
+			this.voxelMarker.updatePreview(true, true);
+		});
+
+		taro.client.on('empty-tile', () => {
+			this.voxels.updateLayer(new Map(), this.currentLayerIndex);
+			this.voxelMarker.updatePreview(true, true);
+		});
+
+		taro.client.on('clear', () => {
+			const data: TileData<'clear'> = {
+				clear: {
+					layer: this.currentLayerIndex,
+					layerName: taro.game.data.map.layers[this.currentLayerIndex].name,
+				},
+			};
+			inGameEditor.showClearLayerConfirmation(data);
+		});
+
+		taro.client.on('undo', () => {
+			this.commandController.undo();
+		});
+
+		taro.client.on('redo', () => {
+			this.commandController.redo();
+		});
+
+		taro.client.on('hide-layer', (data) => {
+			this.hideLayer(data.index, data.state);
+		});
+
 		this.paletteArea = { x: 1, y: 1 };
 		this.brushArea = new TileShape();
 		this.selectedTileArea = {};
@@ -69,72 +101,47 @@ class VoxelEditor {
 			this.tileSize = gameMap.tilewidth;
 		}
 
-		// taro.clearLayer = (payload: TileData<'clear'>) => {
-		// 	const map = taro.game.data.map;
-		// 	const nowLayerData = {};
-		// 	for (let x = 0; x < taro.map.data.width; x++) {
-		// 		for (let y = 0; y < taro.map.data.height; y++) {
-		// 			if (nowLayerData[x] === undefined) {
-		// 				nowLayerData[x] = {};
-		// 			}
-		// 			nowLayerData[x][y] = map.layers[payload.clear.layer].data[x + y * taro.map.data.width];
-		// 		}
-		// 	}
-		// 	const nowTileMapLayerData = tileMap.getLayer(payload.clear.layer).data;
-		// 	commandController.addCommand(
-		// 		{
-		// 			func: () => {
-		// 				taro.network.send<'clear'>('editTile', payload);
-		// 			},
-		// 			undo: () => {
-		// 				taro.network.send<'edit'>('editTile', {
-		// 					edit: {
-		// 						selectedTiles: [nowLayerData],
-		// 						size: 'fitContent',
-		// 						shape: 'rectangle',
-		// 						layer: [payload.clear.layer],
-		// 						x: 0,
-		// 						y: 0,
-		// 					},
-		// 				});
-		// 			},
-		// 		},
-		// 		true
-		// 	);
-		// };
+		taro.clearLayer = (payload: TileData<'clear'>) => {
+			const map = taro.game.data.map;
+			const nowLayerData = {};
+			for (let x = 0; x < taro.map.data.width; x++) {
+				for (let y = 0; y < taro.map.data.height; y++) {
+					if (nowLayerData[x] === undefined) {
+						nowLayerData[x] = {};
+					}
+					nowLayerData[x][y] = map.layers[payload.clear.layer].data[x + y * taro.map.data.width];
+				}
+			}
+			this.commandController.addCommand(
+				{
+					func: () => {
+						taro.network.send<'clear'>('editTile', payload);
+					},
+					undo: () => {
+						taro.network.send<'edit'>('editTile', {
+							edit: {
+								selectedTiles: [nowLayerData],
+								size: 'fitContent',
+								shape: 'rectangle',
+								layer: [payload.clear.layer],
+								x: 0,
+								y: 0,
+							},
+						});
+					},
+				},
+				true
+			);
+		};
 	}
 
-	updateSelectedTiles(devModeScene: DevModeScene) {
-		const palettePoint = devModeScene.cameras
-			.getCamera('palette')
-			.getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
-		const palettePointerTileX = this.tilePalette.map.worldToTileX(palettePoint.x);
-		const palettePointerTileY = this.tilePalette.map.worldToTileY(palettePoint.y);
-		if (!this.selectedTileArea[palettePointerTileX]) {
-			this.selectedTileArea[palettePointerTileX] = {};
-		}
-		const tile = this.getTile(palettePointerTileX, palettePointerTileY, this.tilePalette.map);
-		this.selectedTileArea[palettePointerTileX][palettePointerTileY] = tile;
-		this.marker.changePreview();
+	removePreview() {
+		this.voxels.updateLayer(new Map(), this.currentLayerIndex);
+		this.voxelMarker.removeMeshes();
 	}
 
-	activateMarkers(active: boolean): void {
-		this.marker.active = active;
-		this.paletteMarker.active = active;
-	}
-
-	showMarkers(value: boolean): void {
-		this.marker.graphics.setVisible(value);
-		this.marker.showPreview(value);
-		this.paletteMarker.graphics.setVisible(value);
-	}
-
-	clearTint(): void {
-		this.tilePalette.map.layers[0].data.forEach((tilearray) => {
-			tilearray.forEach((tile) => {
-				if (tile) tile.tint = 0xffffff;
-			});
-		});
+	updateSelectedTiles(x, y) {
+		this.voxelMarker;
 	}
 
 	edit<T extends MapEditToolEnum>(data: TileData<T>): void {
@@ -150,11 +157,13 @@ class VoxelEditor {
 			return { dataType, dataValue };
 		})[0];
 		let tempLayer = dataType === 'edit' ? dataValue.layer[0] : dataValue.layer;
-
 		switch (dataType) {
 			case 'fill': {
 				const nowValue = dataValue as TileData<'fill'>['fill'];
-				const oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
+				let oldTile = map.layers[tempLayer].data[nowValue.y * width + nowValue.x];
+				if (oldTile === 0) {
+					oldTile = -1;
+				}
 				if (
 					taro.game.data.map.layers[nowValue.layer].type === 'tilelayer' &&
 					taro.game.data.map.layers[nowValue.layer].data
@@ -214,7 +223,8 @@ class VoxelEditor {
 		shape: Shape,
 		layer: number,
 		local?: boolean,
-		flat = false
+		flat = false,
+		isPreview = false
 	) {
 		const voxels = new Map<string, Renderer.Three.VoxelCell>();
 		const allFacesVisible = [false, false, false, false, false, false];
@@ -239,10 +249,6 @@ class VoxelEditor {
 					let _x = tileX + x + 0.5;
 					let _z = tileY + y + 0.5;
 					let tileId = sample[x][y];
-					if (tileId <= 0) {
-						continue;
-					}
-
 					tileId -= 1;
 					const height = this.voxels.calcHeight(layer);
 					const pos = { x: _x, y: height + yOffset * height, z: _z };
@@ -252,14 +258,18 @@ class VoxelEditor {
 						type: tileId,
 						visible: true,
 						hiddenFaces: [...hiddenFaces],
+						isPreview,
 					});
-					if (tileId === -1) tileId = 0;
-					taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
+					if (!isPreview) {
+						tileId += 1;
+						if (tileId < 0) tileId = 0;
+						taroMap.layers[layer].data[(tileY + y) * width + tileX + x] = tileId;
+					}
 				}
 			}
 		}
-		this.voxels.addLayer(voxels, layer);
-		if (!local) {
+		this.voxels.updateLayer(voxels, layer, isPreview);
+		if (!local && !isPreview) {
 			const data: { edit: MapEditTool['edit'] } = {
 				edit: {
 					size: brushSize,
@@ -278,14 +288,101 @@ class VoxelEditor {
 		}
 	}
 
-	getTile(tileX: number, tileY: number, map: Phaser.Tilemaps.Tilemap): number {
-		if (DevModeScene.pointerInsideMap(tileX, tileY, map)) {
-			if (map.getTileAt(tileX, tileY) && map.getTileAt(tileX, tileY).index !== 0) {
-				let selectedTile = map.getTileAt(tileX, tileY);
-				return selectedTile.index;
+	getTile(tileX: number, tileY: number, tileZ: number, layer?: number): number {
+		const renderer = Renderer.Three.instance();
+		const voxelsMap = Renderer.Three.getVoxels().voxels[layer ?? this.currentLayerIndex];
+		let tileId = voxelsMap.get(Renderer.Three.getKeyFromPos(tileX + 0.5, tileY, tileZ + 0.5))?.type ?? -2;
+		return tileId + 1;
+	}
+
+	handleMapToolEdit() {
+		const renderer = Renderer.Three.instance();
+		const developerMode = taro.developerMode;
+		const intersect = renderer.raycastFloor();
+		if (!intersect) {
+			return;
+		}
+		const _x = Math.floor(intersect.x);
+		const _y = Math.floor(intersect.z);
+		const selectedTiles = {};
+		const tileId = renderer.tmp_tileId;
+		selectedTiles[_x] = {};
+		selectedTiles[_x][_y] = developerMode.activeButton === 'eraser' ? -1 : tileId;
+		const nowTile = rfdc()(selectedTiles);
+		const oldTile = this.getTile(_x, this.voxels.calcLayersHeight(this.currentLayerIndex), _y);
+		nowTile[_x][_y] = oldTile;
+		const nowLayer = this.currentLayerIndex;
+		if (!this.leftButtonDown) {
+			this.voxelMarker.updatePreview();
+		} else {
+			switch (taro.developerMode.activeButton) {
+				case 'eraser':
+				case 'brush': {
+					this.commandController.addCommand({
+						func: () => {
+							this.putTiles(_x, _y, selectedTiles, 'fitContent', 'rectangle', nowLayer);
+						},
+						undo: () => {
+							this.putTiles(_x, _y, nowTile, 'fitContent', 'rectangle', nowLayer);
+						},
+					});
+					break;
+				}
+				case 'fill': {
+					const nowCommandCount = this.commandController.nowInsertIndex;
+					const nowLayer = this.currentLayerIndex;
+					const addToLimits = (v2d: Vector2D) => {
+						setTimeout(() => {
+							const cache = this.commandController.commands[nowCommandCount - this.commandController.offset]
+								.cache as Record<number, Record<number, number>>;
+							if (!cache[v2d.x]) {
+								cache[v2d.x] = {};
+							}
+							cache[v2d.x][v2d.y] = 1;
+						}, 0);
+					};
+					if (
+						taro.game.data.map.layers[this.currentLayerIndex].type === 'tilelayer' &&
+						taro.game.data.map.layers[this.currentLayerIndex].data
+					) {
+						this.commandController.addCommand({
+							func: () => {
+								this.floodFill(nowLayer, oldTile, tileId, _x, _y, false, {}, addToLimits);
+							},
+							undo: () => {
+								this.floodFill(
+									nowLayer,
+									tileId,
+									oldTile,
+									_x,
+									_y,
+									false,
+									this.commandController.commands[nowCommandCount - this.commandController.offset].cache,
+									undefined,
+									true
+								);
+							},
+							cache: {},
+						});
+					}
+				}
 			}
 		}
-		return -1;
+	}
+
+	handleMapToolCopy() {
+		const renderer = Renderer.Three.instance();
+		const intersect = renderer.raycastFloor();
+		if (!intersect) {
+			return;
+		}
+		const _x = Math.floor(intersect.x);
+		const _y = Math.floor(intersect.z);
+		const taroMap = taro.game.data.map;
+		if (taroMap.layers[this.currentLayerIndex].data[_y * taroMap.width + _x] !== 0) {
+			renderer.tmp_tileId = taroMap.layers[this.currentLayerIndex].data[_y * taroMap.width + _x];
+		}
+		this.voxels.updateLayer(new Map(), this.currentLayerIndex);
 	}
 
 	floodFill(
@@ -296,72 +393,73 @@ class VoxelEditor {
 		y: number,
 		fromServer: boolean,
 		limits?: Record<number, Record<number, number>>,
-		addToLimits?: (v2d: Vector2D) => void
+		addToLimits?: (v2d: Vector2D) => void,
+		sendToServerWithLimits = false
 	): void {
-		let map: MapData | Phaser.Tilemaps.Tilemap;
+		let map: MapData;
 		const openQueue: Vector2D[] = [{ x, y }];
 		const closedQueue: Record<number, Record<number, number>> = {};
-		//TODO
-		// while (openQueue.length !== 0) {
-		// 	const nowPos = openQueue[0];
-		// 	openQueue.shift();
-		// 	if (closedQueue[nowPos.x]?.[nowPos.y]) {
-		// 		continue;
-		// 	}
-		// 	if (!closedQueue[nowPos.x]) {
-		// 		closedQueue[nowPos.x] = {};
-		// 	}
-		// 	closedQueue[nowPos.x][nowPos.y] = 1;
-		// 	if (newTile === 0 || newTile === null) {
-		// 		newTile = -1;
-		// 	}
-		// 	if (fromServer) {
-		// 		map = taro.game.data.map;
-		// 		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
-		// 		const tileMap = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		// 		const width = map.width;
-		// 		if (limits?.[nowPos.x]?.[nowPos.y]) {
-		// 			continue;
-		// 		}
-		// 		if (map.layers[layer].data[nowPos.y * width + nowPos.x] !== oldTile) {
-		// 			addToLimits?.({ x: nowPos.x, y: nowPos.y });
-		// 			continue;
-		// 		}
-		// 		tileMap.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
-		// 		//save tile change to taro.game.map.data
-		// 		if (newTile === -1) {
-		// 			newTile = 0;
-		// 		}
-		// 		map.layers[layer].data[nowPos.y * width + nowPos.x] = newTile;
-		// 	} else {
-		// 		map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		// 		const nowTile = map.getTileAt(nowPos.x, nowPos.y, true, layer);
-		// 		if (limits?.[nowPos.x]?.[nowPos.y]) {
-		// 			continue;
-		// 		}
-		// 		if (nowTile !== undefined && nowTile !== null && nowTile.index !== oldTile) {
-		// 			addToLimits?.({ x: nowPos.x, y: nowPos.y });
-		// 			continue;
-		// 		}
+		const selectedTiles = {};
+		while (openQueue.length !== 0) {
+			const nowPos = openQueue[0];
+			openQueue.shift();
+			if (closedQueue[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			if (!closedQueue[nowPos.x]) {
+				closedQueue[nowPos.x] = {};
+			}
+			closedQueue[nowPos.x][nowPos.y] = 1;
+			if (newTile === 0 || newTile === null) {
+				newTile = -1;
+			}
 
-		// 		map.putTileAt(newTile, nowPos.x, nowPos.y, false, layer);
-		// 	}
-		// 	if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
-		// 		openQueue.push({ x: nowPos.x - 1, y: nowPos.y });
-		// 	}
-		// 	if (nowPos.x < map.width - 1 && !closedQueue[nowPos.x + 1]?.[nowPos.y]) {
-		// 		openQueue.push({ x: nowPos.x + 1, y: nowPos.y });
-		// 	}
-		// 	if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
-		// 		openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
-		// 	}
-		// 	if (nowPos.y < map.height - 1 && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
-		// 		openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
-		// 	}
-		// }
+			map = taro.game.data.map;
+			inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
+			const curTileId = this.getTile(nowPos.x, this.voxels.calcLayersHeight(layer), nowPos.y, layer);
+			if (limits?.[nowPos.x]?.[nowPos.y]) {
+				continue;
+			}
+			if (curTileId !== oldTile) {
+				addToLimits?.({ x: nowPos.x, y: nowPos.y });
+				continue;
+			}
+			if (selectedTiles[nowPos.x] === undefined) {
+				selectedTiles[nowPos.x] = {};
+			}
+			selectedTiles[nowPos.x][nowPos.y] = newTile;
+
+			if (nowPos.x > 0 && !closedQueue[nowPos.x - 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x - 1, y: nowPos.y });
+			}
+			if (nowPos.x < map.width - 1 && !closedQueue[nowPos.x + 1]?.[nowPos.y]) {
+				openQueue.push({ x: nowPos.x + 1, y: nowPos.y });
+			}
+			if (nowPos.y > 0 && !closedQueue[nowPos.x]?.[nowPos.y - 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y - 1 });
+			}
+			if (nowPos.y < map.height - 1 && !closedQueue[nowPos.x]?.[nowPos.y + 1]) {
+				openQueue.push({ x: nowPos.x, y: nowPos.y + 1 });
+			}
+		}
+		if (Object.keys(selectedTiles).length > 0) {
+			this.putTiles(0, 0, selectedTiles, 'fitContent', 'rectangle', layer, true);
+			if (!fromServer) {
+				taro.network.send<'fill'>('editTile', {
+					fill: {
+						gid: newTile,
+						layer,
+						x,
+						y,
+						limits: sendToServerWithLimits ? limits : undefined,
+					},
+				});
+			}
+		}
 	}
 
 	clearLayer(layer: number): void {
+		let emptyVoxels = new Map();
 		const map = taro.game.data.map;
 		inGameEditor.mapWasEdited && inGameEditor.mapWasEdited();
 		const width = map.width;
@@ -373,6 +471,8 @@ class VoxelEditor {
 				}
 			}
 		}
+		this.voxels.clearLayer(layer);
+		this.voxels.updateLayer(emptyVoxels, layer);
 	}
 
 	changeLayerOpacity(layer: number, opacity: number): void {
@@ -383,209 +483,73 @@ class VoxelEditor {
 		}
 	}
 
+	switchLayer(value: number): void {
+		const voxels = Renderer.Three.getVoxels();
+		if (!voxels.meshes[value]) {
+			return;
+		}
+		this.currentLayerIndex = value;
+		voxels.meshes[value].visible = true;
+	}
+
+	hideLayer(layer: number, state: boolean): void {
+		Renderer.Three.getVoxels().meshes[layer].visible = !state;
+	}
+
+	showAllLayers(): void {
+		const voxels = Renderer.Three.getVoxels();
+		for (let i = 0; i < voxels.meshes.length; i++) {
+			if (voxels?.meshes[i]?.visible === false) {
+				this.hideLayer(i, false);
+			}
+		}
+	}
+
 	update(): void {
-		// TODO
-		// if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-		// 	const devModeScene = this.devModeTools.scene;
-		// 	const palette = this.tilePalette;
-		// 	const map = this.gameScene.tilemap as Phaser.Tilemaps.Tilemap;
-		// 	const paletteMap = palette.map;
-		// 	const worldPoint = this.gameScene.cameras.main.getWorldPoint(
-		// 		this.gameScene.input.activePointer.x,
-		// 		this.gameScene.input.activePointer.y
-		// 	);
-		// 	const palettePoint = devModeScene.cameras
-		// 		.getCamera('palette')
-		// 		.getWorldPoint(devModeScene.input.activePointer.x, devModeScene.input.activePointer.y);
-		// 	const marker = this.marker;
-		// 	const paletteMarker = this.paletteMarker;
-		// 	paletteMarker.graphics.setVisible(true);
-		// 	marker.graphics.setVisible(false);
-		// 	marker.showPreview(false);
-		// 	// Rounds down to nearest tile
-		// 	const palettePointerTileX = paletteMap.worldToTileX(palettePoint.x);
-		// 	const palettePointerTileY = paletteMap.worldToTileY(palettePoint.y);
-		// 	if (palette.visible && devModeScene.pointerInsidePalette()) {
-		// 		devModeScene.regionEditor.cancelDrawRegion();
-		// 		marker.graphics.setVisible(false);
-		// 		marker.showPreview(false);
-		// 		// Snap to tile coordinates, but in world space
-		// 		paletteMarker.graphics.x = paletteMap.tileToWorldX(palettePointerTileX);
-		// 		paletteMarker.graphics.y = paletteMap.tileToWorldY(palettePointerTileY);
-		// 	} else if (
-		// 		(!devModeScene.pointerInsidePalette() || !palette.visible) &&
-		// 		!devModeScene.pointerInsideButtons &&
-		// 		!devModeScene.pointerInsideWidgets() &&
-		// 		map.currentLayerIndex >= 0
-		// 	) {
-		// 		taro.client.emit('update-tooltip', {
-		// 			label: 'Position',
-		// 			text:
-		// 				`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  \n` +
-		// 				`Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}`,
-		// 		});
-		// 		if (marker.active) {
-		// 			paletteMarker.graphics.setVisible(false);
-		// 			marker.graphics.setVisible(true);
-		// 			marker.showPreview(true);
-		// 			// Rounds down to nearest tile
-		// 			const pointerTileX = map.worldToTileX(
-		// 				worldPoint.x - ((marker.graphics.scaleSidesX - 1) * this.tileSize) / 2,
-		// 				true
-		// 			);
-		// 			const pointerTileY = map.worldToTileY(
-		// 				worldPoint.y - ((marker.graphics.scaleSidesY - 1) * this.tileSize) / 2,
-		// 				true
-		// 			);
-		// 			// Snap to tile coordinates, but in world space
-		// 			marker.graphics.x = map.tileToWorldX(pointerTileX);
-		// 			marker.graphics.y = map.tileToWorldY(pointerTileY);
-		// 			marker.preview.x = map.tileToWorldX(pointerTileX);
-		// 			marker.preview.y = map.tileToWorldY(pointerTileY);
-		// 			if (
-		// 				map?.getTileAt(pointerTileX, pointerTileY)?.index &&
-		// 				map?.getTileAt(pointerTileX, pointerTileY)?.index !== -1 &&
-		// 				map?.getTileAt(pointerTileX, pointerTileY)?.index !== 0
-		// 			) {
-		// 				taro.client.emit('update-tooltip', {
-		// 					label: 'Position',
-		// 					text:
-		// 						`X: ${Math.floor(worldPoint.x).toString()}, Y: ${Math.floor(worldPoint.y).toString()}  \n` +
-		// 						`Tile X: ${Math.floor(worldPoint.x / taro.scaleMapDetails.tileWidth).toString()}, Tile Y: ${Math.floor(worldPoint.y / taro.scaleMapDetails.tileHeight).toString()}  |  ` +
-		// 						`Tile id: ${map.getTileAt(pointerTileX, pointerTileY).index}`,
-		// 				});
-		// 			}
-		// 			if (devModeScene.input.manager.activePointer.leftButtonDown()) {
-		// 				if (this.devModeTools.activeButton === 'brush' || this.devModeTools.activeButton === 'eraser') {
-		// 					const originTileArea = {};
-		// 					const nowBrushSize = JSON.parse(JSON.stringify(this.brushArea.size)) as Vector2D;
-		// 					const nowBrushShape = JSON.parse(JSON.stringify(this.brushArea.shape)) as Shape;
-		// 					const sample = JSON.parse(JSON.stringify(this.brushArea.sample));
-		// 					const selectedTiles = JSON.parse(JSON.stringify(this.selectedTileArea));
-		// 					const nowLayer = map.currentLayerIndex;
-		// 					if (
-		// 						taro.game.data.map.layers[nowLayer].type === 'tilelayer' &&
-		// 						taro.game.data.map.layers[nowLayer].data
-		// 					) {
-		// 						Object.entries(sample).map(([x, obj]) => {
-		// 							Object.entries(obj).map(([y, value]) => {
-		// 								if (!originTileArea[x]) {
-		// 									originTileArea[x] = {};
-		// 								}
-		// 								originTileArea[x][y] = this.getTile(pointerTileX + parseInt(x), pointerTileY + parseInt(y), map);
-		// 							});
-		// 						});
-		// 						this.commandController.addCommand({
-		// 							func: () => {
-		// 								this.putTiles(
-		// 									pointerTileX,
-		// 									pointerTileY,
-		// 									selectedTiles,
-		// 									nowBrushSize,
-		// 									nowBrushShape,
-		// 									nowLayer,
-		// 									false
-		// 								);
-		// 							},
-		// 							undo: () => {
-		// 								this.putTiles(
-		// 									pointerTileX,
-		// 									pointerTileY,
-		// 									originTileArea,
-		// 									nowBrushSize,
-		// 									nowBrushShape,
-		// 									nowLayer,
-		// 									false
-		// 								);
-		// 							},
-		// 						});
-		// 					}
-		// 				} else if (this.devModeTools.activeButton === 'fill') {
-		// 					const targetTile = this.getTile(pointerTileX, pointerTileY, map);
-		// 					const selectedTile = Object.values(Object.values(this.selectedTileArea)?.[0] || {})?.[0];
-		// 					if (
-		// 						selectedTile &&
-		// 						targetTile !== selectedTile &&
-		// 						(targetTile || map.currentLayerIndex === 0 || map.currentLayerIndex === 1)
-		// 					) {
-		// 						const nowCommandCount = this.commandController.nowInsertIndex;
-		// 						const addToLimits = (v2d: Vector2D) => {
-		// 							setTimeout(() => {
-		// 								const cache = this.commandController.commands[nowCommandCount - this.commandController.offset]
-		// 									.cache as Record<number, Record<number, number>>;
-		// 								if (!cache[v2d.x]) {
-		// 									cache[v2d.x] = {};
-		// 								}
-		// 								cache[v2d.x][v2d.y] = 1;
-		// 							}, 0);
-		// 						};
-		// 						const nowLayer = map.currentLayerIndex;
-		// 						if (
-		// 							taro.game.data.map.layers[nowLayer].type === 'tilelayer' &&
-		// 							taro.game.data.map.layers[nowLayer].data
-		// 						) {
-		// 							this.commandController.addCommand(
-		// 								{
-		// 									func: () => {
-		// 										this.floodFill(
-		// 											nowLayer,
-		// 											targetTile,
-		// 											selectedTile,
-		// 											pointerTileX,
-		// 											pointerTileY,
-		// 											false,
-		// 											{},
-		// 											addToLimits
-		// 										);
-		// 										taro.network.send<'fill'>('editTile', {
-		// 											fill: {
-		// 												gid: selectedTile,
-		// 												layer: nowLayer,
-		// 												x: pointerTileX,
-		// 												y: pointerTileY,
-		// 											},
-		// 										});
-		// 									},
-		// 									undo: () => {
-		// 										this.floodFill(
-		// 											nowLayer,
-		// 											selectedTile,
-		// 											targetTile,
-		// 											pointerTileX,
-		// 											pointerTileY,
-		// 											false,
-		// 											this.commandController.commands[nowCommandCount - this.commandController.offset].cache
-		// 										);
-		// 										taro.network.send<'fill'>('editTile', {
-		// 											fill: {
-		// 												gid: targetTile,
-		// 												layer: nowLayer,
-		// 												x: pointerTileX,
-		// 												y: pointerTileY,
-		// 												limits:
-		// 													this.commandController.commands[nowCommandCount - this.commandController.offset].cache,
-		// 											},
-		// 										});
-		// 									},
-		// 									cache: {},
-		// 								},
-		// 								true
-		// 							);
-		// 						}
-		// 					}
-		// 				}
-		// 			}
-		// 		} else if (this.devModeTools.entityEditor.selectedEntityImage) {
-		// 			taro.client.emit('update-tooltip', {
-		// 				label: 'Entity Position',
-		// 				text: `X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`,
-		// 			});
-		// 		}
-		// 	} else {
-		// 		this.showMarkers(false);
-		// 	}
-		// } else {
-		// 	this.showMarkers(false);
-		// }
+		const renderer = Renderer.Three.instance();
+		const raycaster = new THREE.Raycaster();
+
+		raycaster.setFromCamera(Renderer.Three.getPointer(), renderer.camera.instance);
+		const intersect = renderer.raycastFloor();
+
+		if (!intersect) {
+			return;
+		}
+		const x = Math.floor(Renderer.Three.Utils.worldToPixel(intersect.x));
+		const y = Math.floor(Renderer.Three.Utils.worldToPixel(intersect.z));
+
+		const tileX = Math.floor(x / taro.scaleMapDetails.tileWidth);
+		const tileY = Math.floor(y / taro.scaleMapDetails.tileHeight);
+
+		if (
+			taro.developerMode.activeButton === 'brush' ||
+			taro.developerMode.activeButton === 'eraser' ||
+			taro.developerMode.activeButton === 'fill'
+		) {
+			//if brush tool selected
+			const taroMap = taro.game.data.map;
+			const tileId = taroMap.layers[this.currentLayerIndex].data[tileY * taroMap.width + tileX];
+			taro.client.emit('update-tooltip', {
+				label: 'Position',
+				text:
+					`X: ${x.toString()}, Y: ${y.toString()}  \n` +
+					`Tile X: ${tileX.toString()}, Tile Y: ${tileY.toString()}  |  ` +
+					`Tile id: ${tileId}`,
+			});
+		} else {
+			//if cursor tool selected
+			taro.client.emit('update-tooltip', {
+				label: 'Position',
+				text:
+					`X: ${x.toString()}, Y: ${Math.floor(Renderer.Three.Utils.worldToPixel(intersect.z)).toString()}  \n` +
+					`Tile X: ${tileX.toString()}, Tile Y: ${tileY.toString()}`,
+			});
+		}
+
+		// if entity image is selected
+		/*taro.client.emit('update-tooltip', {
+			label: 'Entity Position',
+			text: `X: ${this.devModeTools.entityEditor.selectedEntityImage.image.x.toString()}, Y: ${this.devModeTools.entityEditor.selectedEntityImage.image.y.toString()}`,
+		});*/
 	}
 }

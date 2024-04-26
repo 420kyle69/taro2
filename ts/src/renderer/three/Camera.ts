@@ -5,13 +5,16 @@ namespace Renderer {
 			target: THREE.Object3D | null = null;
 			controls: OrbitControls;
 			zoom = 1;
+			lastAuthoritativeZoom = 1;
 			zoomHeight = 700;
 			isPerspective = false;
 
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
 
-			isDevelopmentMode = false;
+			isEditorMode = false;
+
+			private debugMode = false;
 
 			private orthographicCamera: THREE.OrthographicCamera;
 			private perspectiveCamera: THREE.PerspectiveCamera;
@@ -25,7 +28,6 @@ namespace Renderer {
 			private originalDistance = 1;
 			private originalHalfWidth;
 
-			private originalZoom = 1;
 			private elevationAngle = 0;
 			private azimuthAngle = 0;
 			private pointerlockSpeed = 0.35;
@@ -97,9 +99,9 @@ namespace Renderer {
 				this.controls.update();
 
 				this.controls.mouseButtons = {
-					LEFT: THREE.MOUSE.PAN,
-					MIDDLE: THREE.MOUSE.DOLLY,
-					RIGHT: THREE.MOUSE.ROTATE,
+					LEFT: undefined,
+					MIDDLE: THREE.MOUSE.ROTATE,
+					RIGHT: THREE.MOUSE.PAN,
 				};
 
 				this.controls.addEventListener('change', () => {
@@ -119,7 +121,11 @@ namespace Renderer {
 				};
 
 				window.addEventListener('keypress', (evt) => {
-					if (!this.isDevelopmentMode) return;
+					if (evt.key === '~') {
+						this.debugMode = !this.debugMode;
+					}
+
+					if (!this.debugMode) return;
 
 					if (evt.key === 'l') {
 						this.isLocked ? this.unlock() : this.lock();
@@ -127,7 +133,7 @@ namespace Renderer {
 						this.isPerspective = false;
 						this.instance = this.orthographicCamera;
 						this.controls.object = this.orthographicCamera;
-						this.zoom = this.originalZoom;
+						this.zoom = this.lastAuthoritativeZoom;
 
 						this.setElevationAngle(90);
 						this.setAzimuthAngle(0);
@@ -279,7 +285,7 @@ namespace Renderer {
 			}
 
 			update() {
-				if (this.isDevelopmentMode) {
+				if (this.isEditorMode) {
 					const azimuthAngle = this.controls.getAzimuthalAngle() * (180 / Math.PI);
 					const elevationAngle = this.getElevationAngle() * (180 / Math.PI);
 					this.debugInfo.style.display = 'block';
@@ -297,7 +303,7 @@ namespace Renderer {
 					this.debugInfo.innerHTML += `zoom: ${editorZoom}</br>`;
 				}
 
-				if (this.target && !this.isDevelopmentMode) {
+				if (this.target && !this.isEditorMode) {
 					const targetWorldPos = new THREE.Vector3();
 					this.target.getWorldPosition(targetWorldPos);
 					this.setPosition(targetWorldPos.x, targetWorldPos.y, targetWorldPos.z, true);
@@ -331,7 +337,7 @@ namespace Renderer {
 
 			setZoom(ratio: number) {
 				this.zoom = ratio;
-				this.originalZoom = ratio;
+				this.lastAuthoritativeZoom = ratio;
 				this.setDistance(this.originalDistance / ratio);
 			}
 
@@ -410,10 +416,10 @@ namespace Renderer {
 				this.onChangeCbs.push(cb);
 			}
 
-			setDevelopmentMode(state: boolean) {
-				this.isDevelopmentMode = state;
+			setEditorMode(state: boolean) {
+				this.isEditorMode = state;
 
-				if (this.isDevelopmentMode) {
+				if (this.isEditorMode) {
 					this.controls.enablePan = true;
 					this.controls.enableRotate = true;
 					this.controls.enableZoom = true;
@@ -424,7 +430,7 @@ namespace Renderer {
 
 					this.setElevationAngle(this.elevationAngle);
 					this.setAzimuthAngle(this.azimuthAngle);
-					this.setZoom(this.originalZoom);
+					this.setZoom(this.lastAuthoritativeZoom);
 
 					if (this.target) {
 						const targetWorldPos = new THREE.Vector3();

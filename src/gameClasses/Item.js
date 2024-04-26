@@ -84,14 +84,14 @@ var Item = TaroEntityPhysics.extend({
 
 			taro.server.totalItemsCreated++;
 		} else if (taro.isClient) {
-			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._hidden) {
+			if (self._stats.currentBody == undefined || self._stats.currentBody.type == 'none' || self._stats.isHidden) {
 				self.hide();
-				this.emit('hide');
 			} else {
 				self.show();
-				this.emit('show');
-
-				self.width(self._stats.currentBody.width).height(self._stats.currentBody.height);
+			}
+			if (self._stats.currentBody) {
+				self.width(self._stats.currentBody.width);
+				self.height(self._stats.currentBody.height);
 			}
 			self.addToRenderer();
 			self.drawBounds(false);
@@ -211,7 +211,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	setOwnerUnit: function (newOwner) {
-		var oldOwner = taro.$(this.oldOwnerId);
+		var oldOwner = taro.$(this._stats.oldOwnerUnitId);
 
 		if (newOwner == oldOwner) return;
 		if (newOwner) {
@@ -230,20 +230,20 @@ var Item = TaroEntityPhysics.extend({
 				this.streamMode(2);
 			}
 
-			this.oldOwnerId = this._stats.ownerUnitId;
+			this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
 			this._stats.ownerUnitId = newOwner.id();
 		} else {
 			// item is being dropped.
 			this._stats.ownerUnitId = null;
 
-			if (oldOwner) {
+			if (this._stats.oldOwnerUnitId) {
 				if (taro.isClient) {
 					if (oldOwner._stats) {
 						oldOwner._stats.currentItemId = null;
 					}
 				}
 
-				this.oldOwnerId = null;
+				this._stats.oldOwnerUnitId = null;
 			}
 
 			if (taro.isServer) {
@@ -668,9 +668,9 @@ var Item = TaroEntityPhysics.extend({
 	updateQuantity: function (qty) {
 		this._stats.quantity = qty;
 		if (taro.isServer) {
+			var clientId = this.getOwnerUnit()?.getOwner()?._stats.clientId;
 			// if server authoritative mode is enabled, then stream item quantity to the item's owner player only
 			if (taro.runMode == 0) {
-				var clientId = this.getOwnerUnit()?.getOwner()?._stats.clientId;
 				this.streamUpdateData([{ quantity: qty }], clientId);
 			}
 
@@ -679,7 +679,7 @@ var Item = TaroEntityPhysics.extend({
 				var ownerUnit = this.getOwnerUnit();
 				this.remove();
 				if (ownerUnit) {
-					ownerUnit.streamUpdateData([{ itemIds: ownerUnit._stats.itemIds }]);
+					ownerUnit.streamUpdateData([{ itemIds: ownerUnit._stats.itemIds }], clientId);
 				}
 			}
 		} else if (taro.isClient && taro.client.selectedUnit == this.getOwnerUnit()) {
@@ -854,14 +854,6 @@ var Item = TaroEntityPhysics.extend({
 			if (self._stats.currentBody) {
 				var unitRotate = ownerUnit._rotate.z;
 
-				// Keep the items anchored in the correct place even when the
-				// camera is rotated. The camera's yaw is present in the
-				// angleToTargetRelative variable.
-				if (ownerUnit.angleToTarget && ownerUnit.angleToTargetRelative) {
-					const yaw = ownerUnit.angleToTarget - ownerUnit.angleToTargetRelative;
-					unitRotate += yaw;
-				}
-
 				if (self._stats.currentBody.fixedRotation) {
 					rotate = unitRotate;
 				}
@@ -914,6 +906,23 @@ var Item = TaroEntityPhysics.extend({
 		}
 
 		return offset;
+	},
+
+	changeSlotIndex: function (index) {
+		var self = this;
+		var owner = self.getOwnerUnit();
+		if (taro.isServer) {
+			this._stats.slotIndex = index;
+			this.streamUpdateData([{ slotIndex: index }]);
+		}
+
+		if (owner) {
+			if (this._stats.slotIndex >= owner._stats.inventorySize) {
+				this.hide();
+			} else if (this._stats.slotIndex < owner._stats.inventorySize) {
+				this.show();
+			}
+		}
 	},
 
 	changeItemType: function (type, defaultData) {
@@ -1091,6 +1100,7 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'ownerUnitId':
+						this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
 						this._stats[attrName] = newValue;
 						if (taro.isClient) {
 							var newOwner = taro.$(newValue);

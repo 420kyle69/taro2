@@ -5,27 +5,29 @@ namespace Renderer {
 			voxelData: { positions: any[]; uvs: any[]; normals: any[]; topIndices: any[]; sidesIndices: any[] }[] = [];
 			voxels: Map<string, VoxelCell>[] = [];
 			meshes: THREE.Mesh[] = [];
+			preview: THREE.Mesh | undefined = undefined;
 			layerPlanes: THREE.Plane[] = [];
 			layerLookupTable: Record<number, number> = {};
+
 			constructor(
-				private topTileset: Tileset,
-				private sidesTileset: Tileset
+				private topTileset: TextureSheet,
+				private sidesTileset: TextureSheet
 			) {
 				super();
 				this.brushArea = new TileShape();
 			}
 
 			static create(config?: MapData['layers']) {
-				const textureRepository = TextureRepository.instance();
 				const tilesetMain = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'top' });
 				let tilesetSide = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'side' });
 				if (!tilesetSide) tilesetSide = tilesetMain;
 
-				const texMain = textureRepository.get(tilesetMain.image);
-				const texSide = textureRepository.get(tilesetSide.image);
+				const textureMgr = TextureManager.instance();
+				const texMain = textureMgr.get(tilesetMain.image);
+				const texSide = textureMgr.get(tilesetSide.image);
 
-				const topTileset = new Tileset(texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
-				const sidesTileset = new Tileset(texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+				const topTileset = new TextureSheet(tilesetMain.image, texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
+				const sidesTileset = new TextureSheet(tilesetSide.image, texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
 
 				const voxels = new Voxels(topTileset, sidesTileset);
 				if (config) {
@@ -33,7 +35,7 @@ namespace Renderer {
 					for (const [idx, layer] of config.entries()) {
 						if (layer.type === 'tilelayer' && layer.data) {
 							const voxelsData = Voxels.generateVoxelsFromLayerData(layer, numTileLayers, false);
-							voxels.addLayer(voxelsData, idx, true);
+							voxels.updateLayer(voxelsData, idx);
 							voxels.setLayerLookupTable(idx, numTileLayers);
 							numTileLayers++;
 						}
@@ -50,6 +52,16 @@ namespace Renderer {
 
 			calcHeight(layerIdx: number) {
 				return this.layerLookupTable[layerIdx] ?? layerIdx;
+			}
+
+			static getLayersYOffset() {
+				return 0.001;
+			}
+
+			calcLayersHeight(rawLayer: number) {
+				const renderer = Renderer.Three.instance();
+				const height = this.layerLookupTable[rawLayer ?? renderer.voxelEditor.currentLayerIndex];
+				return height + Renderer.Three.Voxels.getLayersYOffset() * height;
 			}
 
 			static generateVoxelsFromLayerData(data: LayerData, height: number, flat = false) {
@@ -73,44 +85,77 @@ namespace Renderer {
 							type: tileId,
 							visible: true,
 							hiddenFaces: [...hiddenFaces],
+							isPreview: false,
 						});
 					}
 				}
 				return voxels;
 			}
 
-			addLayer(voxels: Map<string, VoxelCell>, layerIdx: number, transparent = true) {
+			clearLayer(rawLayerIdx: number) {
+				this.voxels[rawLayerIdx] = new Map();
+				this.remove(this.meshes[rawLayerIdx]);
+			}
+
+			updateLayer(voxels: Map<string, VoxelCell>, layerIdx: number, isPreview = false) {
+				if (this.meshes[layerIdx] && this.meshes[layerIdx].visible === false) {
+					return;
+				}
 				const renderOrder = (layerIdx + 1) * 100;
-				const prunedVoxels = pruneCells(voxels, this.voxels[layerIdx]);
-				this.voxels[layerIdx] = prunedVoxels;
+				const prunedVoxels = pruneCells(
+					voxels,
+					isPreview ? new Map([...this.voxels[layerIdx]]) : this.voxels[layerIdx]
+				);
+
 				const voxelData = buildMeshDataFromCells(prunedVoxels, this.topTileset);
-				this.voxelData[layerIdx] = voxelData;
+				if (!isPreview) {
+					this.voxels[layerIdx] = prunedVoxels;
+					this.voxelData[layerIdx] = voxelData;
+				}
 				const geometry = new THREE.BufferGeometry();
-				geometry.setIndex([...voxelData.sidesIndices, ...voxelData.topIndices]);
+				geometry.setIndex([
+					...voxelData.sidesIndices,
+					...voxelData.topIndices,
+					...voxelData.previewTopIndices,
+					...voxelData.previewSidesIndices,
+				]);
 				geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(voxelData.positions), 3));
 				geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(voxelData.uvs), 2));
 				geometry.setAttribute('normal', new THREE.BufferAttribute(new Float32Array(voxelData.normals), 3));
 
 				const mat1 = new THREE.MeshBasicMaterial({
-					transparent,
 					map: this.sidesTileset.texture,
 					side: THREE.DoubleSide,
 				});
-				const mat2 = new THREE.MeshBasicMaterial({ transparent, map: this.topTileset.texture, side: THREE.DoubleSide });
-
+				const mat2 = new THREE.MeshBasicMaterial({
+					map: this.topTileset.texture,
+					side: THREE.DoubleSide,
+				});
+				const mat1Preview = mat1.clone();
+				mat1Preview.opacity = 0.5;
+				const mat2Preview = mat2.clone();
+				mat2Preview.opacity = 0.5;
+				let curLength = 0;
 				geometry.addGroup(0, voxelData.sidesIndices.length, 0);
-				geometry.addGroup(voxelData.sidesIndices.length, voxelData.topIndices.length, 1);
+				curLength += voxelData.sidesIndices.length;
+				geometry.addGroup(curLength, voxelData.topIndices.length, 1);
+				curLength += voxelData.topIndices.length;
+				geometry.addGroup(curLength, voxelData.previewSidesIndices.length, 2);
+				curLength += voxelData.previewSidesIndices.length;
+				geometry.addGroup(curLength, voxelData.previewTopIndices.length, 3);
 
-				const mesh = new THREE.Mesh(geometry, [mat1, mat2]);
+				const mesh = new THREE.Mesh(geometry, [mat1, mat2, mat1Preview, mat2Preview]);
 
 				if (this.layerPlanes[layerIdx] === undefined) {
 					const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 1 - renderOrder / 100);
 					this.layerPlanes[layerIdx] = plane;
 				}
 
-				mesh.renderOrder = renderOrder;
-				//@ts-ignore
-				geometry.computeBoundsTree();
+				if (!isPreview) {
+					//@ts-ignore
+					geometry.computeBoundsTree();
+				}
+
 				this.remove(this.meshes[layerIdx]);
 				this.add(mesh);
 				this.meshes[layerIdx] = mesh;
@@ -153,7 +198,7 @@ namespace Renderer {
 			for (let k of cells.keys()) {
 				const curCell = cells.get(k);
 
-				if (prevCells && curCell.type === -1) {
+				if (prevCells && curCell.type < 0) {
 					let pos = curCell.position;
 					prevCells.delete(k);
 					findNeighbors(pos[0], pos[1], pos[2]).forEach((neighborKey) => {
@@ -173,7 +218,7 @@ namespace Renderer {
 			return prunedVoxels;
 		}
 
-		function buildMeshDataFromCells(cells: Map<string, VoxelCell>, tileset: Tileset) {
+		function buildMeshDataFromCells(cells: Map<string, VoxelCell>, tileset: TextureSheet) {
 			const xStep = tileset.tileWidth / tileset.width;
 			const yStep = tileset.tileHeight / tileset.height;
 
@@ -210,6 +255,8 @@ namespace Renderer {
 				normals: [],
 				topIndices: [],
 				sidesIndices: [],
+				previewTopIndices: [],
+				previewSidesIndices: [],
 			};
 
 			for (let c of cells.keys()) {
@@ -231,8 +278,8 @@ namespace Renderer {
 					}
 					targetData.positions.push(...localPositions);
 
-					const xIdx = curCell.type % tileset.columns;
-					const yIdx = Math.floor(curCell.type / tileset.columns);
+					const xIdx = curCell.type % tileset.cols;
+					const yIdx = Math.floor(curCell.type / tileset.cols);
 
 					const singlePixelOffset = { x: xStep / tileset.tileWidth, y: yStep / tileset.tileHeight };
 					const halfPixelOffset = { x: singlePixelOffset.x / 2, y: singlePixelOffset.y / 2 };
@@ -276,9 +323,17 @@ namespace Renderer {
 
 					// top and bottom face
 					if (i === 2 || i === 3) {
-						targetData.topIndices.push(...localIndices);
+						if (curCell.isPreview) {
+							targetData.previewTopIndices.push(...localIndices);
+						} else {
+							targetData.topIndices.push(...localIndices);
+						}
 					} else {
-						targetData.sidesIndices.push(...localIndices);
+						if (curCell.isPreview) {
+							targetData.previewSidesIndices.push(...localIndices);
+						} else {
+							targetData.sidesIndices.push(...localIndices);
+						}
 					}
 				}
 			}
@@ -300,6 +355,7 @@ namespace Renderer {
 			type: number;
 			visible: boolean;
 			hiddenFaces: boolean[];
+			isPreview: boolean;
 		};
 	}
 }

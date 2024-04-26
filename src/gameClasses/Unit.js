@@ -110,7 +110,6 @@ var Unit = TaroEntityPhysics.extend({
 				if (ownerPlayer) {
 					this.setOwnerPlayer(this._stats.ownerId);
 					this.equipSkin();
-
 					// player was already set to camera-track this unit
 					if (ownerPlayer._stats.cameraTrackedUnitId == this.id()) {
 						this.emit('follow');
@@ -358,7 +357,7 @@ var Unit = TaroEntityPhysics.extend({
 	},
 
 	hide: function () {
-		if (!this._hidden) {
+		if (!this._stats.isHidden) {
 			this.stopMoving();
 
 			// hide all items carried by this unit
@@ -382,7 +381,7 @@ var Unit = TaroEntityPhysics.extend({
 	},
 
 	show: function () {
-		if (this._hidden) {
+		if (this._stats.isHidden) {
 			if (this._stats.aiEnabled) {
 				this.ai.enable();
 			}
@@ -1295,7 +1294,7 @@ var Unit = TaroEntityPhysics.extend({
 					}
 
 					// Unit
-					self.streamUpdateData([{ itemIds: self._stats.itemIds }]);
+					self.streamUpdateData([{ itemIds: self._stats.itemIds }], self._stats.clientId);
 
 					if (item._stats.bonus && item._stats.bonus.passive) {
 						if (
@@ -1447,7 +1446,7 @@ var Unit = TaroEntityPhysics.extend({
 				// give it a body (cuz it's dropped)
 				// if item is already being held, then simply detach it
 				var owner = item.getOwnerUnit();
-				item.oldOwnerId = owner.id();
+				item._stats.oldOwnerUnitId = owner.id();
 
 				var defaultData = {
 					translate: {
@@ -2116,7 +2115,7 @@ var Unit = TaroEntityPhysics.extend({
 
 		// ignore unit movement or controls if hidden
 		// make sure that this executes after this._streamUpdateData because we still need to fetch isHidden updates from the server
-		if (this._hidden) {
+		if (this._stats.isHidden) {
 			return;
 		}
 

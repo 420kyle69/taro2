@@ -57,6 +57,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 
 		// console.log("updatebody", this._stats.name, defaultData, this._stats.currentBody.type)
 		// console.trace()
+
 		body = this._stats.currentBody;
 		if (!body) {
 			return;

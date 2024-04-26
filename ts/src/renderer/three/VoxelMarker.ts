@@ -7,45 +7,28 @@ namespace Renderer {
 			commandController: CommandController;
 			active: boolean;
 			extrudedKey: string;
+			private lastPoint: THREE.Vector3 | undefined = undefined;
 
-			constructor(
-				//private scene: Phaser.Scene,
-				//private devModeScene: DevModeScene,
-				//private map: Phaser.Tilemaps.Tilemap,
-				//private palette: boolean,
-				//w: number,
-				commandController: CommandController
-			) {
+			constructor(commandController: CommandController) {
 				super();
 
 				this.active = true;
 				this.commandController = commandController;
 				this.lines = new MarkerLines();
 
-				//if (!palette) {
 				this.preview = new THREE.Group();
 				this.meshes = {};
-				//}
 			}
 
 			addMesh(x: number, y: number, z: number): THREE.Mesh {
-				//const map = this.map;
-				const data = taro.game.data;
-				const tileset = data.map.tilesets[0];
-				const key = `tiles/${tileset.name}`;
-				const extrudedKey = (this.extrudedKey = `extruded-${key}`);
-
-				let width = Constants.TILE_SIZE;
-				let height = Constants.TILE_SIZE;
-				/*if (taro.game.data.defaultData.dontResize) {
-                    width = map.tileWidth;
-                    height = map.tileHeight;
-                }*/
-
-				const geometry = new THREE.BoxGeometry(1.1, 1.1, 1.1);
-				const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+				const geometry = new THREE.BoxGeometry(1.01, 1.01, 1.01);
+				const material = new THREE.MeshBasicMaterial({
+					color: 0xff0000,
+					opacity: 0.5,
+					transparent: true,
+				});
 				const mesh = new THREE.Mesh(geometry, material);
-				mesh.position.set(x, z, y);
+				mesh.position.set(x, y, z);
 				this.preview.add(mesh);
 				return mesh;
 			}
@@ -54,21 +37,49 @@ namespace Renderer {
 				this.preview.clear();
 			}
 
-			changeMesh(tile: number, i: number, j: number): void {}
+			updatePreview(shouldUpdatePos = true, force = false) {
+				const renderer = Renderer.Three.instance();
+				const voxels = Renderer.Three.getVoxels();
+				if (shouldUpdatePos) {
+					const raycaster = new THREE.Raycaster();
 
-			changePreview(): void {}
+					raycaster.setFromCamera(Renderer.Three.getPointer(), renderer.camera.instance);
+					const intersect = renderer.raycastFloor();
 
-			hideMeshes(): void {
-				this.preview.visible = false;
-				Object.values(this.meshes).forEach((v) => {
-					Object.values(v).forEach((mesh) => {
-						mesh.material[0].opacity = 0;
-					});
-				});
-			}
+					if (!force && (!intersect || (this.lastPoint !== undefined && this.lastPoint.equals(intersect.floor())))) {
+						return;
+					}
+					this.lastPoint = intersect.floor().clone();
+				}
 
-			showPreview(): void {
-				//this.preview.visible = true;
+				this.removeMeshes();
+				if (taro.developerMode.activeButton === 'eraser') {
+					this.addMesh(
+						Math.floor(this.lastPoint.x) + 0.5,
+						renderer.voxelEditor.voxels.layerLookupTable[renderer.voxelEditor.currentLayerIndex],
+						Math.floor(this.lastPoint.z) + 0.5
+					);
+					voxels.add(this.preview);
+					return;
+				}
+
+				const _x = Math.floor(this.lastPoint.x);
+				const _y = Math.floor(this.lastPoint.z);
+				const selectedTiles = {};
+				const tileId = renderer.tmp_tileId;
+				selectedTiles[_x] = {};
+				selectedTiles[_x][_y] = taro.developerMode.activeButton === 'eraser' ? -1 : tileId;
+				renderer.voxelEditor.putTiles(
+					_x,
+					_y,
+					selectedTiles,
+					'fitContent',
+					'rectangle',
+					renderer.voxelEditor.currentLayerIndex,
+					true,
+					false,
+					true
+				);
 			}
 		}
 	}

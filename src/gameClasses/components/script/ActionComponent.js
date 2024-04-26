@@ -156,7 +156,11 @@ var ActionComponent = TaroEntity.extend({
 										// ask client to reload game
 										taro.network.send(
 											'sendPlayerToMap',
-											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											{
+												type: 'sendPlayerToMap',
+												gameSlug: res.gameSlug,
+												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+											},
 											player._stats.clientId
 										);
 									}
@@ -174,7 +178,7 @@ var ActionComponent = TaroEntity.extend({
 							let userIds = [];
 							for (var l = 0; l < players.length; l++) {
 								var player = players[l];
-								console.log('player', player._stats.clientId, player._stats.userId );
+								console.log('player', player._stats.clientId, player._stats.userId);
 								if (player && player._stats && player._stats.clientId) {
 									userIds.push(player._stats.userId || 'guest');
 								}
@@ -188,7 +192,11 @@ var ActionComponent = TaroEntity.extend({
 										// ask client to reload game
 										taro.network.send(
 											'sendPlayerToMap',
-											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											{
+												type: 'sendPlayerToMap',
+												gameSlug: res.gameSlug,
+												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+											},
 											player._stats.clientId
 										);
 									}
@@ -197,7 +205,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
-					
+
 					case 'sendPlayerToSpawningMap':
 						if (taro.isServer) {
 							var player = self._script.param.getValue(action.player, vars);
@@ -209,7 +217,11 @@ var ActionComponent = TaroEntity.extend({
 										// ask client to reload game
 										taro.network.send(
 											'sendPlayerToMap',
-											{ type: 'sendPlayerToMap', gameSlug: res.gameSlug, autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'] },
+											{
+												type: 'sendPlayerToMap',
+												gameSlug: res.gameSlug,
+												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+											},
 											player._stats.clientId
 										);
 									}
@@ -1635,6 +1647,7 @@ var ActionComponent = TaroEntity.extend({
 									translate: spawnPosition,
 									rotate: facingAngle,
 								},
+								isHidden: false,
 							});
 
 							var unit = player.createUnit(data);
@@ -2218,7 +2231,7 @@ var ActionComponent = TaroEntity.extend({
 							entity.show();
 						}
 						break;
-					
+
 					case 'makeUnitInvisibleToNeutralPlayers':
 						if (entity && entity._category == 'unit') {
 							entity.streamUpdateData([{ isInvisibleToNeutral: true }, { isNameLabelHiddenToNeutral: true }]);
@@ -3605,7 +3618,6 @@ var ActionComponent = TaroEntity.extend({
 						var key = self._script.param.getValue(action.key, vars);
 						var value = self._script.param.getValue(action.value, vars);
 						var object = self._script.param.getValue(action.object, vars);
-
 						if (object && key && value) {
 							object[key] = value;
 						}
@@ -3617,7 +3629,7 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.param.getValue(action.value, vars);
 						var object = self._script.param.getValue(action.object, vars);
 
-						if (object && key && value) {
+						if (object && key && (value || value === 0)) {
 							object[key] = parseFloat(value);
 						}
 
@@ -3821,6 +3833,44 @@ var ActionComponent = TaroEntity.extend({
 							);
 						}
 						break;
+
+					case 'setUIElementProperty': {
+						let player = self._script.param.getValue(action.player, vars);
+						let elementId = self._script.param.getValue(action.elementId, vars);
+						let value = self._script.param.getValue(action.value, vars);
+						let key = self._script.param.getValue(action.key, vars);
+						const sanitizerFunction = taro.isClient ? taro.clientSanitizer : taro.sanitizer;
+
+						if (typeof key === 'string') {
+							const data = {
+								command: 'updateUiElement',
+								elementId,
+								action: 'setUIElementProperty',
+								value: typeof value === 'string' ? sanitizerFunction(value) : '',
+								key
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
+						}
+						break;
+					}
+					
+					case 'sendDataFromClientToServer': {
+						if (taro.isClient) {
+							const player = self._script.param.getValue(action.player, vars);
+							const data = self._script.param.getValue(action.data, vars);
+
+							if (player && player._stats.clientId === taro.network.id()) {
+								taro.network.send('sendDataFromClient', { 
+									data
+								});
+							}
+						}
+						break;
+					}
 
 					case 'comment':
 						break;

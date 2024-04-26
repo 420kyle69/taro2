@@ -1193,7 +1193,7 @@ var ShopComponent = TaroEntity.extend({
 							.on('touchstart', function () {
 								longPressTimeOut = setTimeout(() => {
 									$(this).popover('show');
-								}, 1000);
+								}, 500);
 							})
 							.on('touchend', function () {
 								clearTimeout(longPressTimeOut);
@@ -1639,14 +1639,12 @@ var ShopComponent = TaroEntity.extend({
 				// img.style.background = `url('${image.src}')`;
 				// img.src = '';
 
-				if (itemDetails.cellSheet.rowCount <= 1 && itemDetails.cellSheet.columnCount <= 1) {
-					img.style.backgroundRepeat = 'no-repeat';
-					img.style.backgroundPosition = 'center center';
-					img.style.backgroundSize = 'contain';
-					img.style.marginBottom = '8px';
-					img.style.height = '64px';
-					img.style.width = '64px';
-				}
+				img.style.backgroundRepeat = 'no-repeat';
+				img.style.backgroundPosition = 'center center';
+				img.style.backgroundSize = 'contain';
+				img.style.marginBottom = '8px';
+				img.style.height = '64px';
+				img.style.width = '64px';
 			};
 		}
 	},

@@ -1,11 +1,11 @@
 namespace Renderer {
 	export namespace Three {
-		export class Particles extends Node {
+		export class ParticleSystem extends Node {
 			emitters: Emitter[] = [];
 
 			private particles = [];
 
-			private textures = TextureRepository.instance().getTexturesWithKeyContains('particle');
+			private textures = TextureManager.instance().getTexturesWithKeyContains('particle');
 
 			// NOTE(nick): Use groups/buckets to get around the max 16 textures shader
 			// limit. There are others way to do this but because textures can have a
@@ -93,7 +93,7 @@ namespace Renderer {
 
 			createEmitter(config: Particle) {
 				const particleData = taro.game.data.particleTypes[config.particleId];
-				const tex = TextureRepository.instance().get(`particle/${particleData.url}`);
+				const tex = TextureManager.instance().get(`particle/${particleData.url}`);
 
 				let zPosition = 0;
 				if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
