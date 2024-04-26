@@ -124,8 +124,8 @@ var Item = TaroEntityPhysics.extend({
 				}
 			}
 		}
-
-		if (body && body.type != 'none') {
+		//
+		if (body && body.type != 'none' && !this._stats.isHidden) {
 			TaroEntityPhysics.prototype.updateBody.call(self, initTransform);
 
 			self.show();
@@ -193,13 +193,11 @@ var Item = TaroEntityPhysics.extend({
 
 			if (isInvisible || !hasBody) {
 				self.hide();
-				this.emit('hide');
 				return;
 			}
 		}
 
 		self.show();
-		this.emit('show');
 		// leave because it is taro not renderer
 		self.updateLayer();
 		// leave because it updates state for animation
@@ -262,6 +260,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	hide: function () {
+		console.log(`${this.id()} HIDE`);
 		if (taro.isServer) {
 			this.streamUpdateData([{ isHidden: true }]);
 		}
@@ -271,6 +270,7 @@ var Item = TaroEntityPhysics.extend({
 	},
 
 	show: function () {
+		console.log(`${this.id()} SHOW`);
 		if (taro.isServer) {
 			this.streamUpdateData([{ isHidden: false }]);
 		}
@@ -915,7 +915,7 @@ var Item = TaroEntityPhysics.extend({
 			this._stats.slotIndex = index;
 			this.streamUpdateData([{ slotIndex: index }]);
 		}
-
+		// if item is in its owner's backpack, hide it
 		if (owner) {
 			if (this._stats.slotIndex >= owner._stats.inventorySize) {
 				this.hide();
