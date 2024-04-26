@@ -34,6 +34,7 @@ namespace Renderer {
 			private entityManager = new EntityManager();
 			private entitiesLayer = new THREE.Group();
 			private regionsLayer = new THREE.Group();
+			private entityPreviewLayer = new THREE.Group();
 
 			private sky: Skybox;
 			private voxels: Voxels;
@@ -516,6 +517,9 @@ namespace Renderer {
 
 				this.regionsLayer.position.y = 0.51;
 				this.scene.add(this.regionsLayer);
+
+				this.entityPreviewLayer.position.y = 0.51;
+				this.scene.add(this.entityPreviewLayer);
 
 				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') => {
 					const entity = this.entityManager.create(taroEntity, type);

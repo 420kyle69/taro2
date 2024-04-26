@@ -21,12 +21,10 @@ namespace Renderer {
 			y: number;
 
 			constructor(
-				devModeTools: DevModeTools,
 				entityImages: (Renderer.Three.AnimatedSprite & { entity: EntityPreview })[],
 				action: ActionData,
 				type?: string
 			) {
-				const entityEditor = (this.entityEditor = devModeTools.entityEditor);
 				this.action = action;
 
 				let key: string;
@@ -46,70 +44,72 @@ namespace Renderer {
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
 
 				// TODO: add preview here
-				const image = (this.image = scene.add.image(action.position?.x, action.position?.y, key));
-				if (!isNaN(action.angle)) image.angle = action.angle;
-				if (!isNaN(action.width) && !isNaN(action.height)) image.setDisplaySize(action.width, action.height);
-				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-					image.setVisible(true);
-				} else {
-					image.setVisible(false);
-				}
-				image.setInteractive({ draggable: true });
-				image.entity = this;
-				entityImages.push(image);
+				const renderer = Renderer.Three.instance();
+
+				// const image = (this.image = scene.add.image(action.position?.x, action.position?.y, key));
+				// if (!isNaN(action.angle)) image.angle = action.angle;
+				// if (!isNaN(action.width) && !isNaN(action.height)) image.setDisplaySize(action.width, action.height);
+				// if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+				// 	image.setVisible(true);
+				// } else {
+				// 	image.setVisible(false);
+				// }
+				// image.setInteractive({ draggable: true });
+				// image.entity = this;
+				// entityImages.push(image);
 
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });
 
 				//TODO: add select here
-			// 	image.on('pointerdown', () => {
-			// 		if (this.devModeTools.activeButton !== 'cursor') return;
-			// 		if (entityEditor.selectedEntityImage !== this) {
-			// 			entityEditor.selectEntityImage(this);
-			// 		}
+				// 	image.on('pointerdown', () => {
+				// 		if (this.devModeTools.activeButton !== 'cursor') return;
+				// 		if (entityEditor.selectedEntityImage !== this) {
+				// 			entityEditor.selectEntityImage(this);
+				// 		}
 
-			// 		//double click
-			// 		let clickDelay = taro._currentTime - lastTime;
-			// 		lastTime = taro._currentTime;
-			// 		if (clickDelay < 350) {
-			// 			if (inGameEditor && inGameEditor.showScriptForEntity) {
-			// 				inGameEditor.showScriptForEntity(action.actionId);
-			// 			}
-			// 		}
+				// 		//double click
+				// 		let clickDelay = taro._currentTime - lastTime;
+				// 		lastTime = taro._currentTime;
+				// 		if (clickDelay < 350) {
+				// 			if (inGameEditor && inGameEditor.showScriptForEntity) {
+				// 				inGameEditor.showScriptForEntity(action.actionId);
+				// 			}
+				// 		}
 
-			// 		this.startDragX = image.x;
-			// 		this.startDragY = image.y;
-			// 		this.scale = image.scale;
-			// 		if (!devModeTools.altKey.isDown && !devModeTools.shiftKey.isDown) {
-			// 			this.dragMode = 'position';
-			// 		} else if (devModeTools.altKey.isDown) {
-			// 			this.dragMode = 'angle';
-			// 			image.rotation = 0;
-			// 			editedAction.angle = image.angle;
-			// 		} else if (devModeTools.shiftKey.isDown) {
-			// 			this.dragMode = 'scale';
-			// 			if (!isNaN(this.defaultWidth) && !isNaN(this.defaultHeight)) {
-			// 				image.setDisplaySize(this.defaultWidth, this.defaultHeight);
-			// 				editedAction.width = this.defaultWidth;
-			// 				editedAction.height = this.defaultHeight;
-			// 			}
-			// 		}
-			// 		this.updateOutline();
-			// 	});
+				// 		this.startDragX = image.x;
+				// 		this.startDragY = image.y;
+				// 		this.scale = image.scale;
+				// 		if (!devModeTools.altKey.isDown && !devModeTools.shiftKey.isDown) {
+				// 			this.dragMode = 'position';
+				// 		} else if (devModeTools.altKey.isDown) {
+				// 			this.dragMode = 'angle';
+				// 			image.rotation = 0;
+				// 			editedAction.angle = image.angle;
+				// 		} else if (devModeTools.shiftKey.isDown) {
+				// 			this.dragMode = 'scale';
+				// 			if (!isNaN(this.defaultWidth) && !isNaN(this.defaultHeight)) {
+				// 				image.setDisplaySize(this.defaultWidth, this.defaultHeight);
+				// 				editedAction.width = this.defaultWidth;
+				// 				editedAction.height = this.defaultHeight;
+				// 			}
+				// 		}
+				// 		this.updateOutline();
+				// 	});
 
-			// 	const outlineHover = entityEditor.outlineHover;
+				// 	const outlineHover = entityEditor.outlineHover;
 
-			// 	image.on('pointerover', () => {
-			// 		scene.input.setTopOnly(true);
-			// 		if (this.devModeTools.activeButton !== 'cursor' || entityEditor.activeHandler) return;
-			// 		this.updateOutline();
-			// 	});
+				// 	image.on('pointerover', () => {
+				// 		scene.input.setTopOnly(true);
+				// 		if (this.devModeTools.activeButton !== 'cursor' || entityEditor.activeHandler) return;
+				// 		this.updateOutline();
+				// 	});
 
-			// 	image.on('pointerout', () => {
-			// 		if (entityEditor.selectedEntityImage === this) return;
-			// 		outlineHover.clear();
-			// 	});
-			// }
+				// 	image.on('pointerout', () => {
+				// 		if (entityEditor.selectedEntityImage === this) return;
+				// 		outlineHover.clear();
+				// 	});
+			}
 
 			edit(action: ActionData): void {
 				if (!this.action.wasEdited || !action.wasEdited) {
@@ -119,7 +119,7 @@ namespace Renderer {
 				taro.network.send<any>('editInitEntity', action);
 			}
 
-			updateOutline(hide?): void {
+			updateOutline(hide?: boolean): void {
 				const outline = this.entityEditor.outline;
 				const outlineHover = this.entityEditor.outlineHover;
 				const selectionContainer = this.entityEditor.selectionContainer;
@@ -132,76 +132,76 @@ namespace Renderer {
 				const handlers = this.entityEditor.handlers;
 				const image = this.image;
 
-				if (this.devModeTools.entityEditor.selectedEntityImage === this) {
-					outline.clear();
-					outlineHover.clear();
-					outline.lineStyle(6, 0x036ffc, 0.3);
-					selectionContainer.setVisible(true);
-					selectionContainer.x = image.x;
-					selectionContainer.y = image.y;
-					selectionContainer.angle = image.angle;
-					const smallDistance = 20 / this.scene.cameras.main.zoom;
-					const largeDistance = 25 / this.scene.cameras.main.zoom;
+				// if (this.entityEditor.selectedEntityImage === this) {
+				// 	outline.clear();
+				// 	outlineHover.clear();
+				// 	outline.lineStyle(6, 0x036ffc, 0.3);
+				// 	selectionContainer.setVisible(true);
+				// 	selectionContainer.x = image.x;
+				// 	selectionContainer.y = image.y;
+				// 	selectionContainer.angle = image.angle;
+				// 	const smallDistance = 20 / this.scene.cameras.main.zoom;
+				// 	const largeDistance = 25 / this.scene.cameras.main.zoom;
 
-					handlers.topLeft.setPosition(
-						-image.displayWidth / 2 - smallDistance,
-						-image.displayHeight / 2 - smallDistance
-					);
-					handlers.topLeftRotate.setPosition(
-						-image.displayWidth / 2 - largeDistance,
-						-image.displayHeight / 2 - largeDistance
-					);
-					handlers.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
-					handlers.topRight.setPosition(
-						image.displayWidth / 2 + smallDistance,
-						-image.displayHeight / 2 - smallDistance
-					);
-					handlers.topRightRotate.setPosition(
-						image.displayWidth / 2 + largeDistance,
-						-image.displayHeight / 2 - largeDistance
-					);
-					handlers.right.setPosition(image.displayWidth / 2 + smallDistance, 0);
-					handlers.bottomRight.setPosition(
-						image.displayWidth / 2 + smallDistance,
-						image.displayHeight / 2 + smallDistance
-					);
-					handlers.bottomRightRotate.setPosition(
-						image.displayWidth / 2 + largeDistance,
-						image.displayHeight / 2 + largeDistance
-					);
-					handlers.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
-					handlers.bottomLeft.setPosition(
-						-image.displayWidth / 2 - smallDistance,
-						image.displayHeight / 2 + smallDistance
-					);
-					handlers.bottomLeftRotate.setPosition(
-						-image.displayWidth / 2 - largeDistance,
-						image.displayHeight / 2 + largeDistance
-					);
-					handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
+				// 	handlers.topLeft.setPosition(
+				// 		-image.displayWidth / 2 - smallDistance,
+				// 		-image.displayHeight / 2 - smallDistance
+				// 	);
+				// 	handlers.topLeftRotate.setPosition(
+				// 		-image.displayWidth / 2 - largeDistance,
+				// 		-image.displayHeight / 2 - largeDistance
+				// 	);
+				// 	handlers.top.setPosition(0, -image.displayHeight / 2 - smallDistance);
+				// 	handlers.topRight.setPosition(
+				// 		image.displayWidth / 2 + smallDistance,
+				// 		-image.displayHeight / 2 - smallDistance
+				// 	);
+				// 	handlers.topRightRotate.setPosition(
+				// 		image.displayWidth / 2 + largeDistance,
+				// 		-image.displayHeight / 2 - largeDistance
+				// 	);
+				// 	handlers.right.setPosition(image.displayWidth / 2 + smallDistance, 0);
+				// 	handlers.bottomRight.setPosition(
+				// 		image.displayWidth / 2 + smallDistance,
+				// 		image.displayHeight / 2 + smallDistance
+				// 	);
+				// 	handlers.bottomRightRotate.setPosition(
+				// 		image.displayWidth / 2 + largeDistance,
+				// 		image.displayHeight / 2 + largeDistance
+				// 	);
+				// 	handlers.bottom.setPosition(0, image.displayHeight / 2 + smallDistance);
+				// 	handlers.bottomLeft.setPosition(
+				// 		-image.displayWidth / 2 - smallDistance,
+				// 		image.displayHeight / 2 + smallDistance
+				// 	);
+				// 	handlers.bottomLeftRotate.setPosition(
+				// 		-image.displayWidth / 2 - largeDistance,
+				// 		image.displayHeight / 2 + largeDistance
+				// 	);
+				// 	handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
 
-					outline.strokeRect(
-						-image.displayWidth / 2,
-						-image.displayHeight / 2,
-						image.displayWidth,
-						image.displayHeight
-					);
-					outline.x = image.x;
-					outline.y = image.y;
-					outline.angle = image.angle;
-				} else {
-					outlineHover.clear();
-					outlineHover.lineStyle(2, 0x036ffc, 1);
-					outlineHover.strokeRect(
-						-image.displayWidth / 2,
-						-image.displayHeight / 2,
-						image.displayWidth,
-						image.displayHeight
-					);
-					outlineHover.x = image.x;
-					outlineHover.y = image.y;
-					outlineHover.angle = image.angle;
-				}
+				// 	outline.strokeRect(
+				// 		-image.displayWidth / 2,
+				// 		-image.displayHeight / 2,
+				// 		image.displayWidth,
+				// 		image.displayHeight
+				// 	);
+				// 	outline.x = image.x;
+				// 	outline.y = image.y;
+				// 	outline.angle = image.angle;
+				// } else {
+				// 	outlineHover.clear();
+				// 	outlineHover.lineStyle(2, 0x036ffc, 1);
+				// 	outlineHover.strokeRect(
+				// 		-image.displayWidth / 2,
+				// 		-image.displayHeight / 2,
+				// 		image.displayWidth,
+				// 		image.displayHeight
+				// 	);
+				// 	outlineHover.x = image.x;
+				// 	outlineHover.y = image.y;
+				// 	outlineHover.angle = image.angle;
+				// }
 			}
 
 			update(action: ActionData): void {
@@ -238,7 +238,7 @@ namespace Renderer {
 					this.hide();
 					this.action.wasDeleted = true;
 				}
-				if (this === this.entityEditor.selectedEntityImage) this.updateOutline();
+				// if (this === this.entityEditor.selectedEntityImage) this.updateOutline();
 			}
 
 			hide(): void {
