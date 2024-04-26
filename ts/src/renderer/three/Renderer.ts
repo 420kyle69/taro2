@@ -205,9 +205,9 @@ namespace Renderer {
 						raycaster.setFromCamera(this.pointer, this.camera.instance);
 
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
-						if (intersects.length > 0) {
-							const closest = intersects[0].object as THREE.Mesh;
-							const unit = this.entityManager.entities.find((e) => e instanceof Unit && e.sprite === closest);
+						for (const intersect of intersects) {
+							const closest = intersect.object as THREE.Mesh;
+							const unit = this.entityManager.units.find((unit) => unit.sprite === closest);
 							if (unit) {
 								const ownerPlayer = taro.$(unit.ownerId);
 								if (ownerPlayer?._stats?.controlledBy === 'human') {
@@ -215,6 +215,7 @@ namespace Renderer {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}
+								break;
 							}
 						}
 					}
