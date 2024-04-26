@@ -650,7 +650,15 @@ var ServerNetworkEvents = {
 	_onSendDataFromClient: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player && data) {
-			player.lastClientReceivedData = data.data;
+			player.lastClientReceivedData = data.data ? Object.keys(data.data).reduce((result, key) => {
+				if (['boolean', 'number'].includes(typeof data.data[key])) {
+					result[key] = data.data[key];
+				} else if (typeof data.data[key] === 'string') {
+					result[key] = taro.sanitizer(data.data[key]);
+				}
+
+				return result;
+			}, {}) : {};
 			taro.script.trigger('whenDataReceivedFromClient', { playerId: player.id() });
 		}
 	},

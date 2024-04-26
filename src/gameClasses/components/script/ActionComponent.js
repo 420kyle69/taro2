@@ -3839,18 +3839,21 @@ var ActionComponent = TaroEntity.extend({
 						let elementId = self._script.param.getValue(action.elementId, vars);
 						let value = self._script.param.getValue(action.value, vars);
 						let key = self._script.param.getValue(action.key, vars);
+						const sanitizerFunction = taro.isClient ? taro.clientSanitizer : taro.sanitizer;
 
-						const data = {
-							command: 'updateUiElement',
-							elementId,
-							action: 'setUIElementProperty',
-							value,
-							key
-						};
-						if (taro.isServer) {
-							taro.network.send('ui', data, player._stats.clientId);
-						} else if (player._stats.clientId === taro.network.id()) {
-							taro.playerUi.updateUiElement(data);
+						if (typeof key === 'string') {
+							const data = {
+								command: 'updateUiElement',
+								elementId,
+								action: 'setUIElementProperty',
+								value: typeof value === 'string' ? sanitizerFunction(value) : '',
+								key
+							};
+							if (taro.isServer) {
+								taro.network.send('ui', data, player._stats.clientId);
+							} else if (player._stats.clientId === taro.network.id()) {
+								taro.playerUi.updateUiElement(data);
+							}
 						}
 						break;
 					}
