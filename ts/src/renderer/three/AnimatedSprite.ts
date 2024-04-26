@@ -54,17 +54,17 @@ namespace Renderer {
 				}
 			}
 
-			setTexture(tex: THREE.Texture) {
-				// super.setTexture(tex);
-				// this.tex = tex;
-				// if (tex.userData.numColumns && tex.userData.numRows) {
-				// 	this.tileH = tex.userData.numColumns;
-				// 	this.tileV = tex.userData.numRows;
-				// }
-				// tex.repeat.set(1 / this.tileH, 1 / this.tileV);
-				// const offsetX = (this.currentTile % this.tileH) / this.tileH;
-				// const offsetY = 1 - 1 / this.tileV - (Math.floor(this.currentTile / this.tileH) % this.tileV) / this.tileV;
-				// tex.offset.set(offsetX, offsetY);
+			setTextureSheet(spriteSheet: TextureSheet) {
+				this.spriteSheet = spriteSheet;
+
+				super.setTexture(spriteSheet.texture);
+				this.tex = spriteSheet.texture;
+
+				this.tileH = 1 / (spriteSheet.width / spriteSheet.tileWidth);
+				this.tileV = 1 / (spriteSheet.height / spriteSheet.tileHeight);
+				this.spriteSheet.texture.repeat.set(this.tileH, this.tileV);
+
+				this.setUvOffset(this.currentTile);
 			}
 
 			private setUvOffset(tileIndex: number) {

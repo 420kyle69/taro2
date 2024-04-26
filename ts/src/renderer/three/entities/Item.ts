@@ -83,26 +83,29 @@ namespace Renderer {
 					}
 				});
 
-				// taroEntity.on('update-texture', (data) => {
-				// 	const textureMgr = TextureManager.instance();
-				// 	const key = taroEntity._stats.cellSheet.url;
-				// 	const tex2 = textureMgr.get(key);
-				// 	if (tex2) {
-				// 		this.createAnimations(taroEntity._stats);
-				// 		tex = tex2.clone();
-				// 		entity.setTexture(tex);
-				// 		const bounds = taroEntity._bounds2d;
-				// 		entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
-				// 	} else {
-				// 		textureMgr.loadTextureFromUrl(key, Utils.patchAssetUrl(key), (tex2) => {
-				// 			this.createAnimations(taroEntity._stats);
-				// 			tex = tex2.clone();
-				// 			entity.setTexture(tex);
-				// 			const bounds = taroEntity._bounds2d;
-				// 			entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
-				// 		});
-				// 	}
-				// });
+				taroEntity.on('update-texture', (data) => {
+					const textureMgr = TextureManager.instance();
+					const key = taroEntity._stats.cellSheet.url;
+					const animationMgr = AnimationManager.instance();
+					const sheet = textureMgr.getTextureSheetShallowCopy(key);
+
+					const replaceTexture = (spriteSheet: TextureSheet) => {
+						entity.setTextureSheet(sheet);
+						const bounds = taroEntity._bounds2d;
+						entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
+					};
+
+					if (sheet) {
+						replaceTexture(sheet);
+					} else {
+						const cols = taroEntity._stats.cellSheet.columnCount;
+						const rows = taroEntity._stats.cellSheet.rowCount;
+						textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
+							animationMgr.createAnimationsFromTaroData(key, taroEntity._stats);
+							replaceTexture(sheet);
+						});
+					}
+				});
 
 				taroEntity.on('fading-text', (data: { text: string; color?: string }) => {
 					const size = entity.getSizeInPixels();
