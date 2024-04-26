@@ -209,12 +209,19 @@ namespace Renderer {
 							const closest = intersect.object as THREE.Mesh;
 							const unit = this.entityManager.units.find((unit) => unit.sprite === closest);
 							if (unit) {
-								const ownerPlayer = taro.$(unit.ownerId);
-								if (ownerPlayer?._stats?.controlledBy === 'human') {
+								const clientUnit = taro.client.selectedUnit;
+								const otherUnit = taro.$(unit.ownerId);
+
+								if (clientUnit === otherUnit) {
+									break;
+								}
+
+								if (otherUnit?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}
+
 								break;
 							}
 						}
