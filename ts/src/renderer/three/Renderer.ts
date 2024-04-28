@@ -216,7 +216,8 @@ namespace Renderer {
 									break;
 								}
 
-								if (otherUnit?._stats?.controlledBy === 'human') {
+								const otherOwnerUnit =  taro.$(unit.ownerId);
+								if (otherOwnerUnit?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
