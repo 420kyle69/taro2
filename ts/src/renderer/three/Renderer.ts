@@ -294,7 +294,7 @@ namespace Renderer {
 					requestAnimationFrame(this.render.bind(this));
 				};
 
-				this.loadTextures();
+				this.loadAssets();
 
 				taro.client.on('enterPlayTab', () => {
 					this.mode = Mode.Play;
@@ -421,7 +421,7 @@ namespace Renderer {
 				this.entitiesLayer.visible = visible;
 			}
 
-			private loadTextures() {
+			private loadAssets() {
 				const textureMgr = TextureManager.instance();
 				textureMgr.setFilter(taro.game.data.defaultData.renderingFilter);
 				textureMgr.setLoadingManager(this.initLoadingManager);
@@ -439,7 +439,39 @@ namespace Renderer {
 					...Object.values(data.itemTypes),
 				];
 
+				const gltfLoader = new GLTFLoader(this.initLoadingManager);
+				const dracoLoader = new DRACOLoader(this.initLoadingManager);
+				dracoLoader.setDecoderPath('/assets/lib/draco');
+				gltfLoader.setDRACOLoader(dracoLoader);
+
 				for (const taroEntity of taroEntities) {
+					// Load 3D models
+					if (taroEntity.is3DObject) {
+						const url = taroEntity['3DObjectUrl'];
+						if (url) {
+							gltfLoader.load(url, (gltf) => {
+								const model = gltf.scene;
+								model.position.y = 0.5;
+								model.position.x = 5;
+								model.position.z = 5;
+								model.traverse((child) => {
+									if (child instanceof THREE.Mesh) {
+										// Convert to basic material to avoid lighting
+										const material = new THREE.MeshBasicMaterial();
+										THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
+										child.material = material;
+									}
+								});
+
+								this.scene.add(model);
+							});
+						}
+
+						// Uncomment below once model loads 3D model instead of cellsheet
+						// continue;
+					}
+
+					// Load textures
 					const cellSheet = taroEntity.cellSheet;
 					if (!cellSheet) continue;
 

@@ -9,6 +9,8 @@ var taroClientConfig = {
 		'/lib/rexuiplugin.min.js',
 		'/lib/rexvirtualjoystickplugin.min.js',
 		'/lib/three.min.js',
+		'/lib/DRACOLoader.js',
+		'/lib/GLTFLoader.js',
 		'/lib/OrbitControls.js',
 		'/lib/tween.umd.js',
 		'/lib/three_mesh_bvh.umd.js',
