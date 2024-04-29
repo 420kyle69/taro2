@@ -6,7 +6,6 @@ declare interface EntityStats {
 	userId: string;
 	defaultData: any;
 	isMobile: boolean;
-	isBillboard?: boolean;
 
 	name: string;
 	nameLabelColor?: string;
