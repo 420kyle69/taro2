@@ -179,8 +179,12 @@ var AbilityComponent = TaroEntity.extend({
 						}
 
 						taro.game.lastCastingUnitId = self._entity.id();
+
+						const isWorldEntity = self._entity._stats.isWorld;
+						const triggeredFrom = isWorldEntity ? 'world' : 'map';
+
 						// now both entity and global scripts (removed if/else)
-						self._entity.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id() } });
+						self._entity.script.runScript(ability.scriptName, { triggeredBy: { unitId: self._entity.id() }, triggeredFrom });
 					}
 				}
 			} else {
@@ -269,8 +273,11 @@ var AbilityComponent = TaroEntity.extend({
 
 		taro.game.lastCastingUnitId = this._entity.id();
 
+		const isWorldEntity = this._entity._stats.isWorld;
+		const triggeredFrom = isWorldEntity ? 'world' : 'map';
+
 		// run script associated with this ability
-		this._entity.script.runScript(ability.eventScripts.startCasting, { triggeredBy: { unitId: this._entity.id() } });
+		this._entity.script.runScript(ability.eventScripts.startCasting, { triggeredBy: { unitId: this._entity.id() }, triggeredFrom });
 
 		this.activeAbilities[abilityId] = true;
 
@@ -304,8 +311,11 @@ var AbilityComponent = TaroEntity.extend({
 
 		this.activeAbilities[abilityId] = false;
 
+		const isWorldEntity = this._entity._stats.isWorld;
+		const triggeredFrom = isWorldEntity ? 'world' : 'map';
+
 		// run script associated with this ability
-		this._entity.script.runScript(ability.eventScripts.stopCasting, { triggeredBy: { unitId: this._entity.id() } });
+		this._entity.script.runScript(ability.eventScripts.stopCasting, { triggeredBy: { unitId: this._entity.id() }, triggeredFrom });
 
 		if (taro.isClient && this._entity._stats.clientId === taro.network.id()) {
 			// find key if not provided

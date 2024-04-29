@@ -559,7 +559,9 @@ var PlayerUiComponent = TaroEntity.extend({
 
 				if (selectedOption) {
 					if (selectedOption.scriptName) {
-						taro.script.runScript(selectedOption.scriptName, {});
+						const isWorldDialogue = dialogue.isWorld;
+						const triggeredFrom = isWorldDialogue ? 'world' : 'map';
+						taro.script.runScript(selectedOption.scriptName, { triggeredFrom });
 					}
 				}
 			}
