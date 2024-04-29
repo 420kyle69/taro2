@@ -65,7 +65,7 @@ var ScriptComponent = TaroEntity.extend({
 		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
 
-			if (taro.game.isWorld) {
+			if (taro.game.isWorldMap) {
 				params.isWorldScript = !!this.scripts[scriptId].isWorld;
 				if (params.isWorldScript && params.triggeredFrom === 'map') {
 					// map can not trigger world scripts
