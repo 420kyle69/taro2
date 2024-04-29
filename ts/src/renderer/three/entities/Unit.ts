@@ -89,6 +89,10 @@ namespace Renderer {
 				taroEntity.on('update-label', (data) => {
 					entity.label.visible = true;
 					entity.label.update({ text: data.text, color: data.color, bold: data.bold });
+
+					const size = entity.getSizeInPixels();
+					const unitHeightInLabelHeightUnits = size.height / entity.label.height;
+					entity.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 				});
 
 				taroEntity.on('play-animation', (id) => {
