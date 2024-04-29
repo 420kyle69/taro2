@@ -39,6 +39,8 @@ namespace Renderer {
 				if (this.billboard) {
 					this.faceCamera(camera);
 					this.correctZOffsetBasedOnCameraAngle();
+				} else {
+					this.resetRotation();
 				}
 			}
 
@@ -113,6 +115,11 @@ namespace Renderer {
 				if (!(this instanceof Item) || (this instanceof Item && !this.ownerUnit)) {
 					this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + offset;
 				}
+			}
+
+			private resetRotation() {
+				this.rotation.set(0, 0, 0);
+				this.calcRenderOrder();
 			}
 		}
 	}
