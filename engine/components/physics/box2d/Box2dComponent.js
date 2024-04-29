@@ -736,6 +736,7 @@ var PhysicsComponent = TaroEventingClass.extend({
 								} else if (taro.isClient) {
 									// if CSP is enabled, client-side physics will dictate:
 									// my unit's position and projectiles that are NOT server-streamed.
+									// this does NOT run for items
 									if (
 										(entity == taro.client.selectedUnit && entity._stats.controls?.clientPredictedMovement) ||
 										(entity._category == 'projectile' && !entity._stats.streamMode)
@@ -782,9 +783,11 @@ var PhysicsComponent = TaroEventingClass.extend({
 										}
 									} else {
 										// update server-streamed entities' body position
+										// for items, client-side physics body is updated by setting entity.nextKeyFrame in item._behaviour()
 										x = entity.nextKeyFrame[1][0];
 										y = entity.nextKeyFrame[1][1];
 										angle = entity.nextKeyFrame[1][2];
+
 									}
 
 									if (

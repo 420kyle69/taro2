@@ -1224,26 +1224,30 @@ var Item = TaroEntityPhysics.extend({
 		var ownerUnit = this.getOwnerUnit();
 		if (ownerUnit && this._stats.stateId != 'dropped') {
 			// this is necessary for games that has sprite-only item with no joint. (e.g. team elimination)
-			if (taro.isServer) {
-				var rotate = this._rotate.z;
+			var rotate = this._rotate.z;
 
-				// angleToTarget is only available in server
-				if (taro.isServer && ownerUnit.angleToTarget) {
-					rotate = ownerUnit.angleToTarget;
-				}
-
-				if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
-					rotate = ownerUnit._rotate.z;
-				}
-
-				self.anchoredOffset = self.getAnchoredOffset(rotate);
-				var x = ownerUnit._translate.x + self.anchoredOffset.x;
-				var y = ownerUnit._translate.y + self.anchoredOffset.y;
-
-				self.translateTo(x, y);
-				self.rotateTo(0, 0, rotate);
+			// angleToTarget is only available in server
+			if (taro.isServer && ownerUnit.angleToTarget) {
+				rotate = ownerUnit.angleToTarget;
 			}
 
+			if (self._stats.currentBody && self._stats.currentBody.jointType == 'weldJoint') {
+				rotate = ownerUnit._rotate.z;
+			}
+
+			self.anchoredOffset = self.getAnchoredOffset(rotate);
+			var x = ownerUnit._translate.x + self.anchoredOffset.x;
+			var y = ownerUnit._translate.y + self.anchoredOffset.y;
+
+			if (taro.isServer) {			
+				// for client-side, translate+rotate is handled in entitiesToRender.ts
+				self.translateTo(x, y);
+				self.rotateTo(0, 0, rotate);
+			} else {
+				// for updating physics body of this item
+				self.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, rotate]];
+			}
+			
 			if (taro.isServer || (taro.isClient && taro.client.selectedUnit == ownerUnit)) {
 				if (
 					self._stats.controls &&
