@@ -1280,11 +1280,10 @@ var Unit = TaroEntityPhysics.extend({
 					var slotIndex = availableSlot - 1;
 
 					// Item
-					item.streamUpdateData([
-						{ ownerUnitId: self.id() },
-						{ slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
-						{ quantity: itemData.quantity },
-					]);
+					item.streamUpdateData([{ ownerUnitId: self.id() }]);
+					item.changeSlotIndex(slotIndex);
+					// { slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
+					item.streamUpdateData([{ quantity: itemData.quantity }]);
 
 					self.inventory.insertItem(item, availableSlot - 1);
 					if (slotIndex == self._stats.currentItemIndex) {
@@ -1467,15 +1466,12 @@ var Unit = TaroEntityPhysics.extend({
 				}
 
 				item.setOwnerUnit(undefined);
+				item.show();
 				item.setState('dropped', defaultData);
 
 				// Move item if dropping item at a position
 				if (position) {
 					item.teleportTo(position.x, position.y, item._rotate.z);
-				}
-
-				if (item._stats.hidden) {
-					item.streamUpdateData([{ hidden: false }]);
 				}
 
 				self.inventory.removeItem(itemIndex, item.id());

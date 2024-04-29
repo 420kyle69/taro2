@@ -158,7 +158,7 @@ var TaroEntity = TaroObject.extend({
 					taro.sound.playSound(sound, this._translate, soundId);
 				}
 			}
-
+			// height-based-z code
 			if (taro.game.data.defaultData.heightBasedZIndex) {
 				// code for height-based-zindex
 				if (this._category === 'unit') {
