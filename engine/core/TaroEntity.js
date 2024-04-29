@@ -244,6 +244,8 @@ var TaroEntity = TaroObject.extend({
 			if (!isNaN(body['z-index'].offset) || body['z-index'].offset === undefined) {
 				self.zOffset(body['z-index'].offset ?? 0);
 			}
+
+			self.billboard(!!body['isBillboard']);
 		}
 	},
 

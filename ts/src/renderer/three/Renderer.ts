@@ -216,7 +216,7 @@ namespace Renderer {
 									break;
 								}
 
-								const otherOwnerUnit =  taro.$(unit.ownerId);
+								const otherOwnerUnit = taro.$(unit.ownerId);
 								if (otherOwnerUnit?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });

@@ -123,6 +123,7 @@ namespace Renderer {
 				window.addEventListener('keypress', (evt) => {
 					if (evt.key === '~') {
 						this.debugMode = !this.debugMode;
+						this.setEditorMode(this.debugMode);
 					}
 
 					if (!this.debugMode) return;
