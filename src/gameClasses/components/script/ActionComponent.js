@@ -631,7 +631,7 @@ var ActionComponent = TaroEntity.extend({
 								const isWorldPlayerAttribute = playerType && playerType.isWorld;
 
 								const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
-								if (taro.game.isWorld && !vars.isWorldScript && isWorldPlayerAttribute && !canBeUpdatedByMap) {
+								if (taro.game.isWorldMap && !vars.isWorldScript && isWorldPlayerAttribute && !canBeUpdatedByMap) {
 									self._script.errorLog('can not update world player attribute from map');
 									console.log('can not update world player attribute from map', path, attrId);
 									break;
@@ -732,7 +732,7 @@ var ActionComponent = TaroEntity.extend({
 						var playerTypeId = self._script.param.getValue(action.playerType, vars);
 
 						// map scripts not allowed to assign player type
-						if (taro.game.isWorld && !vars.isWorldScript) {
+						if (taro.game.isWorldMap && !vars.isWorldScript) {
 							self._script.errorLog('can not update player type from map');
 							console.log('can not update player type from map', path, playerTypeId);
 							break;
@@ -756,7 +756,7 @@ var ActionComponent = TaroEntity.extend({
 							var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
 							const isWorldPlayerVariable = playerType && playerType.isWorld;
 							const canBeUpdatedByMap = variable.canBeUpdatedByMap;
-							if (taro.game.isWorld && !vars.isWorldScript && isWorldPlayerVariable && !canBeUpdatedByMap) {
+							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldPlayerVariable && !canBeUpdatedByMap) {
 								self._script.errorLog('can not update world player variable from map');
 								console.log('can not update world player variable from map', path, variableId);
 								break;
@@ -2420,7 +2420,7 @@ var ActionComponent = TaroEntity.extend({
 							quantity = null;
 						}
 
-						if (taro.game.isWorld && !vars.isWorldScript) {
+						if (taro.game.isWorldMap && !vars.isWorldScript) {
 							let itemAttributes = [];
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
@@ -2470,7 +2470,7 @@ var ActionComponent = TaroEntity.extend({
 							quantity = null;
 						}
 
-						if (taro.game.isWorld && !vars.isWorldScript) {
+						if (taro.game.isWorldMap && !vars.isWorldScript) {
 							let itemAttributes = [];
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
@@ -2516,7 +2516,7 @@ var ActionComponent = TaroEntity.extend({
 						var itemData = taro.game.cloneAsset('itemTypes', itemTypeId);
 						var position = self._script.param.getValue(action.position, vars);
 
-						if (taro.game.isWorld && !vars.isWorldScript) {
+						if (taro.game.isWorldMap && !vars.isWorldScript) {
 							let itemAttributes = [];
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
@@ -2988,7 +2988,7 @@ var ActionComponent = TaroEntity.extend({
 
 							if (entityType === 'itemTypes') {
 
-								if (taro.game.isWorld && !vars.isWorldScript) {
+								if (taro.game.isWorldMap && !vars.isWorldScript) {
 									let itemAttributes = [];
 									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.consume?.unitAttribute || {}) || []);
 									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.consume?.playerAttribute || {}) || []);
@@ -3115,7 +3115,7 @@ var ActionComponent = TaroEntity.extend({
 
 							const isWorldEntityAttribute = entity._stats.isWorld;
 							const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
-							if (taro.game.isWorld && !vars.isWorldScript && isWorldEntityAttribute && !canBeUpdatedByMap) {
+							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntityAttribute && !canBeUpdatedByMap) {
 								self._script.errorLog('can not update world entity attribute from map');
 								console.log('can not update world entity attribute from map', path, attrId);
 								break;
@@ -3300,7 +3300,7 @@ var ActionComponent = TaroEntity.extend({
 
 							const isWorldEntityVariable = entity._stats.isWorld;
 							const canBeUpdatedByMap = variable.canBeUpdatedByMap;
-							if (taro.game.isWorld && !vars.isWorldScript && isWorldEntityVariable && !canBeUpdatedByMap) {
+							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntityVariable && !canBeUpdatedByMap) {
 								self._script.errorLog('can not update world entity variable from map');
 								console.log('can not update world entity variable from map', path, variableId);
 								break;

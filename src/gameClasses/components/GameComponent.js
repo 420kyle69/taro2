@@ -48,7 +48,7 @@ var GameComponent = TaroEntity.extend({
 
 		taro.script.trigger('gameStart');
 		self.hasStarted = true;
-		self.isWorld = !!(taro.game?.data?.defaultData?.isWorld || taro.game?.data?.defaultData?.worldId);
+		self.isWorldMap = !!(taro.game?.data?.defaultData?.worldId);
 		
 		taro.timer.startGameClock();
 
