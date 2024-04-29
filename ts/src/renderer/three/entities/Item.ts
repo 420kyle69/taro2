@@ -21,7 +21,6 @@ namespace Renderer {
 
 				let spriteSheet = textureMgr.getTextureSheetShallowCopy(taroEntity._stats.cellSheet.url);
 				const entity = new Item(taroEntity._id, taroEntity._stats.ownerId, spriteSheet, taroEntity);
-				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);
 
 				taroEntity.on('scale', (data: { x: number; y: number }) => entity.scale.set(data.x, 1, data.y), this);
 				taroEntity.on('show', () => (entity.visible = true), this);
@@ -30,6 +29,7 @@ namespace Renderer {
 				taroEntity.on('depth', (depth) => entity.setDepth(depth));
 				taroEntity.on('z-offset', (offset) => entity.setZOffset(Utils.pixelToWorld(offset)));
 				taroEntity.on('flip', (flip) => entity.setFlip(flip % 2 === 1, flip > 1));
+				taroEntity.on('billboard', (isBillboard) => entity.setBillboard(isBillboard, renderer.camera));
 
 				taroEntity.on(
 					'transform',

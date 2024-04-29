@@ -244,6 +244,8 @@ var TaroEntity = TaroObject.extend({
 			if (!isNaN(body['z-index'].offset) || body['z-index'].offset === undefined) {
 				self.zOffset(body['z-index'].offset ?? 0);
 			}
+
+			self.billboard(!!body['isBillboard']);
 		}
 	},
 
@@ -2034,7 +2036,11 @@ var TaroEntity = TaroObject.extend({
 			if (effect.runScript) {
 				const triggeredBy = {};
 				triggeredBy[`${this._category}Id`] = this._id;
-				this.script.runScript(effect.runScript, { triggeredBy });
+
+				const script = this.script.scripts?.[effect.runScript];
+				const triggeredFrom = script.isWorld ? 'world' : 'map';
+
+				this.script.runScript(effect.runScript, { triggeredBy, triggeredFrom });
 			}
 
 			if (taro.isServer) {
