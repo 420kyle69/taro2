@@ -31,7 +31,6 @@ namespace Renderer {
 			static create(taroEntity: TaroEntityPhysics) {
 				const textureMgr = TextureManager.instance();
 				const renderer = Three.instance();
-
 				let spriteSheet = textureMgr.getTextureSheetShallowCopy(taroEntity._stats.cellSheet.url);
 				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, spriteSheet, taroEntity);
 				entity.setBillboard(!!taroEntity._stats.isBillboard, renderer.camera);

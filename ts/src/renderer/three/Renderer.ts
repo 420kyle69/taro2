@@ -34,7 +34,7 @@ namespace Renderer {
 			private entityManager = new EntityManager();
 			private entitiesLayer = new THREE.Group();
 			private regionsLayer = new THREE.Group();
-			private entityPreviewLayer = new THREE.Group();
+			public entityPreviewLayer = new THREE.Group();
 
 			private sky: Skybox;
 			private voxels: Voxels;
@@ -47,6 +47,7 @@ namespace Renderer {
 			public tmp_tileId = 7;
 			public voxelEditor: VoxelEditor;
 			public entityEditor: EntityEditor;
+			private showRepublishWarning: boolean;
 
 			private regionDrawStart: { x: number; y: number } = { x: 0, y: 0 };
 
@@ -365,6 +366,53 @@ namespace Renderer {
 				return intersect;
 			}
 
+			createEntityPreview(action: ActionData): void {
+				if (
+					!action.disabled &&
+					action.position?.function === 'xyCoordinate' &&
+					!isNaN(action.position?.x) &&
+					!isNaN(action.position?.y)
+				) {
+					if (
+						action.type === 'createEntityForPlayerAtPositionWithDimensions' ||
+						(action.type === 'createEntityAtPositionWithDimensions' &&
+							!isNaN(action.width) &&
+							!isNaN(action.height) &&
+							!isNaN(action.angle))
+					) {
+						if (action.actionId) new EntityPreview(action);
+						else {
+							this.showRepublishWarning = true;
+						}
+					} else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
+						if (action.actionId) new EntityPreview(action, 'unit');
+						else {
+							this.showRepublishWarning = true;
+						}
+					} else if (
+						action.type === 'createUnitForPlayerAtPosition' &&
+						!isNaN(action.angle) &&
+						!isNaN(action.width) &&
+						!isNaN(action.height)
+					) {
+						if (action.actionId) new EntityPreview(action, 'unit');
+						else {
+							this.showRepublishWarning = true;
+						}
+					} else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
+						if (action.actionId) new EntityPreview(action, 'item');
+						else {
+							this.showRepublishWarning = true;
+						}
+					} else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
+						if (action.actionId) new EntityPreview(action, 'projectile');
+						else {
+							this.showRepublishWarning = true;
+						}
+					}
+				}
+			}
+
 			getViewportBounds() {
 				const halfWidth = (window.innerWidth * 0.5) / this.camera.zoom;
 				const halfHeight = (window.innerHeight * 0.5) / this.camera.zoom;
@@ -396,6 +444,9 @@ namespace Renderer {
 			private onEnterMapMode() {
 				this.hideEntities();
 				this.entityManager.regions.forEach((r) => r.setMode(RegionMode.Development));
+				if (this.showRepublishWarning) {
+					inGameEditor.showRepublishToInitEntitiesWarning();
+				}
 			}
 
 			private onExitMapMode() {
@@ -447,7 +498,6 @@ namespace Renderer {
 					const key = cellSheet.url;
 					const cols = cellSheet.columnCount;
 					const rows = cellSheet.rowCount;
-
 					textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
 						for (let animationsKey in taroEntity.animations) {
 							const animation = taroEntity.animations[animationsKey];
@@ -465,6 +515,7 @@ namespace Renderer {
 							}
 
 							// Move defaults to AnimationManager.create?
+							console.log(`${key}/${animationsKey}/${taroEntity.id}`);
 							AnimationManager.instance().create({
 								key: `${key}/${animationsKey}/${taroEntity.id}`,
 								textureSheetKey: key,
@@ -622,12 +673,25 @@ namespace Renderer {
 					const dynamicText = DynamicFloatingText.create(config, zOffset);
 					this.entitiesLayer.add(dynamicText);
 				});
+
+				taro.client.on('editInitEntity', (data: ActionData) => {
+					// let found = false;
+					// this.entityPreview.forEach((image) => {
+					// 	if (image.entity.action.actionId === data.actionId) {
+					// 		found = true;
+					// 		image.entity.update(data);
+					// 	}
+					// });
+					// if (!found) {
+					// 	this.createEntityImage(data);
+					// }
+				});
 			}
 
 			private render() {
 				requestAnimationFrame(this.render.bind(this));
 				taro.client.emit('tick');
-
+				if (this.entityEditor) this.entityEditor.update();
 				if (this.camera.target && !taro.isMobile) {
 					const worldPos = this.camera.getWorldPoint(this.pointer);
 					const x = Utils.worldToPixel(worldPos.x);

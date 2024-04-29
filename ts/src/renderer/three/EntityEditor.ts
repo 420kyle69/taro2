@@ -2,7 +2,7 @@ namespace Renderer {
 	export namespace Three {
 		export class EntityEditor {
 			activeEntityPlacement: boolean;
-			//preview: Phaser.GameObjects.Image;
+			preview: Renderer.Three.AnimatedSprite | undefined;
 
 			//outline: Phaser.GameObjects.Graphics;
 			//outlineHover: Phaser.GameObjects.Graphics;
@@ -16,6 +16,9 @@ namespace Renderer {
 			COLOR_HANDLER: number;
 
 			constructor() {
+				this.preview = undefined;
+				const renderer = Renderer.Three.instance();
+				renderer.entityPreviewLayer.add(this.preview);
 				this.activatePlacement(false);
 				taro.client.on('add-entities', () => {
 					this.activatePlacement(true);
@@ -34,6 +37,10 @@ namespace Renderer {
 				});
 				taro.client.on('fill', () => {
 					this.activatePlacement(false);
+				});
+				taro.client.on('updateActiveEntity', () => {
+					this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
+					this.updatePreview();
 				});
 			}
 
@@ -64,19 +71,23 @@ namespace Renderer {
 			}
 
 			updatePreview(): void {
-				/*const entityData = this.activeEntity;
+				const entityData = this.activeEntity;
+				const renderer = Renderer.Three.instance();
+				const textureMgr = TextureManager.instance();
 				if (!entityData) {
-					this.preview.setVisible(false);
+					if (this.preview) {
+						this.preview.visible = false;
+					}
 					return;
 				}
 
 				const entity = taro.game.data[entityData.entityType] && taro.game.data[entityData.entityType][entityData.id];
-				let height;
-				let width;
-				let key;
+				let height: number;
+				let width: number;
+				let key: string;
 
 				if (entityData.entityType === 'unitTypes') {
-					key = `unit/${entity.cellSheet.url}`;
+					key = `${entity.cellSheet.url}`;
 					if (entity.bodies?.default) {
 						height = entity.bodies.default.height;
 						width = entity.bodies.default.width;
@@ -85,7 +96,7 @@ namespace Renderer {
 						return;
 					}
 				} else if (entityData.entityType === 'itemTypes') {
-					key = `item/${entity.cellSheet.url}`;
+					key = `${entity.cellSheet.url}`;
 					if (entity.bodies?.dropped) {
 						height = entity.bodies.dropped.height;
 						width = entity.bodies.dropped.width;
@@ -94,7 +105,7 @@ namespace Renderer {
 						return;
 					}
 				} else if (entityData.entityType === 'projectileTypes') {
-					key = `projectile/${entity.cellSheet.url}`;
+					key = `${entity.cellSheet.url}`;
 					if (entity.bodies?.default) {
 						height = entity.bodies.default.height;
 						width = entity.bodies.default.width;
@@ -103,18 +114,24 @@ namespace Renderer {
 						return;
 					}
 				}
-				this.preview.setTexture(key, 0).setDisplaySize(width, height).setVisible(true);*/
+
+				this.preview = new Renderer.Three.AnimatedSprite(textureMgr.getTextureSheetShallowCopy(key));
+				this.preview.setBillboard(entity.isBillboard, renderer.camera);
+				// this.preview.setTexture(textureMgr.getTextureSheetShallowCopy(key).texture);
+				renderer.scene.add(this.preview);
 			}
 
 			update(): void {
-				/*if (this.activeEntityPlacement && this.preview) {
-					const worldPoint = this.gameScene.cameras.main.getWorldPoint(
-						this.gameScene.input.activePointer.x,
-						this.gameScene.input.activePointer.y
-					);
-					this.preview.x = worldPoint.x;
-					this.preview.y = worldPoint.y;
-				}*/
+				if (this.activeEntityPlacement && this.preview) {
+					const renderer = Renderer.Three.instance();
+					const worldPoint = renderer.raycastFloor();
+					if (worldPoint) {
+						console.log(worldPoint, this.preview);
+						this.preview.position.setX(worldPoint.x);
+						this.preview.position.setY(worldPoint.y + 1);
+						this.preview.position.setZ(worldPoint.z);
+					}
+				}
 			}
 
 			selectEntityImage(entityImage: EntityImage): void {

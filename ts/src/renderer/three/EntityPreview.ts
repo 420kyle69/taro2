@@ -4,7 +4,7 @@ namespace Renderer {
 			entityEditor: EntityEditor;
 			action: ActionData;
 			editedAction: ActionData;
-			image: THREE.Sprite & { entity: EntityPreview };
+			preview: Renderer.Three.Sprite & { entity: EntityPreview };
 			defaultWidth: number;
 			defaultHeight: number;
 
@@ -20,7 +20,7 @@ namespace Renderer {
 			x: number;
 			y: number;
 
-			constructor(previews: (THREE.Sprite & { entity: EntityPreview })[], action: ActionData, type?: string) {
+			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				this.action = action;
 
 				let key: string;
@@ -35,13 +35,13 @@ namespace Renderer {
 						key = `${typeName}/${entityTypeData.cellSheet.url}`;
 					}
 				}
-
+				console.log(key);
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
 
 				// TODO: add preview here
 				const renderer = Renderer.Three.instance();
-				
+				// const preview = (this.preview = new Sprite())
 				// const image = (this.image = scene.add.image(action.position?.x, action.position?.y, key));
 				// if (!isNaN(action.angle)) image.angle = action.angle;
 				// if (!isNaN(action.width) && !isNaN(action.height)) image.setDisplaySize(action.width, action.height);
@@ -212,21 +212,21 @@ namespace Renderer {
 					!isNaN(action.position.y)
 				) {
 					this.action.position = action.position;
-					this.image.position.x = action.position.x;
-					this.image.position.y = action.position.y;
+					this.preview.position.x = action.position.x;
+					this.preview.position.y = action.position.y;
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
 					// TODO: handle the ratation
-					this.image.rotation.set(action.angle, 0, 0);
+					this.preview.rotation.set(action.angle, 0, 0);
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;
-					this.image.scale.setX(action.width);
+					this.preview.scale.setX(action.width);
 				}
 				if (!isNaN(this.action.height) && !isNaN(action.height)) {
 					this.action.height = action.height;
-					this.image.scale.setY(action.height);
+					this.preview.scale.setY(action.height);
 				}
 				if (action.wasDeleted) {
 					this.hide();
@@ -236,7 +236,7 @@ namespace Renderer {
 			}
 
 			hide(): void {
-				this.image.visible = false;
+				this.preview.visible = false;
 				this.updateOutline(true);
 			}
 
