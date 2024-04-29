@@ -4,7 +4,7 @@ namespace Renderer {
 			entityEditor: EntityEditor;
 			action: ActionData;
 			editedAction: ActionData;
-			image: Phaser.GameObjects.Image & { entity: EntityPreview };
+			image: THREE.Sprite & { entity: EntityPreview };
 			defaultWidth: number;
 			defaultHeight: number;
 
@@ -20,11 +20,7 @@ namespace Renderer {
 			x: number;
 			y: number;
 
-			constructor(
-				entityImages: (Renderer.Three.AnimatedSprite & { entity: EntityPreview })[],
-				action: ActionData,
-				type?: string
-			) {
+			constructor(previews: (THREE.Sprite & { entity: EntityPreview })[], action: ActionData, type?: string) {
 				this.action = action;
 
 				let key: string;
@@ -45,7 +41,7 @@ namespace Renderer {
 
 				// TODO: add preview here
 				const renderer = Renderer.Three.instance();
-
+				
 				// const image = (this.image = scene.add.image(action.position?.x, action.position?.y, key));
 				// if (!isNaN(action.angle)) image.angle = action.angle;
 				// if (!isNaN(action.width) && !isNaN(action.height)) image.setDisplaySize(action.width, action.height);
@@ -120,18 +116,17 @@ namespace Renderer {
 			}
 
 			updateOutline(hide?: boolean): void {
-				const outline = this.entityEditor.outline;
-				const outlineHover = this.entityEditor.outlineHover;
-				const selectionContainer = this.entityEditor.selectionContainer;
-				if (hide) {
-					outline.clear();
-					outlineHover.clear();
-					selectionContainer.setVisible(false);
-					return;
-				}
-				const handlers = this.entityEditor.handlers;
-				const image = this.image;
-
+				// const outline = this.entityEditor.outline;
+				// const outlineHover = this.entityEditor.outlineHover;
+				// const selectionContainer = this.entityEditor.selectionContainer;
+				// if (hide) {
+				// 	outline.clear();
+				// 	outlineHover.clear();
+				// 	selectionContainer.setVisible(false);
+				// 	return;
+				// }
+				// const handlers = this.entityEditor.handlers;
+				// const image = this.image;
 				// if (this.entityEditor.selectedEntityImage === this) {
 				// 	outline.clear();
 				// 	outlineHover.clear();
@@ -142,7 +137,6 @@ namespace Renderer {
 				// 	selectionContainer.angle = image.angle;
 				// 	const smallDistance = 20 / this.scene.cameras.main.zoom;
 				// 	const largeDistance = 25 / this.scene.cameras.main.zoom;
-
 				// 	handlers.topLeft.setPosition(
 				// 		-image.displayWidth / 2 - smallDistance,
 				// 		-image.displayHeight / 2 - smallDistance
@@ -179,7 +173,6 @@ namespace Renderer {
 				// 		image.displayHeight / 2 + largeDistance
 				// 	);
 				// 	handlers.left.setPosition(-image.displayWidth / 2 - smallDistance, 0);
-
 				// 	outline.strokeRect(
 				// 		-image.displayWidth / 2,
 				// 		-image.displayHeight / 2,
@@ -219,20 +212,21 @@ namespace Renderer {
 					!isNaN(action.position.y)
 				) {
 					this.action.position = action.position;
-					this.image.x = action.position.x;
-					this.image.y = action.position.y;
+					this.image.position.x = action.position.x;
+					this.image.position.y = action.position.y;
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
-					this.image.angle = action.angle;
+					// TODO: handle the ratation
+					this.image.rotation.set(action.angle, 0, 0);
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;
-					this.image.setDisplaySize(action.width, this.image.displayHeight);
+					this.image.scale.setX(action.width);
 				}
 				if (!isNaN(this.action.height) && !isNaN(action.height)) {
 					this.action.height = action.height;
-					this.image.setDisplaySize(this.image.displayWidth, action.height);
+					this.image.scale.setY(action.height);
 				}
 				if (action.wasDeleted) {
 					this.hide();
@@ -242,8 +236,7 @@ namespace Renderer {
 			}
 
 			hide(): void {
-				this.image.alpha = 0;
-				this.image.setInteractive(false);
+				this.image.visible = false;
 				this.updateOutline(true);
 			}
 
