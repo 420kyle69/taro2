@@ -733,6 +733,8 @@ var ActionComponent = TaroEntity.extend({
 
 						// map scripts not allowed to assign player type
 						if (taro.game.isWorld && !vars.isWorldScript) {
+							self._script.errorLog('can not update player type from map');
+							console.log('can not update player type from map', path, playerTypeId);
 							break;
 						}
 
