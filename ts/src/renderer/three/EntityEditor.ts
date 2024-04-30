@@ -117,6 +117,7 @@ namespace Renderer {
 
 				this.preview = new Renderer.Three.AnimatedSprite(textureMgr.getTextureSheetShallowCopy(key));
 				this.preview.setBillboard(entity.isBillboard, renderer.camera);
+				this.preview.setOpacity(0.5);
 				// this.preview.setTexture(textureMgr.getTextureSheetShallowCopy(key).texture);
 				renderer.scene.add(this.preview);
 			}
