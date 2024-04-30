@@ -100,6 +100,10 @@ var Projectile = TaroEntityPhysics.extend({
 
 			self.updateLayer();
 			self.updateTexture();
+
+			if (this._stats.isHidden) {
+				this.hide(true);
+			}
 		}
 		this.playEffect('create');
 

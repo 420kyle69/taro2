@@ -95,6 +95,10 @@ var Item = TaroEntityPhysics.extend({
 			}
 			self.addToRenderer();
 			self.drawBounds(false);
+
+			if (this._stats.isHidden) {
+				this.hide(true);
+			}
 		}
 		self.playEffect('create');
 		// self.addComponent(EffectComponent);
@@ -1239,7 +1243,7 @@ var Item = TaroEntityPhysics.extend({
 			var x = ownerUnit._translate.x + self.anchoredOffset.x;
 			var y = ownerUnit._translate.y + self.anchoredOffset.y;
 
-			if (taro.isServer) {			
+			if (taro.isServer) {
 				// for client-side, translate+rotate is handled in entitiesToRender.ts
 				self.translateTo(x, y);
 				self.rotateTo(0, 0, rotate);
@@ -1247,7 +1251,7 @@ var Item = TaroEntityPhysics.extend({
 				// for updating physics body of this item
 				self.nextKeyFrame = [taro._currentTime + taro.client.renderBuffer, [x, y, rotate]];
 			}
-			
+
 			if (taro.isServer || (taro.isClient && taro.client.selectedUnit == ownerUnit)) {
 				if (
 					self._stats.controls &&
