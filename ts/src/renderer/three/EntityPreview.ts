@@ -4,7 +4,7 @@ namespace Renderer {
 			entityEditor: EntityEditor;
 			action: ActionData;
 			editedAction: ActionData;
-			preview: Renderer.Three.Sprite & { entity: EntityPreview };
+			preview: Renderer.Three.AnimatedSprite & { entity: EntityPreview };
 			defaultWidth: number;
 			defaultHeight: number;
 
@@ -35,24 +35,24 @@ namespace Renderer {
 						key = `${typeName}/${entityTypeData.cellSheet.url}`;
 					}
 				}
-				console.log(key);
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
 
 				// TODO: add preview here
 				const renderer = Renderer.Three.instance();
-				// const preview = (this.preview = new Sprite())
-				// const image = (this.image = scene.add.image(action.position?.x, action.position?.y, key));
-				// if (!isNaN(action.angle)) image.angle = action.angle;
-				// if (!isNaN(action.width) && !isNaN(action.height)) image.setDisplaySize(action.width, action.height);
-				// if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-				// 	image.setVisible(true);
-				// } else {
-				// 	image.setVisible(false);
-				// }
-				// image.setInteractive({ draggable: true });
-				// image.entity = this;
-				// entityImages.push(image);
+				const textureMgr = TextureManager.instance();
+				const preview = (this.preview = new Renderer.Three.AnimatedSprite(
+					textureMgr.getTextureSheetShallowCopy(key)
+				) as Renderer.Three.AnimatedSprite & { entity: EntityPreview });
+				preview.entity = this;
+				if (!isNaN(action.angle)) preview.rotateY(action.angle);
+				if (!isNaN(action.width) && !isNaN(action.height)) preview.scale.set(action.width, 1, action.height);
+				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
+					preview.visible = true;
+				} else {
+					preview.visible = false;
+				}
+				renderer.entityPreviewLayer.add(preview);
 
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });

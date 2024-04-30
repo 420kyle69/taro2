@@ -118,8 +118,7 @@ namespace Renderer {
 				this.preview = new Renderer.Three.AnimatedSprite(textureMgr.getTextureSheetShallowCopy(key));
 				this.preview.setBillboard(entity.isBillboard, renderer.camera);
 				this.preview.setOpacity(0.5);
-				// this.preview.setTexture(textureMgr.getTextureSheetShallowCopy(key).texture);
-				renderer.scene.add(this.preview);
+				renderer.entityPreviewLayer.add(this.preview);
 			}
 
 			update(): void {
@@ -127,9 +126,8 @@ namespace Renderer {
 					const renderer = Renderer.Three.instance();
 					const worldPoint = renderer.raycastFloor();
 					if (worldPoint) {
-						console.log(worldPoint, this.preview);
 						this.preview.position.setX(worldPoint.x);
-						this.preview.position.setY(worldPoint.y + 1);
+						this.preview.position.setY(Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1);
 						this.preview.position.setZ(worldPoint.z);
 					}
 				}
