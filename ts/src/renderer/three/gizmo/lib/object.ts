@@ -1,9 +1,9 @@
-const objLoader = new THREE.ObjectLoader();
-
 function parse(data) {
+	var objLoader = new OBJLoader();
 	return objLoader.parse(data);
 }
 function load(path) {
+	var objLoader = new OBJLoader();
 	return new Promise((resolve) => {
 		objLoader.load(
 			path,

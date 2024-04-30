@@ -38,7 +38,6 @@ function gizmo(camera, renderer) {
 	// };
 
 	// object.setScale = (...props) => scalePivot.set(...props);
-
 	const movePivot: any = move(
 		renderer.domElement,
 		camera,

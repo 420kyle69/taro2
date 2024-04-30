@@ -1,6 +1,6 @@
 function move(canvas, camera, renderer, position, callback, endCallback) {
 	let active = false;
-	const pivotScene = new THREE.Scene();
+	const pivotScene = new THREE.Group();
 	const material1 = new THREE.MeshBasicMaterial({ color: getColor('color1') });
 	const material2 = new THREE.MeshBasicMaterial({ color: getColor('color2') });
 	const material3 = new THREE.MeshBasicMaterial({ color: getColor('color3') });
@@ -8,7 +8,6 @@ function move(canvas, camera, renderer, position, callback, endCallback) {
 	const material4 = new THREE.MeshBasicMaterial({ color: getColor('hover') });
 
 	const x = parse(gizmoObject('move_helper'));
-
 	const y = x.clone();
 	const z = x.clone();
 
@@ -57,10 +56,9 @@ function move(canvas, camera, renderer, position, callback, endCallback) {
 	function move(point, axis) {
 		position[axis] = point[axis];
 	}
-	function scalegizmoObject(gizmoObject) {
+	function scaleGizmoObject(gizmoObject) {
 		// Calculate the distance between the camera and the gizmoObject
 		const distance = camera.position.distanceTo(position) / 80;
-
 		// Set the scale of the gizmoObject based on distance
 		gizmoObject.scale.set(distance, distance, distance);
 	}
@@ -71,12 +69,12 @@ function move(canvas, camera, renderer, position, callback, endCallback) {
 		xz.position.copy(position);
 		xy.position.copy(position);
 		yz.position.copy(position);
-		scalegizmoObject(x);
-		scalegizmoObject(y);
-		scalegizmoObject(z);
-		scalegizmoObject(xz);
-		scalegizmoObject(xy);
-		scalegizmoObject(yz);
+		scaleGizmoObject(x);
+		scaleGizmoObject(y);
+		scaleGizmoObject(z);
+		scaleGizmoObject(xz);
+		scaleGizmoObject(xy);
+		scaleGizmoObject(yz);
 	}
 
 	document.addEventListener('mouseup', (e) => {
@@ -178,7 +176,7 @@ function move(canvas, camera, renderer, position, callback, endCallback) {
 		if (!active) return;
 		scale();
 		renderer.clearDepth();
-		renderer.render(pivotScene, camera);
+		(taro.renderer as any).scene.add(pivotScene);
 	}
 	function set(x, y, z) {
 		position.x = x;

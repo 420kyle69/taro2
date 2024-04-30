@@ -20,7 +20,8 @@ namespace Renderer {
 				const renderer = Renderer.Three.instance();
 				renderer.entityPreviewLayer.add(this.preview);
 				this.activatePlacement(false);
-				// this.helper = gizmo(renderer.camera, renderer);
+				this.helper = gizmo(renderer.camera.instance, renderer.renderer);
+				this.helper.move();
 				taro.client.on('add-entities', () => {
 					this.activatePlacement(true);
 				});
@@ -132,6 +133,7 @@ namespace Renderer {
 						this.preview.position.setZ(worldPoint.z);
 					}
 				}
+				this.helper.render();
 			}
 
 			selectEntityImage(entityImage: EntityImage): void {
