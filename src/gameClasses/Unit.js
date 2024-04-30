@@ -138,6 +138,10 @@ var Unit = TaroEntityPhysics.extend({
 			self._scaleTexture();
 
 			self.flip(self._stats.flip);
+
+			if (this._stats.isHidden) {
+				this.hide(true);
+			}
 		}
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);
@@ -356,8 +360,8 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	hide: function () {
-		if (!this._stats.isHidden) {
+	hide: function (force = false) {
+		if (!this._stats.isHidden || force) {
 			this.stopMoving();
 
 			// hide all items carried by this unit
@@ -380,8 +384,8 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	show: function () {
-		if (this._stats.isHidden) {
+	show: function (force = false) {
+		if (this._stats.isHidden || force) {
 			if (this._stats.aiEnabled) {
 				this.ai.enable();
 			}
@@ -389,7 +393,7 @@ var Unit = TaroEntityPhysics.extend({
 			// update visibility of all items based on their current state
 			this._stats.itemIds.forEach((itemId) => {
 				const item = taro.$(itemId);
-				if (itemId != undefined && item) {
+				if (itemId != undefined && item && item._stats.slotIndex < this._stats.inventorySize) {
 					item.updateBody(); // don't use .show() to avoid unnecessary streaming. we know that showing unit's items will also show.
 				}
 			});
