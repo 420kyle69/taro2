@@ -196,6 +196,8 @@ class DeveloperMode {
 	initEntities: ActionData[];
 
 	serverScriptData: Record<string, ScriptData>;
+	savedScriptData: Record<string, ScriptData>;
+
 	serverVariableData: Record<string, VariableData>;
 
 	regionTool: boolean;
@@ -208,21 +210,28 @@ class DeveloperMode {
 	}
 
 	initializeEventListeners() {
-		taro.client.on('applyScriptChanges', (data: ScriptData) => {
+		taro.client.on('applyScriptChanges', (data: ScriptChangesData) => {
 			taro.network.send<any>('editGlobalScripts', data);
 		});
 
-		taro.client.on('editGlobalScripts', (data: ScriptData) => {
-			Object.entries(data).forEach(([scriptId, script]) => {
+		taro.client.on('editGlobalScripts', (data: ScriptChangesData) => {
+			Object.entries(data.scriptData).forEach(([scriptId, script]) => {
 				if (!script.deleted) {
-					taro.developerMode.serverScriptData[scriptId] = script;
+					if (data.action === 'apply') {
+						taro.developerMode.serverScriptData[scriptId] = script;
+					}
+					taro.developerMode.savedScriptData[scriptId] = script;
 				} else {
 					delete taro.developerMode.serverScriptData[scriptId];
 				}
 			});
 
-			taro.script.load(data, true);
-			taro.script.scriptCache = {};
+			if (data.action === 'apply') {
+				taro.script.load(data.scriptData, true);
+				taro.script.scriptCache = {};
+			}
+
+			inGameEditor?.editGlobalScripts?.(data);
 		});
 
 		taro.client.on('applyVariableChanges', (data: Record<string, VariableData>) => {
@@ -807,12 +816,15 @@ class DeveloperMode {
 		}
 	}
 
-	editGlobalScripts(data, clientId: string): void {
+	editGlobalScripts(data: ScriptChangesData, clientId: string): void {
 		// only allow developers to modify global scripts
 		if (taro.server.developerClientIds.includes(clientId)) {
+			data.clientId = clientId;
 			taro.network.send('editGlobalScripts', data);
-			taro.script.load(data, true);
-			taro.script.scriptCache = {};
+			if (data.action === 'apply') {
+				taro.script.load(data.scriptData, true);
+				taro.script.scriptCache = {};
+			}
 		}
 	}
 
