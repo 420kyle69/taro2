@@ -52,6 +52,7 @@ namespace Renderer {
 				} else {
 					preview.visible = false;
 				}
+				this.preview.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				preview.position.set(
 					action.position?.x,
 					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
@@ -217,7 +218,7 @@ namespace Renderer {
 				) {
 					this.action.position = action.position;
 					this.preview.position.x = action.position.x;
-					this.preview.position.y = action.position.y;
+					this.preview.position.z = action.position.y;
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;

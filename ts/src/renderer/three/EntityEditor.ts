@@ -12,7 +12,7 @@ namespace Renderer {
 
 			activeEntity: { id: string; player: string; entityType: string };
 			selectedEntityImage: EntityImage;
-
+			helper: any;
 			COLOR_HANDLER: number;
 
 			constructor() {
@@ -20,6 +20,7 @@ namespace Renderer {
 				const renderer = Renderer.Three.instance();
 				renderer.entityPreviewLayer.add(this.preview);
 				this.activatePlacement(false);
+				// this.helper = gizmo(renderer.camera, renderer);
 				taro.client.on('add-entities', () => {
 					this.activatePlacement(true);
 				});
