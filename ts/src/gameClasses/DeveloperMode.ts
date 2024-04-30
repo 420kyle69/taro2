@@ -196,6 +196,8 @@ class DeveloperMode {
 	initEntities: ActionData[];
 
 	serverScriptData: Record<string, ScriptData>;
+	savedScriptData: Record<string, ScriptData>;
+
 	serverVariableData: Record<string, VariableData>;
 
 	regionTool: boolean;
@@ -208,21 +210,28 @@ class DeveloperMode {
 	}
 
 	initializeEventListeners() {
-		taro.client.on('applyScriptChanges', (data: ScriptData) => {
+		taro.client.on('applyScriptChanges', (data: ScriptChangesData) => {
 			taro.network.send<any>('editGlobalScripts', data);
 		});
 
-		taro.client.on('editGlobalScripts', (data: ScriptData) => {
-			Object.entries(data).forEach(([scriptId, script]) => {
+		taro.client.on('editGlobalScripts', (data: ScriptChangesData) => {
+			Object.entries(data.scriptData).forEach(([scriptId, script]) => {
 				if (!script.deleted) {
-					taro.developerMode.serverScriptData[scriptId] = script;
+					if (data.action === 'apply') {
+						taro.developerMode.serverScriptData[scriptId] = script;
+					}
+					taro.developerMode.savedScriptData[scriptId] = script;
 				} else {
 					delete taro.developerMode.serverScriptData[scriptId];
 				}
 			});
 
-			taro.script.load(data, true);
-			taro.script.scriptCache = {};
+			if (data.action === 'apply') {
+				taro.script.load(data.scriptData, true);
+				taro.script.scriptCache = {};
+			}
+
+			inGameEditor?.editGlobalScripts?.(data);
 		});
 
 		taro.client.on('applyVariableChanges', (data: Record<string, VariableData>) => {
@@ -807,12 +816,15 @@ class DeveloperMode {
 		}
 	}
 
-	editGlobalScripts(data, clientId: string): void {
+	editGlobalScripts(data: ScriptChangesData, clientId: string): void {
 		// only allow developers to modify global scripts
 		if (taro.server.developerClientIds.includes(clientId)) {
+			data.clientId = clientId;
 			taro.network.send('editGlobalScripts', data);
-			taro.script.load(data, true);
-			taro.script.scriptCache = {};
+			if (data.action === 'apply') {
+				taro.script.load(data.scriptData, true);
+				taro.script.scriptCache = {};
+			}
 		}
 	}
 
@@ -844,9 +856,9 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		if (taro.game.data.unitTypes[data.typeId]) {
-			if (data.newData.scripts) {
+			if (data.valueType === 'script') {
 				taro.game.data.unitTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
-			} else {
+			} else if (data.valueType === 'property') {
 				const oldScripts = rfdc()(taro.game.data.unitTypes[data.typeId].scripts);
 				taro.game.data.unitTypes[data.typeId] = rfdc()(data.newData);
 				taro.game.data.unitTypes[data.typeId].scripts = oldScripts;
@@ -864,6 +876,8 @@ class DeveloperMode {
 		});
 		if (taro.isServer) {
 			taro.network.send('updateUnit', data);
+		} else {
+			inGameEditor.updateEntity?.(data);
 		}
 	}
 
@@ -915,9 +929,9 @@ class DeveloperMode {
 		// 2. force update its dimension/scale/layer/image
 		// 3. we may need to re-mount the item on unit
 		if (taro.game.data.itemTypes[data.typeId]) {
-			if (data.newData.scripts) {
+			if (data.valueType === 'script') {
 				taro.game.data.itemTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
-			} else {
+			} else if (data.valueType === 'property') {
 				const oldScripts = rfdc()(taro.game.data.itemTypes[data.typeId].scripts);
 				taro.game.data.itemTypes[data.typeId] = rfdc()(data.newData);
 				taro.game.data.itemTypes[data.typeId].scripts = oldScripts;
@@ -935,6 +949,8 @@ class DeveloperMode {
 		});
 		if (taro.isServer) {
 			taro.network.send('updateItem', data);
+		} else {
+			inGameEditor.updateEntity?.(data);
 		}
 	}
 
@@ -960,9 +976,9 @@ class DeveloperMode {
 		// 1. broadcast update to all players
 		// 2. force update its dimension/scale/layer/image
 		if (taro.game.data.projectileTypes[data.typeId]) {
-			if (data.newData.scripts) {
+			if (data.valueType === 'script') {
 				taro.game.data.projectileTypes[data.typeId].scripts = rfdc()(data.newData.scripts);
-			} else {
+			} else if (data.valueType === 'property') {
 				const oldScripts = rfdc()(taro.game.data.projectileTypes[data.typeId].scripts);
 				taro.game.data.projectileTypes[data.typeId] = rfdc()(data.newData);
 				taro.game.data.projectileTypes[data.typeId].scripts = oldScripts;
@@ -980,6 +996,8 @@ class DeveloperMode {
 		});
 		if (taro.isServer) {
 			taro.network.send('updateProjectile', data);
+		} else {
+			inGameEditor.updateEntity?.(data);
 		}
 	}
 
@@ -1025,13 +1043,28 @@ class DeveloperMode {
 		}
 	}
 
-	editEntity(data: EditEntityData, clientId: string) {
+	updateDevelopersData(data: EditEntityData) {
+		if (taro.isServer) {
+			(taro.server.developerClientIds || []).forEach((developerId) => {
+				if (data.clientId !== developerId) {
+					taro.network.send('updateDevelopersData', data, developerId);
+				}
+			});
+		} else {
+			inGameEditor.updateEntity?.(data);
+		}
+	}
+
+	editEntity(data: EditEntityData, clientId?: string) {
 		if (taro.isClient) {
 			taro.network.send<any>('editEntity', data);
 		} else {
+			if (data) {
+				data.clientId = clientId;
+			}
 			// only allow developers to modify entities
 			if (taro.server.developerClientIds.includes(clientId)) {
-				if (data.entityType === 'unit') {
+				if (data.entityType === 'unitTypes') {
 					switch (data.action) {
 						case 'create':
 							//this.createUnit(data);
@@ -1048,8 +1081,12 @@ class DeveloperMode {
 						case 'delete':
 							//this.deleteUnit(data);
 							break;
+						
+						case 'update-developers-data':
+							this.updateDevelopersData(data);
+							break;
 					}
-				} else if (data.entityType === 'item') {
+				} else if (data.entityType === 'itemTypes') {
 					switch (data.action) {
 						case 'create':
 							//this.createItem(data);
@@ -1067,7 +1104,7 @@ class DeveloperMode {
 							//this.deleteItem(data);
 							break;
 					}
-				} else if (data.entityType === 'projectile') {
+				} else if (data.entityType === 'projectileTypes') {
 					switch (data.action) {
 						case 'create':
 							//this.createProjectile(data);
@@ -1085,7 +1122,7 @@ class DeveloperMode {
 							//this.deleteProjectile(data);
 							break;
 					}
-				} else if (data.entityType === 'shop') {
+				} else if (data.entityType === 'shops') {
 					switch (data.action) {
 						case 'update':
 							this.updateShop(data);
@@ -1093,7 +1130,7 @@ class DeveloperMode {
 						default:
 							break;
 					}
-				} else if (data.entityType === 'dialogue') {
+				} else if (data.entityType === 'dialogues') {
 					switch (data.action) {
 						case 'update':
 							this.updateDialogue(data);
@@ -1243,13 +1280,18 @@ interface RegionData {
 }
 
 interface EditEntityData {
+	action: string;
 	entityType: string;
 	typeId: string;
-	action: string;
+	valueType?: string;
 	newData?: any; //EntityStats,
 	playerId?: string;
 	position?: { x: number; y: number };
 	angle?: number;
+	clientId?: string;
+	extraData?: {
+		[key: string]: any;
+	}
 }
 
 type devModeTab = 'play' | 'map' | 'entities' | 'moderate' | 'debug';
