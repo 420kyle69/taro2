@@ -124,7 +124,7 @@ namespace Renderer {
 			update(): void {
 				if (this.activeEntityPlacement && this.preview) {
 					const renderer = Renderer.Three.instance();
-					const worldPoint = renderer.raycastFloor();
+					const worldPoint = renderer.raycastFloor(0);
 					if (worldPoint) {
 						this.preview.position.setX(worldPoint.x);
 						this.preview.position.setY(Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1);

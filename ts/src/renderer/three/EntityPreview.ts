@@ -22,7 +22,6 @@ namespace Renderer {
 
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				this.action = action;
-
 				let key: string;
 				let entityTypeData: Record<string, any>;
 
@@ -32,7 +31,7 @@ namespace Renderer {
 					if (action.entityType === iterTypes || type === typeName) {
 						entityTypeData = taro.game.data[iterTypes] && taro.game.data[iterTypes][action.entity ?? action[iterType]];
 						if (!entityTypeData) return;
-						key = `${typeName}/${entityTypeData.cellSheet.url}`;
+						key = `${entityTypeData.cellSheet.url}`;
 					}
 				}
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
@@ -46,14 +45,19 @@ namespace Renderer {
 				) as Renderer.Three.AnimatedSprite & { entity: EntityPreview });
 				preview.entity = this;
 				if (!isNaN(action.angle)) preview.rotateY(action.angle);
-				if (!isNaN(action.width) && !isNaN(action.height)) preview.scale.set(action.width, 1, action.height);
+				if (!isNaN(action.width) && !isNaN(action.height))
+					preview.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 					preview.visible = true;
 				} else {
 					preview.visible = false;
 				}
+				preview.position.set(
+					action.position?.x,
+					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
+					action.position?.y
+				);
 				renderer.entityPreviewLayer.add(preview);
-
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });
 

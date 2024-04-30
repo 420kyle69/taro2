@@ -191,7 +191,7 @@ const debounceRecalcPhysics = debounce(recalcWallsPhysics, 0);
 class DeveloperMode {
 	active: boolean;
 	activeTab: devModeTab;
-	activeButton: string;
+	activeButton: 'cursor' | 'draw-region' | 'add-entities' | 'brush' | 'eraser' | 'fill';
 
 	initEntities: ActionData[];
 

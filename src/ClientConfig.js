@@ -127,6 +127,7 @@ var taroClientConfig = {
 		'renderer/three/Skybox.js',
 		'renderer/three/TextureSheet.js',
 		'renderer/three/EntityEditor.js',
+		'renderer/three/EntityPreview.js',
 		'renderer/three/VoxelEditor.js',
 		'renderer/three/VoxelMarker.js',
 		'renderer/three/MarkerLines.js',
