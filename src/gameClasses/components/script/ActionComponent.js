@@ -211,7 +211,8 @@ var ActionComponent = TaroEntity.extend({
 						var playerGroupName = action.playerGroup && action.playerGroup.variableName;
 
 						if (player?._stats?.clientId && taro.game.data.variables.hasOwnProperty(playerGroupName)) {
-							taro.game.data.variables[playerGroupName].value = [player];
+							taro.game.data.variables[playerGroupName].value = taro.game.data.variables[playerGroupName].value || [];
+							taro.game.data.variables[playerGroupName].value.push(player);
 							taro.game.lastUpdatedVariableName = playerGroupName;
 						}
 
@@ -237,7 +238,8 @@ var ActionComponent = TaroEntity.extend({
 						var unitGroupName = action.unitGroup && action.unitGroup.variableName;
 
 						if (unit?.id() && taro.game.data.variables.hasOwnProperty(unitGroupName)) {
-							taro.game.data.variables[unitGroupName].value = [unit];
+							taro.game.data.variables[unitGroupName].value = taro.game.data.variables[unitGroupName].value || [];
+							taro.game.data.variables[unitGroupName].value.push(unit);
 							taro.game.lastUpdatedVariableName = unitGroupName;
 						}
 
