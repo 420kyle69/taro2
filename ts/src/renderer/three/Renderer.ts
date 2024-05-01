@@ -207,7 +207,7 @@ namespace Renderer {
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
 						for (const intersect of intersects) {
 							const closest = intersect.object as THREE.Mesh;
-							const unit = this.entityManager.units.find((unit) => unit.sprite === closest);
+							const unit = this.entityManager.units.find((unit) => unit.body.sprite === closest);
 							if (unit) {
 								const clientUnit = taro.client.selectedUnit;
 								const otherUnit = taro.$(unit.taroId);

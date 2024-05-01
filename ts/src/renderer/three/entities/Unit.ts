@@ -1,11 +1,13 @@
 namespace Renderer {
 	export namespace Three {
-		export class Unit extends AnimatedSprite {
+		export class Unit extends Node {
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },
 				offset: { x: 0, y: 0, z: 0 },
 			};
+
+			body: AnimatedSprite;
 
 			hud = new THREE.Group();
 
@@ -19,7 +21,10 @@ namespace Renderer {
 				spriteSheet: TextureSheet,
 				public taroEntity?: TaroEntityPhysics
 			) {
-				super(spriteSheet);
+				super();
+
+				this.body = new AnimatedSprite(spriteSheet);
+				this.add(this.body);
 
 				this.label.visible = false;
 
@@ -59,11 +64,11 @@ namespace Renderer {
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
 				taroEntity.on('update-attribute', (data) => (entity as Unit).attributes.update(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
-				taroEntity.on('layer', (layer) => entity.setLayer(layer));
-				taroEntity.on('depth', (depth) => entity.setDepth(depth));
-				taroEntity.on('z-offset', (offset) => entity.setZOffset(Utils.pixelToWorld(offset)));
-				taroEntity.on('flip', (flip) => entity.setFlip(flip % 2 === 1, flip > 1));
-				taroEntity.on('billboard', (isBillboard) => entity.setBillboard(isBillboard, renderer.camera));
+				taroEntity.on('layer', (layer) => entity.body.setLayer(layer));
+				taroEntity.on('depth', (depth) => entity.body.setDepth(depth));
+				taroEntity.on('z-offset', (offset) => entity.body.setZOffset(Utils.pixelToWorld(offset)));
+				taroEntity.on('flip', (flip) => entity.body.setFlip(flip % 2 === 1, flip > 1));
+				taroEntity.on('billboard', (isBillboard) => entity.body.setBillboard(isBillboard, renderer.camera));
 
 				taroEntity.on(
 					'transform',
@@ -71,9 +76,9 @@ namespace Renderer {
 						entity.position.x = Utils.pixelToWorld(data.x);
 						entity.position.z = Utils.pixelToWorld(data.y);
 
-						entity.setRotationY(-data.rotation);
+						entity.body.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;
-						entity.setFlip(flip % 2 === 1, flip > 1);
+						entity.body.setFlip(flip % 2 === 1, flip > 1);
 					},
 					this
 				);
@@ -90,7 +95,7 @@ namespace Renderer {
 					entity.label.visible = true;
 					entity.label.update({ text: data.text, color: data.color, bold: data.bold });
 
-					const size = entity.getSizeInPixels();
+					const size = entity.body.getSizeInPixels();
 					const unitHeightInLabelHeightUnits = size.height / entity.label.height;
 					entity.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 				});
@@ -99,7 +104,7 @@ namespace Renderer {
 					const key = `${spriteSheet.key}/${id}/${taroEntity._stats.id}`;
 					const animation = AnimationManager.instance().animations.get(key);
 					if (animation) {
-						entity.loop(animation.frames, animation.fps, animation.repeat);
+						entity.body.loop(animation.frames, animation.fps, animation.repeat);
 					}
 				});
 
@@ -110,7 +115,7 @@ namespace Renderer {
 					const sheet = textureMgr.getTextureSheetShallowCopy(key);
 
 					const replaceTexture = (spriteSheet: TextureSheet) => {
-						entity.setTextureSheet(sheet);
+						entity.body.setTextureSheet(sheet);
 						const bounds = taroEntity._bounds2d;
 						entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 					};
@@ -121,14 +126,14 @@ namespace Renderer {
 						const cols = taroEntity._stats.cellSheet.columnCount;
 						const rows = taroEntity._stats.cellSheet.rowCount;
 						textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
-							animationMgr.createAnimationsFromTaroData(key, taroEntity._stats);
+							animationMgr.createAnimationsFromTaroData(key, taroEntity._stats as unknown as EntityData);
 							replaceTexture(sheet);
 						});
 					}
 				});
 
 				taroEntity.on('fading-text', (data: { text: string; color?: string }) => {
-					const size = entity.getSizeInPixels();
+					const size = entity.body.getSizeInPixels();
 					const offsetInPixels = -25 - size.height * 0.5;
 					const text = new FloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
 					entity.add(text);
@@ -143,6 +148,10 @@ namespace Renderer {
 						this.taroEntity.off(key, listener);
 					}
 				}
+			}
+
+			update(dt) {
+				this.body.update(dt);
 			}
 
 			renderChat(text: string): void {
@@ -165,15 +174,15 @@ namespace Renderer {
 				this.attributes.clear();
 				this.attributes.addAttributes(data);
 
-				const size = this.getSizeInPixels();
+				const size = this.body.getSizeInPixels();
 				const halfHeight = size.height * 0.5;
 				this.attributes.position.z = Utils.pixelToWorld(halfHeight);
 			}
 
 			setScale(sx: number, sy: number) {
-				super.setScale(sx, sy);
+				this.body.setScale(sx, sy);
 
-				const size = this.getSizeInPixels();
+				const size = this.body.getSizeInPixels();
 				const unitHeightInLabelHeightUnits = size.height / this.label.height;
 				this.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 			}
