@@ -221,8 +221,9 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 						var playerGroupName = action.playerGroup && action.playerGroup.variableName;
 
-						if (taro.game.data.variables[playerGroupName]?.value?.length) {
-							for (let i = 0; i < taro.game.data.variables[playerGroupName].value.length; i++) {
+						var playerGroupLength = taro.game.data.variables[playerGroupName]?.value?.length;
+						if (playerGroupLength) {
+							for (let i = 0; i < playerGroupLength; i++) {
 								if (taro.game.data.variables[playerGroupName].value[i]?._stats?.clientId == player?._stats?.clientId) {
 									taro.game.data.variables[playerGroupName].value.splice(i, 1);
 								}
@@ -254,7 +255,7 @@ var ActionComponent = TaroEntity.extend({
 								}
 							}
 						}
-						
+
 						break;
 
 					case 'sendPlayerToSpawningMap':
