@@ -439,6 +439,23 @@ namespace Renderer {
 					...Object.values(data.itemTypes),
 				];
 
+				gAssetManager.setFilter(taro.game.data.defaultData.renderingFilter);
+				const sources = [];
+				for (const taroEntity of taroEntities) {
+					if (taroEntity.is3DObject) {
+						const url = taroEntity['3DObjectUrl'];
+						if (!url) continue;
+
+						sources.push({ name: url, type: 'gltf', src: url });
+					} else {
+						const url = taroEntity?.cellSheet?.url;
+						if (!url) continue;
+
+						sources.push({ name: url, type: 'texture', src: url });
+					}
+				}
+				gAssetManager.load(sources, this.initLoadingManager);
+
 				const gltfLoader = new GLTFLoader(this.initLoadingManager);
 				const dracoLoader = new DRACOLoader(this.initLoadingManager);
 				dracoLoader.setDecoderPath('/assets/lib/draco');
