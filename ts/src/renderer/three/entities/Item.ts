@@ -82,10 +82,7 @@ namespace Renderer {
 
 				taroEntity.on('play-animation', (id) => {
 					const key = `${spriteSheet.key}/${id}/${taroEntity._stats.id}`;
-					const animation = AnimationManager.instance().animations.get(key);
-					if (animation) {
-						entity.body.loop(animation.frames, animation.fps, animation.repeat);
-					}
+					entity.body.play(key);
 				});
 
 				taroEntity.on('update-texture', (data) => {

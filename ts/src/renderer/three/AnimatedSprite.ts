@@ -1,5 +1,7 @@
 namespace Renderer {
 	export namespace Three {
+		const animationMgr = AnimationManager.instance();
+
 		export class AnimatedSprite extends Sprite {
 			private playSpriteIndices: number[] = [];
 			private runningTileArrayIndex = 0;
@@ -21,12 +23,15 @@ namespace Renderer {
 				this.setUvOffset(0);
 			}
 
-			loop(playSpriteIndices: number[], fps: number, repeat = 0) {
-				this.playSpriteIndices = playSpriteIndices;
+			play(animKey: string) {
+				const animation = animationMgr.animations.get(animKey);
+				if (!animation) return;
+
+				this.playSpriteIndices = animation.frames;
 				this.runningTileArrayIndex = 0;
-				this.currentTile = playSpriteIndices[this.runningTileArrayIndex];
-				this.maxDisplayTime = 1 / fps;
-				this.repeat = repeat;
+				this.currentTile = animation.frames[this.runningTileArrayIndex];
+				this.maxDisplayTime = 1 / animation.fps;
+				this.repeat = animation.repeat;
 				this.cycle = 0;
 				this.elapsedTime = 0;
 				this.setUvOffset(this.currentTile);
