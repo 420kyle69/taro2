@@ -294,6 +294,9 @@ namespace Renderer {
 					requestAnimationFrame(this.render.bind(this));
 				};
 
+				const isPixelArt = taro.game.data.defaultData.renderingFilter === 'pixelArt';
+				gAssetManager.setFilter(isPixelArt ? THREE.NearestFilter : THREE.LinearFilter);
+
 				this.loadAssets();
 
 				taro.client.on('enterPlayTab', () => {
@@ -422,15 +425,13 @@ namespace Renderer {
 			}
 
 			private loadAssets() {
-				const textureMgr = TextureManager.instance();
-				textureMgr.setFilter(taro.game.data.defaultData.renderingFilter);
-				textureMgr.setLoadingManager(this.initLoadingManager);
+				const sources = [];
 
 				const data = taro.game.data;
 
 				data.map.tilesets.forEach((tileset) => {
 					const key = tileset.image;
-					textureMgr.loadTextureFromUrl(key, Utils.patchAssetUrl(key));
+					sources.push({ name: key, type: 'texture', src: Utils.patchAssetUrl(key) });
 				});
 
 				const taroEntities = [
@@ -439,22 +440,21 @@ namespace Renderer {
 					...Object.values(data.itemTypes),
 				];
 
-				gAssetManager.setFilter(taro.game.data.defaultData.renderingFilter);
-				const sources = [];
 				for (const taroEntity of taroEntities) {
 					if (taroEntity.is3DObject) {
 						const url = taroEntity['3DObjectUrl'];
-						if (!url) continue;
+						//if (!url) continue; uncomment later when unit can be only sprite or model
 
-						sources.push({ name: url, type: 'gltf', src: url });
-					} else {
-						const url = taroEntity?.cellSheet?.url;
-						if (!url) continue;
+						sources.push({ name: url, type: 'gltf', src: Utils.patchAssetUrl(url) });
+					} // code below should be in else block after unit can be only sprite or model
 
-						sources.push({ name: url, type: 'texture', src: url });
-					}
+					const url = taroEntity?.cellSheet?.url;
+					if (!url) continue;
+
+					sources.push({ name: url, type: 'texture', src: Utils.patchAssetUrl(url) });
+
+					AnimationManager.instance().createAnimationsFromTaroData(url, taroEntity);
 				}
-				gAssetManager.load(sources, this.initLoadingManager);
 
 				const gltfLoader = new GLTFLoader(this.initLoadingManager);
 				const dracoLoader = new DRACOLoader(this.initLoadingManager);
@@ -462,10 +462,10 @@ namespace Renderer {
 				gltfLoader.setDRACOLoader(dracoLoader);
 
 				for (const taroEntity of taroEntities) {
-					// Load 3D models
 					if (taroEntity.is3DObject) {
 						const url = taroEntity['3DObjectUrl'];
 						if (url) {
+							console.log(url);
 							gltfLoader.load(url, (gltf) => {
 								const model = gltf.scene;
 								model.position.y = 0.5;
@@ -483,38 +483,21 @@ namespace Renderer {
 								this.scene.add(model);
 							});
 						}
-
-						// Uncomment below once model loads 3D model instead of cellsheet
-						// continue;
 					}
-
-					// Load textures
-					const cellSheet = taroEntity.cellSheet;
-					if (!cellSheet) continue;
-
-					const key = cellSheet.url;
-					const cols = cellSheet.columnCount;
-					const rows = cellSheet.rowCount;
-
-					textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
-						AnimationManager.instance().createAnimationsFromTaroData(key, taroEntity);
-					});
 				}
 
 				for (const taroEntity of Object.values(data.particleTypes)) {
 					const key = taroEntity.url;
-					textureMgr.loadTextureFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
+					sources.push({ name: `particle/${key}`, type: 'texture', src: Utils.patchAssetUrl(key) });
 				}
 
-				const urls = taro.game.data.settings.skybox;
-				textureMgr.loadTextureFromUrl('left', urls.left);
-				textureMgr.loadTextureFromUrl('right', urls.right);
-				textureMgr.loadTextureFromUrl('top', urls.top);
-				textureMgr.loadTextureFromUrl('bottom', urls.bottom);
-				textureMgr.loadTextureFromUrl('front', urls.front);
-				textureMgr.loadTextureFromUrl('back', urls.back);
+				const skyboxFacesUrls = taro.game.data.settings.skybox;
+				for (const key in skyboxFacesUrls) {
+					sources.push({ name: key, type: 'texture', src: skyboxFacesUrls[key] });
+				}
 
-				textureMgr.setLoadingManager(THREE.DefaultLoadingManager);
+				console.log(sources);
+				gAssetManager.load(sources, this.initLoadingManager);
 			}
 
 			private forceLoadUnusedCSSFonts() {

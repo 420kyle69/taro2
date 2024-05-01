@@ -1,12 +1,12 @@
 namespace Renderer {
 	export namespace Three {
-		type Source = {
+		export type AssetSource = {
 			name: string;
-			type: string;
+			type: 'gltf' | 'texture';
 			src: string;
 		};
 
-		type GLTF = {
+		export type GLTF = {
 			animations: THREE.AnimationClip[];
 			scene: THREE.Group;
 			scenes: THREE.Group[];
@@ -14,12 +14,13 @@ namespace Renderer {
 			asset: Object;
 		};
 
-		type Asset = THREE.Texture | GLTF;
+		export type Asset = THREE.Texture | GLTF;
 
 		class AssetManager {
 			filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter = THREE.LinearFilter;
 
 			private assets: Map<string, Asset> = new Map();
+			private textures: Map<string, THREE.Texture> = new Map();
 			private loaders: Map<string, THREE.Loader> = new Map();
 
 			constructor() {
@@ -33,7 +34,11 @@ namespace Renderer {
 				this.loaders.set('texture', new THREE.TextureLoader());
 			}
 
-			load(sources: Source[], loadingManager?: THREE.LoadingManager) {
+			setFilter(filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter) {
+				this.filter = filter;
+			}
+
+			load(sources: AssetSource[], loadingManager?: THREE.LoadingManager, cb?: (name: string) => void) {
 				for (const source of sources) {
 					const loader = this.loaders.get(source.type);
 					if (loader) {
@@ -42,8 +47,15 @@ namespace Renderer {
 						}
 
 						loader.load(source.src, (asset: Asset) => {
-							console.log(asset);
+							if (source.type === 'texture') {
+								(asset as THREE.Texture).colorSpace = THREE.SRGBColorSpace;
+								(asset as THREE.Texture).magFilter = this.filter;
+								this.textures.set(source.name, asset as THREE.Texture);
+							}
+
 							this.assets.set(source.name, asset);
+
+							if (cb) cb(source.name);
 						});
 					}
 				}
@@ -53,12 +65,26 @@ namespace Renderer {
 				return this.assets.get(name);
 			}
 
-			set(name: string, asset: Asset) {
-				this.assets.set(name, asset);
+			getTexture(name: string) {
+				return this.assets.get(name) as THREE.Texture;
 			}
 
-			setFilter(filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter) {
-				this.filter = filter;
+			getModel(name: string) {
+				return this.assets.get(name) as GLTF;
+			}
+
+			getTexturesContaining(name: string) {
+				const textures: THREE.Texture[] = [];
+				for (const [key, value] of this.assets) {
+					if (key.includes(name) && value instanceof THREE.Texture) {
+						textures.push(value);
+					}
+				}
+				return textures;
+			}
+
+			set(name: string, asset: Asset) {
+				this.assets.set(name, asset);
 			}
 		}
 

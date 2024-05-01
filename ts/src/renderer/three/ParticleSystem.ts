@@ -5,7 +5,7 @@ namespace Renderer {
 
 			private particles = [];
 
-			private textures = TextureManager.instance().getTexturesWithKeyContains('particle');
+			private textures = gAssetManager.getTexturesContaining('particle');
 
 			// NOTE(nick): Use groups/buckets to get around the max 16 textures shader
 			// limit. There are others way to do this but because textures can have a
@@ -93,7 +93,7 @@ namespace Renderer {
 
 			createEmitter(config: Particle) {
 				const particleData = taro.game.data.particleTypes[config.particleId];
-				const tex = TextureManager.instance().get(`particle/${particleData.url}`);
+				const tex = gAssetManager.getTexture(`particle/${particleData.url}`);
 
 				let zPosition = 0;
 				if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
@@ -363,7 +363,7 @@ namespace Renderer {
 				};
 
 				// need to reverse the angle here, so make it negative
-				const targetAngle = -emitter.target.sprite.rotation.y;
+				const targetAngle = -emitter.target.body.sprite.rotation.y;
 				const tempX = offset.x;
 				offset.x = offset.x * Math.cos(targetAngle) - offset.z * Math.sin(targetAngle);
 				offset.z = tempX * Math.sin(targetAngle) + offset.z * Math.cos(targetAngle);
