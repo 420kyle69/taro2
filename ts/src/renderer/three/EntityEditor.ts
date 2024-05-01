@@ -12,6 +12,7 @@ namespace Renderer {
 
 			activeEntity: { id: string; player: string; entityType: string };
 			selectedEntityImage: EntityImage;
+			selectedEntityPreview: EntityPreview;
 			helper: any;
 			COLOR_HANDLER: number;
 
@@ -43,6 +44,33 @@ namespace Renderer {
 				taro.client.on('updateActiveEntity', () => {
 					this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
 					this.updatePreview();
+				});
+				const enitityPreviews = renderer.entityManager.entityPreviews;
+				taro.client.on('editInitEntity', (data: ActionData) => {
+					let found = false;
+					enitityPreviews.forEach((preview) => {
+						if (preview.entity.action.actionId === data.actionId) {
+							found = true;
+							preview.entity.update(data);
+						}
+					});
+					if (!found) {
+						renderer.createEntityPreview(data);
+					}
+				});
+				taro.client.on('updateInitEntities', () => {
+					taro.developerMode.initEntities.forEach((action) => {
+						let found = false;
+						enitityPreviews.forEach((preview) => {
+							if (preview.entity.action.actionId === action.actionId) {
+								found = true;
+								preview.entity.update(action);
+							}
+						});
+						if (!found) {
+							renderer.createEntityPreview(action);
+						}
+					});
 				});
 			}
 
@@ -144,6 +172,16 @@ namespace Renderer {
 				}
 				this.selectedEntityImage = entityImage;
 				entityImage.updateOutline();
+			}
+
+			selectEntityPreview(entityPreview: EntityPreview): void {
+				if (entityPreview === null) {
+					if (this.selectedEntityPreview) this.selectedEntityPreview.updateOutline(true);
+					this.selectedEntityPreview = null;
+					return;
+				}
+				this.selectedEntityPreview = entityPreview;
+				entityPreview.updateOutline();
 			}
 
 			rescaleInitEntity(

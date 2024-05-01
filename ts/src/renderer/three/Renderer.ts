@@ -31,7 +31,7 @@ namespace Renderer {
 			private pointer = new THREE.Vector2();
 			private initLoadingManager = new THREE.LoadingManager();
 
-			private entityManager = new EntityManager();
+			public entityManager = new EntityManager();
 			private entitiesLayer = new THREE.Group();
 			private regionsLayer = new THREE.Group();
 			public entityPreviewLayer = new THREE.Group();
@@ -510,6 +510,27 @@ namespace Renderer {
 				if (this.showRepublishWarning) {
 					inGameEditor.showRepublishToInitEntitiesWarning();
 				}
+
+				if (this.entityManager.entityPreviews.length === 0) {
+					// create images for entities created in initialize script
+					Object.values(taro.game.data.scripts).forEach((script) => {
+						if (script.triggers?.[0]?.type === 'gameStart') {
+							Object.values(script.actions).forEach((action) => {
+								this.createEntityPreview(action);
+							});
+						}
+					});
+
+					if (this.showRepublishWarning) {
+						inGameEditor.showRepublishToInitEntitiesWarning();
+					}
+				}
+
+				taro.network.send<any>('updateClientInitEntities', true);
+
+				this.entityManager.entityPreviews.forEach((preview) => {
+					preview.visible = true;
+				});
 			}
 
 			private onExitMapMode() {
@@ -517,6 +538,14 @@ namespace Renderer {
 				this.entityManager.regions.forEach((r) => r.setMode(RegionMode.Normal));
 				this.voxelEditor.voxels.updateLayer(new Map(), this.voxelEditor.currentLayerIndex);
 				this.voxelEditor.showAllLayers();
+
+				if (this.entityEditor.selectedEntityPreview) {
+					this.entityEditor.selectEntityPreview(null);
+				}
+
+				this.entityManager.entityPreviews.forEach((preview) => {
+					preview.visible = false;
+				});
 			}
 
 			private onEnterEntitiesMode() {}
@@ -746,7 +775,7 @@ namespace Renderer {
 					// 	}
 					// });
 					// if (!found) {
-					// 	this.createEntityImage(data);
+					// 	this.createEntityPreview(data);
 					// }
 				});
 			}

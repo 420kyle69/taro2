@@ -54,13 +54,15 @@ namespace Renderer {
 				}
 				this.preview.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				preview.position.set(
-					action.position?.x,
+					Utils.pixelToWorld(action.position?.x),
 					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
-					action.position?.y
+					Utils.pixelToWorld(action.position?.y)
 				);
 				renderer.entityPreviewLayer.add(preview);
 				renderer.entityEditor.helper.setOrigin(preview.position);
 				renderer.entityEditor.helper.render();
+
+				renderer.entityManager.entityPreviews.push(preview);
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });
 

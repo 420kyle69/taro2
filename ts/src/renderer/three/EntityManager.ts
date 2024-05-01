@@ -6,6 +6,7 @@ namespace Renderer {
 			items: Item[] = [];
 			projectiles: Unit[] = [];
 			regions: Region[] = [];
+			entityPreviews: (Renderer.Three.AnimatedSprite & { entity: EntityPreview })[] = [];
 
 			private animatedSprites: AnimatedSprite[] = [];
 			private unownedItems = new Map<string, Item>();
