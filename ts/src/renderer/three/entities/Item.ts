@@ -111,13 +111,6 @@ namespace Renderer {
 					}
 				});
 
-				taroEntity.on('fading-text', (data: { text: string; color?: string }) => {
-					const size = entity.body.getSizeInPixels();
-					const offsetInPixels = -25 - size.height * 0.5;
-					const text = new FloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
-					entity.add(text);
-				});
-
 				taroEntity.on('setOwnerUnit', (unitId: string) => {
 					entity.ownerUnitId = unitId;
 				});
