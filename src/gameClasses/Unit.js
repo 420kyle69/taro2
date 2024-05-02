@@ -815,15 +815,17 @@ var Unit = TaroEntityPhysics.extend({
 
 				newItem.applyAnimationForState('selected');
 
-				let customTween = {
-					type: 'swing',
-					keyFrames: [
-						[0, [0, 0, -1.57]],
-						[100, [0, 0, 0]],
-					],
-				};
+				if (newItem._stats.type !== 'unusable') {
+					let customTween = {
+						type: 'swing',
+						keyFrames: [
+							[0, [0, 0, -1.57]],
+							[100, [0, 0, 0]],
+						],
+					};
 
-				newItem.tween.start(null, this._rotate.z, customTween);
+					newItem.tween.start(null, this._rotate.z, customTween);
+				}
 			}
 		}
 
