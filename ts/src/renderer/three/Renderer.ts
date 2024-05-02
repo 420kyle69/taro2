@@ -150,31 +150,44 @@ namespace Renderer {
 										const raycaster = new THREE.Raycaster();
 										raycaster.setFromCamera(this.pointer, this.camera.instance);
 
-										const intersects = raycaster.intersectObjects(this.entityManager.entities);
+										let intersects = raycaster.intersectObjects(this.entityManager.entityPreviews);
 										if (intersects?.length > 0) {
 											const closest = intersects[0].object as THREE.Mesh;
-											const region = this.entityManager.entities.find(
-												(e) => e instanceof Region && e.mesh === closest
-											) as Region;
-											if (region) {
-												/*const ownerPlayer = taro.$(unit.ownerId);
-										if (ownerPlayer?._stats?.controlledBy === 'human') {
-											if (typeof showUserDropdown !== 'undefined') {
-												showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+											const preview = this.entityManager.entityPreviews.find((preview) => preview.sprite === closest);
+											if (preview) {
+												this.entityEditor.selectEntityPreview(preview.entity);
 											}
-										}*/
-												const regionData = {
-													name: region.taroEntity._stats.id,
-													x: region.stats.x,
-													y: region.stats.y,
-													width: region.stats.width,
-													height: region.stats.height,
-													alpha: region.stats.alpha,
-													inside: region.stats.inside,
-												};
-												inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+										} else {
+											if (!this.entityEditor.gizmo.control.dragging) {
+												this.entityEditor.selectEntityPreview(null);
+												intersects = raycaster.intersectObjects(this.entityManager.entities);
+												if (intersects?.length > 0) {
+													const closest = intersects[0].object as THREE.Mesh;
+													const region = this.entityManager.entities.find(
+														(e) => e instanceof Region && e.mesh === closest
+													) as Region;
+													if (region) {
+														/*const ownerPlayer = taro.$(unit.ownerId);
+									if (ownerPlayer?._stats?.controlledBy === 'human') {
+										if (typeof showUserDropdown !== 'undefined') {
+											showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+										}
+									}*/
+														const regionData = {
+															name: region.taroEntity._stats.id,
+															x: region.stats.x,
+															y: region.stats.y,
+															width: region.stats.width,
+															height: region.stats.height,
+															alpha: region.stats.alpha,
+															inside: region.stats.inside,
+														};
+														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+													}
+												}
 											}
 										}
+
 										break;
 									}
 									case 'eraser': {

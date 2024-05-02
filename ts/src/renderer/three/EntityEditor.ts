@@ -3,6 +3,7 @@ namespace Renderer {
 		export class EntityEditor {
 			activeEntityPlacement: boolean;
 			preview: Renderer.Three.AnimatedSprite | undefined;
+			gizmo: EntityGizmo;
 
 			//outline: Phaser.GameObjects.Graphics;
 			//outlineHover: Phaser.GameObjects.Graphics;
@@ -13,7 +14,7 @@ namespace Renderer {
 			activeEntity: { id: string; player: string; entityType: string };
 			selectedEntityImage: EntityImage;
 			selectedEntityPreview: EntityPreview;
-			helper: any;
+
 			COLOR_HANDLER: number;
 
 			constructor() {
@@ -21,8 +22,8 @@ namespace Renderer {
 				const renderer = Renderer.Three.instance();
 				renderer.entityPreviewLayer.add(this.preview);
 				this.activatePlacement(false);
-				this.helper = gizmo(renderer.camera.instance, renderer.renderer);
-				this.helper.move();
+
+				this.gizmo = new EntityGizmo();
 				taro.client.on('add-entities', () => {
 					this.activatePlacement(true);
 				});
@@ -161,7 +162,6 @@ namespace Renderer {
 						this.preview.position.setZ(worldPoint.z);
 					}
 				}
-				this.helper.render();
 			}
 
 			selectEntityImage(entityImage: EntityImage): void {
@@ -178,9 +178,11 @@ namespace Renderer {
 				if (entityPreview === null) {
 					if (this.selectedEntityPreview) this.selectedEntityPreview.updateOutline(true);
 					this.selectedEntityPreview = null;
+					this.gizmo.control.detach();
 					return;
 				}
 				this.selectedEntityPreview = entityPreview;
+				this.gizmo.control.attach(entityPreview.preview);
 				entityPreview.updateOutline();
 			}
 

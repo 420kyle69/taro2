@@ -59,16 +59,11 @@ namespace Renderer {
 					Utils.pixelToWorld(action.position?.y)
 				);
 				renderer.entityPreviewLayer.add(preview);
-				renderer.entityEditor.helper.setOrigin(preview.position);
-				renderer.entityEditor.helper.render();
 
 				renderer.entityManager.entityPreviews.push(preview);
+
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });
-
-				renderer.entityEditor.helper.on('move', (position) => {
-					preview.position.copy(position);
-				});
 
 				//TODO: add select here
 				// 	image.on('pointerdown', () => {
