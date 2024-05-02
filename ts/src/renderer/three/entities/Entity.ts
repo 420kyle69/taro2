@@ -16,10 +16,8 @@ namespace Renderer {
 			}
 
 			onDestroy(): void {
-				if (this.taroEntity) {
-					for (const [key, listener] of Object.entries(this.taroEntity.eventList())) {
-						this.taroEntity.off(key, listener);
-					}
+				for (const [key, listener] of Object.entries(this.taroEntity.eventList())) {
+					this.taroEntity.off(key, listener);
 				}
 			}
 
