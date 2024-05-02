@@ -20,9 +20,9 @@ namespace Renderer {
 				public taroId: string,
 				public ownerId: string,
 				spriteSheet: TextureSheet,
-				public taroEntity?: TaroEntityPhysics
+				public taroEntity: TaroEntityPhysics
 			) {
-				super();
+				super(taroEntity);
 
 				this.body = new AnimatedSprite(spriteSheet);
 				this.add(this.body);
@@ -68,17 +68,12 @@ namespace Renderer {
 					entity.cameraConfig.offset.z = taroEntity._stats.cameraOffset.y;
 				}
 
-				taroEntity.on('scale', (data: { x: number; y: number }) => entity.scale.set(data.x, 1, data.y), this);
-				taroEntity.on('show', () => (entity.visible = true), this);
-				taroEntity.on('hide', () => (entity.visible = false), this);
 				taroEntity.on('show-label', () => (entity.label.visible = true));
 				taroEntity.on('hide-label', () => (entity.label.visible = false));
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
 				taroEntity.on('update-attribute', (data) => (entity as Unit).attributes.update(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
-				taroEntity.on('layer', (layer) => entity.body.setLayer(layer));
 				taroEntity.on('depth', (depth) => entity.body.setDepth(depth));
-				taroEntity.on('z-offset', (offset) => entity.body.setZOffset(Utils.pixelToWorld(offset)));
 				taroEntity.on('flip', (flip) => entity.body.setFlip(flip % 2 === 1, flip > 1));
 				taroEntity.on('billboard', (isBillboard) => entity.body.setBillboard(isBillboard, renderer.camera));
 
@@ -88,18 +83,12 @@ namespace Renderer {
 						entity.position.x = Utils.pixelToWorld(data.x);
 						entity.position.z = Utils.pixelToWorld(data.y);
 
-						// TODO: Probably can just rotate the unit itself instead of the body?
-						// And move all shared item/unit logic into a general entity class
-						// or something.
 						entity.body.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;
 						entity.body.setFlip(flip % 2 === 1, flip > 1);
 
 						if (entity.body3d) {
 							entity.body3d.rotation.y = -data.rotation;
-							// TODO: Don't use sprite properties to set model height. I also noticed the hud is centered on
-							// unit position, not sprite position. Probably move sprite layer/zoffset logic to unit/entity class.
-							entity.body3d.position.y = Utils.getLayerZOffset(entity.body.layer) + entity.body.zOffset;
 						}
 					},
 					this
@@ -164,14 +153,6 @@ namespace Renderer {
 				});
 
 				return entity;
-			}
-
-			onDestroy(): void {
-				if (this.taroEntity) {
-					for (const [key, listener] of Object.entries(this.taroEntity.eventList())) {
-						this.taroEntity.off(key, listener);
-					}
-				}
 			}
 
 			update(dt) {

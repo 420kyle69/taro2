@@ -5,9 +5,6 @@ namespace Renderer {
 			billboard = false;
 			scaleUnflipped = new THREE.Vector2(1, 1);
 
-			layer = 3;
-			zOffset = 0;
-
 			private depth = 1;
 			private flipX = 1;
 			private flipY = 1;
@@ -54,20 +51,9 @@ namespace Renderer {
 				this.sprite.rotation.y = rad;
 			}
 
-			setLayer(layer: number) {
-				this.layer = layer;
-				this.calcRenderOrder();
-			}
-
 			setDepth(depth: number) {
 				this.depth = depth;
 				this.calcRenderOrder();
-			}
-
-			setZOffset(offset: number) {
-				this.zOffset = offset;
-				this.calcRenderOrder();
-				this.correctZOffsetBasedOnCameraAngle();
 			}
 
 			setTexture(tex: THREE.Texture) {
@@ -96,7 +82,6 @@ namespace Renderer {
 			}
 
 			private calcRenderOrder() {
-				this.position.y = Utils.getLayerZOffset(this.layer) + this.zOffset;
 				this.sprite.position.y = Utils.getDepthZOffset(this.depth);
 			}
 
@@ -111,10 +96,11 @@ namespace Renderer {
 				let halfHeight = this.scaleUnflipped.y * 0.5;
 				const adj = Math.cos(angle) * halfHeight;
 				this.angleOffset = Math.tan(angle) * adj;
-				const offset = this.zOffset + this.angleOffset;
+				const offset = this.angleOffset;
 
-				if (!(this instanceof Item) || (this instanceof Item && !this.ownerUnit)) {
-					this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + offset;
+				const parent = this.parent as Unit | Item;
+				if ((parent && !(parent instanceof Item)) || (parent && parent instanceof Item && !parent.ownerUnit)) {
+					this.position.y = Utils.getDepthZOffset(this.depth) + offset;
 				}
 			}
 

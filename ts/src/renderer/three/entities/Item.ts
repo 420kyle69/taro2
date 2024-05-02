@@ -9,9 +9,9 @@ namespace Renderer {
 				public taroId: string,
 				public ownerId: string,
 				spriteSheet: TextureSheet,
-				public taroEntity?: TaroEntityPhysics
+				public taroEntity: TaroEntityPhysics
 			) {
-				super();
+				super(taroEntity);
 
 				this.body = new AnimatedSprite(spriteSheet);
 				this.add(this.body);
@@ -29,12 +29,7 @@ namespace Renderer {
 				const spriteSheet = new TextureSheet(key, tex, frameWidth, frameHeight);
 				const entity = new Item(taroEntity._id, taroEntity._stats.ownerId, spriteSheet, taroEntity);
 
-				taroEntity.on('scale', (data: { x: number; y: number }) => entity.scale.set(data.x, 1, data.y), this);
-				taroEntity.on('show', () => (entity.visible = true), this);
-				taroEntity.on('hide', () => (entity.visible = false), this);
-				taroEntity.on('layer', (layer) => entity.body.setLayer(layer));
 				taroEntity.on('depth', (depth) => entity.body.setDepth(depth));
-				taroEntity.on('z-offset', (offset) => entity.body.setZOffset(Utils.pixelToWorld(offset)));
 				taroEntity.on('flip', (flip) => entity.body.setFlip(flip % 2 === 1, flip > 1));
 				taroEntity.on('billboard', (isBillboard) => entity.body.setBillboard(isBillboard, Three.instance().camera));
 
@@ -128,14 +123,6 @@ namespace Renderer {
 				});
 
 				return entity;
-			}
-
-			onDestroy(): void {
-				if (this.taroEntity) {
-					for (const [key, listener] of Object.entries(this.taroEntity.eventList())) {
-						this.taroEntity.off(key, listener);
-					}
-				}
 			}
 
 			update(dt: number) {
