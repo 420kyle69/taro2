@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Unit extends Node {
+		export class Unit extends Entity {
 			cameraConfig = {
 				pointerLock: false,
 				pitchRange: { min: -90, max: 90 },

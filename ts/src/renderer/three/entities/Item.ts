@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Item extends Node {
+		export class Item extends Entity {
 			ownerUnitId: string | undefined;
 			ownerUnit: Unit | undefined;
 			body: AnimatedSprite;
