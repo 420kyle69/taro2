@@ -70,9 +70,9 @@ namespace Renderer {
 
 				//window.addEventListener('resize', this.onWindowResize);
 
-				/*window.addEventListener('keydown', function (event) {
+				window.addEventListener('keydown', function (event) {
 					switch (event.key) {
-						case 'q':
+						/*case 'q':
 							control.setSpace(control.space === 'local' ? 'world' : 'local');
 							break;
 
@@ -80,19 +80,21 @@ namespace Renderer {
 							control.setTranslationSnap(1);
 							control.setRotationSnap(THREE.MathUtils.degToRad(15));
 							control.setScaleSnap(0.25);
-							break;
+							break;*/
 
-						case 'w':
+						case 'i':
 							control.setMode('translate');
 							break;
 
-						case 'e':
+						case 'o':
 							control.setMode('rotate');
 							break;
 
-						case 'r':
+						case 'p':
 							control.setMode('scale');
-							break;*/
+							break;
+					}
+				});
 
 				/*case 'c':
 							const position = currentCamera.position.clone();

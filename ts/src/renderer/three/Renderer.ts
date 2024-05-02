@@ -162,10 +162,14 @@ namespace Renderer {
 												this.entityEditor.selectEntityPreview(null);
 												intersects = raycaster.intersectObjects(this.entityManager.entities);
 												if (intersects?.length > 0) {
-													const closest = intersects[0].object as THREE.Mesh;
-													const region = this.entityManager.entities.find(
-														(e) => e instanceof Region && e.mesh === closest
-													) as Region;
+													let closest: THREE.Mesh;
+													for (const intersect of intersects) {
+														if ((intersect.object as THREE.Mesh).isMesh) {
+															closest = intersect.object as THREE.Mesh;
+															break;
+														}
+													}
+													const region = this.entityManager.regions.find((e) => e.mesh === closest);
 													if (region) {
 														/*const ownerPlayer = taro.$(unit.ownerId);
 									if (ownerPlayer?._stats?.controlledBy === 'human') {
