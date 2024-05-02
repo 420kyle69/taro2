@@ -788,6 +788,11 @@ var Unit = TaroEntityPhysics.extend({
 			oldItem.setState('unselected');
 			if (taro.isClient) {
 				oldItem.applyAnimationForState('unselected');
+				// don't wait for server to tell us to hide the item
+				// otherwise item remains rendered in center of unit for a few frames
+				if (this == taro.client.selectedUnit && !oldItem._stats.currentBody) {
+					oldItem.hide();
+				}
 			}
 		}
 
@@ -807,6 +812,10 @@ var Unit = TaroEntityPhysics.extend({
 
 			// whip-out the new item using tween
 			if (taro.isClient) {
+				// don't wait for server to tell us to show the item
+				if (this == taro.client.selectedUnit && newItem._stats.currentBody) {
+					newItem.show();
+				}
 				//emit size event
 				newItem.emit('size', {
 					width: newItem._stats.currentBody.width, // this could be causing item size issues by using currentBody dimensions
@@ -815,15 +824,18 @@ var Unit = TaroEntityPhysics.extend({
 
 				newItem.applyAnimationForState('selected');
 
-				let customTween = {
-					type: 'swing',
-					keyFrames: [
-						[0, [0, 0, -1.57]],
-						[100, [0, 0, 0]],
-					],
-				};
+				// don't whip-out tween if item is unusable (e.g. clothes/armor)
+				if (newItem._stats.type !== 'unusable') {
+					let customTween = {
+						type: 'swing',
+						keyFrames: [
+							[0, [0, 0, -1.57]],
+							[100, [0, 0, 0]],
+						],
+					};
 
-				newItem.tween.start(null, this._rotate.z, customTween);
+					newItem.tween.start(null, this._rotate.z, customTween);
+				}
 			}
 		}
 
