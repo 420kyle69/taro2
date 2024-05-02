@@ -788,6 +788,11 @@ var Unit = TaroEntityPhysics.extend({
 			oldItem.setState('unselected');
 			if (taro.isClient) {
 				oldItem.applyAnimationForState('unselected');
+				// don't wait for server to tell us to hide the item
+				// otherwise item remains rendered in center of unit for a few frames
+				if (this == taro.client.selectedUnit && !oldItem._stats.currentBody) {
+					oldItem.hide();
+				}
 			}
 		}
 
@@ -807,6 +812,10 @@ var Unit = TaroEntityPhysics.extend({
 
 			// whip-out the new item using tween
 			if (taro.isClient) {
+				// don't wait for server to tell us to show the item
+				if (this == taro.client.selectedUnit && newItem._stats.currentBody) {
+					newItem.show();
+				}
 				//emit size event
 				newItem.emit('size', {
 					width: newItem._stats.currentBody.width, // this could be causing item size issues by using currentBody dimensions
