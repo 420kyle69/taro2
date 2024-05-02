@@ -850,7 +850,7 @@ var MenuUiComponent = TaroEntity.extend({
 
 			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
 				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
-				const isTabActive = !document.hidden;
+				const isTabActive = document.hasFocus();
 				if (
 					(!autojoinAttempted ||
 						Date.now() - autojoinAttempted > 15 * 60 * 1000 ||
