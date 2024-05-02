@@ -196,12 +196,38 @@ var ActionComponent = TaroEntity.extend({
 												type: 'sendPlayerToMap',
 												gameSlug: res.gameSlug,
 												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+												serverId: res.serverId,
 											},
 											player._stats.clientId
 										);
 									}
 								}
 							});
+						}
+
+						break;
+
+					case 'sendPlayerToSpawningMap':
+						if (taro.isServer) {
+							var player = self._script.param.getValue(action.player, vars);
+
+							if (player && player._stats && player._stats.clientId) {
+								taro.workerComponent.sendPlayerToMap('lastSpawned', [player._stats.userId || 'guest']).then((res) => {
+									console.log('user switched spawning map', res);
+									if (res && res.gameSlug) {
+										// ask client to reload game
+										taro.network.send(
+											'sendPlayerToMap',
+											{
+												type: 'sendPlayerToMap',
+												gameSlug: res.gameSlug,
+												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+											},
+											player._stats.clientId
+										);
+									}
+								});
+							}
 						}
 
 						break;
@@ -255,31 +281,6 @@ var ActionComponent = TaroEntity.extend({
 								if (taro.game.data.variables[unitGroupName].value[i]?.id() == unit?.id()) {
 									taro.game.data.variables[unitGroupName].value.splice(i, 1);
 								}
-							}
-						}
-
-						break;
-
-					case 'sendPlayerToSpawningMap':
-						if (taro.isServer) {
-							var player = self._script.param.getValue(action.player, vars);
-
-							if (player && player._stats && player._stats.clientId) {
-								taro.workerComponent.sendPlayerToMap('lastSpawned', [player._stats.userId || 'guest']).then((res) => {
-									console.log('user switched spawning map', res);
-									if (res && res.gameSlug) {
-										// ask client to reload game
-										taro.network.send(
-											'sendPlayerToMap',
-											{
-												type: 'sendPlayerToMap',
-												gameSlug: res.gameSlug,
-												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
-											},
-											player._stats.clientId
-										);
-									}
-								});
 							}
 						}
 

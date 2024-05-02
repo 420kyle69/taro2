@@ -841,7 +841,7 @@ const Client = TaroEventingClass.extend({
 		};
 
 		// old comment => 'if serverId is present then add it to vars
-		window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, (m, key, value) => {
+		(window.originalUrl || window.location.href).replace(/[?&]+([^=&]+)=([^&]*)/gi, (m, key, value) => {
 			// not sure about this after looking up .replace()
 
 			vars[key] = value;
