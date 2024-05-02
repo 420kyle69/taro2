@@ -53,6 +53,17 @@ namespace Renderer {
 								this.textures.set(source.name, asset as THREE.Texture);
 							}
 
+							if (source.type === 'gltf') {
+								(asset as GLTF).scene.traverse((child) => {
+									if (child instanceof THREE.Mesh) {
+										// Convert to basic material to avoid lighting
+										const material = new THREE.MeshBasicMaterial();
+										THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
+										child.material = material;
+									}
+								});
+							}
+
 							this.assets.set(source.name, asset);
 
 							if (cb) cb(source.name);
