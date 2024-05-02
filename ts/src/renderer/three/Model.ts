@@ -21,6 +21,14 @@ namespace Renderer {
 				return this.aabb.getSize(this.size);
 			}
 
+			setSize(x: number, y: number, z: number) {
+				const size = this.getSize();
+				size.x = (this.scene.scale.x / size.x) * x;
+				size.y = (this.scene.scale.y / size.y) * y;
+				size.z = (this.scene.scale.z / size.z) * z;
+				this.scene.scale.set(size.x, size.y, size.z);
+			}
+
 			getCenter() {
 				this.aabb.setFromObject(this.scene);
 				return this.aabb.getCenter(this.center);
