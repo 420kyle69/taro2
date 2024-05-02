@@ -12,6 +12,8 @@ namespace Renderer {
 				const model = gAssetManager.getModel(name);
 				this.scene = model.scene.clone();
 				this.add(this.scene);
+
+				this.scaleSceneToFitWithinUnits(1);
 			}
 
 			getSize() {
@@ -22,6 +24,14 @@ namespace Renderer {
 			getCenter() {
 				this.aabb.setFromObject(this.scene);
 				return this.aabb.getCenter(this.center);
+			}
+
+			private scaleSceneToFitWithinUnits(units: number) {
+				const size = this.getSize();
+				const sizeArray = size.toArray();
+				const largestComponentIndex = sizeArray.indexOf(Math.max(...sizeArray));
+				const scale = units / sizeArray[largestComponentIndex];
+				this.scene.scale.setScalar(scale);
 			}
 		}
 	}
