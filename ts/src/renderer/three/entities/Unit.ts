@@ -8,7 +8,7 @@ namespace Renderer {
 			};
 
 			body: AnimatedSprite;
-			body3d: Model;
+			body3d: Model | undefined = undefined;
 
 			hud = new THREE.Group();
 
@@ -88,9 +88,19 @@ namespace Renderer {
 						entity.position.x = Utils.pixelToWorld(data.x);
 						entity.position.z = Utils.pixelToWorld(data.y);
 
+						// TODO: Probably can just rotate the unit itself instead of the body?
+						// And move all shared item/unit logic into a general entity class
+						// or something.
 						entity.body.setRotationY(-data.rotation);
 						const flip = taroEntity._stats.flip;
 						entity.body.setFlip(flip % 2 === 1, flip > 1);
+
+						if (entity.body3d) {
+							entity.body3d.rotation.y = -data.rotation;
+							// TODO: Don't use sprite properties to set model height. I also noticed the hud is centered on
+							// unit position, not sprite position. Probably move sprite layer/zoffset logic to unit/entity class.
+							entity.body3d.position.y = Utils.getLayerZOffset(entity.body.layer) + entity.body.zOffset;
+						}
 					},
 					this
 				);

@@ -5,11 +5,12 @@ namespace Renderer {
 			billboard = false;
 			scaleUnflipped = new THREE.Vector2(1, 1);
 
-			private layer = 3;
+			layer = 3;
+			zOffset = 0;
+
 			private depth = 1;
 			private flipX = 1;
 			private flipY = 1;
-			private zOffset = 0;
 			private angleOffset = 0;
 
 			constructor(protected tex: THREE.Texture) {
