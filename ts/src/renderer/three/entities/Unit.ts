@@ -6,7 +6,10 @@ namespace Renderer {
 				pitchRange: { min: -90, max: 90 },
 				offset: { x: 0, y: 0, z: 0 },
 			};
+
 			body: AnimatedSprite;
+			body3d: Model;
+
 			hud = new THREE.Group();
 
 			private label = new Label({ text: '', color: 'white', bold: false, renderOnTop: true });
@@ -23,6 +26,12 @@ namespace Renderer {
 
 				this.body = new AnimatedSprite(spriteSheet);
 				this.add(this.body);
+
+				if (taroEntity._stats.is3DObject) {
+					const name = taroEntity._stats['3DObjectUrl'];
+					this.body3d = new Model(name);
+					this.add(this.body3d);
+				}
 
 				this.label.visible = false;
 
