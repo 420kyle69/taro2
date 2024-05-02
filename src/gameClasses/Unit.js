@@ -815,6 +815,7 @@ var Unit = TaroEntityPhysics.extend({
 
 				newItem.applyAnimationForState('selected');
 
+				// don't whip-out tween if item is unusable (e.g. clothes/armor)
 				if (newItem._stats.type !== 'unusable') {
 					let customTween = {
 						type: 'swing',
