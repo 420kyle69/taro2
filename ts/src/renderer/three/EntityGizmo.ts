@@ -3,6 +3,7 @@ namespace Renderer {
 		export class EntityGizmo {
 			currentCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 			control: TransformControls;
+			dimension: '2d' | '3d' = '3d';
 
 			constructor() {
 				this.init();
@@ -70,7 +71,7 @@ namespace Renderer {
 
 				//window.addEventListener('resize', this.onWindowResize);
 
-				window.addEventListener('keydown', function (event) {
+				window.addEventListener('keydown', (event) => {
 					switch (event.key) {
 						/*case 'q':
 							control.setSpace(control.space === 'local' ? 'world' : 'local');
@@ -84,14 +85,17 @@ namespace Renderer {
 
 						case 'i':
 							control.setMode('translate');
+							this.updateForDimension();
 							break;
 
 						case 'o':
 							control.setMode('rotate');
+							this.updateForDimension();
 							break;
 
 						case 'p':
 							control.setMode('scale');
+							this.updateForDimension();
 							break;
 					}
 				});
@@ -163,6 +167,46 @@ namespace Renderer {
 							break;
 					}
 				});
+			}
+
+			attach(entity: AnimatedSprite | THREE.Mesh) {
+				if (entity instanceof AnimatedSprite) {
+					this.dimension = '2d';
+					this.updateForDimension();
+				} else {
+					// TODO: make it 3d when taro action will support 3d
+					this.dimension = '2d';
+					this.updateForDimension();
+				}
+				this.control.attach(entity);
+			}
+
+			updateForDimension() {
+				console.log('dimension', this.dimension);
+				const control = this.control;
+				if (this.dimension === '2d') {
+					switch (control.mode) {
+						case 'translate':
+							control.showX = true;
+							control.showY = false;
+							control.showZ = true;
+							break;
+						case 'rotate':
+							control.showX = false;
+							control.showY = true;
+							control.showZ = false;
+							break;
+						case 'scale':
+							control.showX = true;
+							control.showY = false;
+							control.showZ = true;
+							break;
+					}
+				} else {
+					control.showX = true;
+					control.showY = true;
+					control.showZ = true;
+				}
 			}
 
 			/*onWindowResize() {

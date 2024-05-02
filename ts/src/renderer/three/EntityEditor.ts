@@ -182,7 +182,7 @@ namespace Renderer {
 					return;
 				}
 				this.selectedEntityPreview = entityPreview;
-				this.gizmo.control.attach(entityPreview.preview);
+				this.gizmo.attach(entityPreview.preview);
 				entityPreview.updateOutline();
 			}
 
