@@ -1978,8 +1978,8 @@ var Unit = TaroEntityPhysics.extend({
 		// independent of currentItemIndex change, set currentItem. null is empty slot
 		// use currentItem to set the _stats property for currentItemId
 		// important for item drop/pickup/remove
-		const currentItem = taro.$(this._stats.itemIds[currentItemIndex]) || null;
-		this._stats.currentItemId = currentItem ? currentItem.id() : null;
+
+		this._stats.currentItemId = this._stats.itemIds[currentItemIndex] || null;
 
 		// client log of item state after pickup will still show 'dropped'. Currently state has not finished updating. It IS 'selected'/'unselected'
 

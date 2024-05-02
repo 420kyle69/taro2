@@ -238,12 +238,6 @@ var Item = TaroEntityPhysics.extend({
 			this._stats.ownerUnitId = null;
 
 			if (this._stats.oldOwnerUnitId) {
-				if (taro.isClient) {
-					if (oldOwner._stats) {
-						oldOwner._stats.currentItemId = null;
-					}
-				}
-
 				this._stats.oldOwnerUnitId = null;
 			}
 
