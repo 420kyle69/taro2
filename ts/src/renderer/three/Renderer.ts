@@ -456,36 +456,6 @@ namespace Renderer {
 					AnimationManager.instance().createAnimationsFromTaroData(url, taroEntity);
 				}
 
-				const gltfLoader = new GLTFLoader(this.initLoadingManager);
-				const dracoLoader = new DRACOLoader(this.initLoadingManager);
-				dracoLoader.setDecoderPath('/assets/lib/draco');
-				gltfLoader.setDRACOLoader(dracoLoader);
-
-				for (const taroEntity of taroEntities) {
-					if (taroEntity.is3DObject) {
-						const url = taroEntity['3DObjectUrl'];
-						if (url) {
-							console.log(url);
-							gltfLoader.load(url, (gltf) => {
-								const model = gltf.scene;
-								model.position.y = 0.5;
-								model.position.x = 5;
-								model.position.z = 5;
-								model.traverse((child) => {
-									if (child instanceof THREE.Mesh) {
-										// Convert to basic material to avoid lighting
-										const material = new THREE.MeshBasicMaterial();
-										THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
-										child.material = material;
-									}
-								});
-
-								this.scene.add(model);
-							});
-						}
-					}
-				}
-
 				for (const taroEntity of Object.values(data.particleTypes)) {
 					const key = taroEntity.url;
 					sources.push({ name: `particle/${key}`, type: 'texture', src: Utils.patchAssetUrl(key) });
