@@ -79,6 +79,12 @@ namespace Renderer {
 					this.faceCamera(Three.instance().camera);
 					this.correctZOffsetBasedOnCameraAngle();
 				}
+
+				const parent = this.parent as Unit | Item;
+				const isOwnedItem = parent && parent instanceof Item && parent.ownerUnit;
+				if (isOwnedItem) {
+					this.position.y = parent.ownerUnit.body.position.y;
+				}
 			}
 
 			private calcRenderOrder() {
@@ -99,7 +105,10 @@ namespace Renderer {
 				const offset = this.angleOffset;
 
 				const parent = this.parent as Unit | Item;
-				if ((parent && !(parent instanceof Item)) || (parent && parent instanceof Item && !parent.ownerUnit)) {
+				const isNotItemOrUnownedItem =
+					(parent && !(parent instanceof Item)) || (parent && parent instanceof Item && !parent.ownerUnit);
+
+				if (isNotItemOrUnownedItem) {
 					this.position.y = Utils.getDepthZOffset(this.depth) + offset;
 				}
 			}
