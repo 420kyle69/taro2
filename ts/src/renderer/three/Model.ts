@@ -30,6 +30,12 @@ namespace Renderer {
 				);
 			}
 
+			setSize2D(x: number, z: number) {
+				const size = this.getSize();
+				this.scene.scale.x = (this.scene.scale.x / size.x) * x;
+				this.scene.scale.z = (this.scene.scale.z / size.z) * z;
+			}
+
 			getCenter() {
 				this.aabb.setFromObject(this.scene);
 				return this.aabb.getCenter(this.center);
