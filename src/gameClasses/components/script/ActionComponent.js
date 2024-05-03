@@ -174,12 +174,10 @@ var ActionComponent = TaroEntity.extend({
 						if (taro.isServer) {
 							var gameId = self._script.param.getValue(action.gameId, vars);
 							var players = self._script.param.getValue(action.playerGroup, vars) || [];
-							console.log('players', players);
 							let userIds = [];
 							for (var l = 0; l < players.length; l++) {
 								var player = players[l];
-								console.log('player', player._stats.clientId, player._stats.userId);
-								if (player && player._stats && player._stats.clientId) {
+								if (player && player._stats && player._stats.clientId && !userIds.includes(player._stats.userId || 'guest')) {
 									userIds.push(player._stats.userId || 'guest');
 								}
 							}
