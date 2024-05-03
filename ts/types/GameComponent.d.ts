@@ -46,6 +46,12 @@ interface ScriptData {
 	deleted?: boolean;
 }
 
+interface ScriptChangesData {
+	scriptData: Record<string, ScriptData>;
+	action: string;
+	clientId: string;
+}
+
 interface ActionData {
 	player?: {
 		variableName: string;

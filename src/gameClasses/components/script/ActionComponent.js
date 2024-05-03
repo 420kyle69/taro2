@@ -174,12 +174,10 @@ var ActionComponent = TaroEntity.extend({
 						if (taro.isServer) {
 							var gameId = self._script.param.getValue(action.gameId, vars);
 							var players = self._script.param.getValue(action.playerGroup, vars) || [];
-							console.log('players', players);
 							let userIds = [];
 							for (var l = 0; l < players.length; l++) {
 								var player = players[l];
-								console.log('player', player._stats.clientId, player._stats.userId);
-								if (player && player._stats && player._stats.clientId) {
+								if (player && player._stats && player._stats.clientId && !userIds.includes(player._stats.userId || 'guest')) {
 									userIds.push(player._stats.userId || 'guest');
 								}
 							}
@@ -196,6 +194,7 @@ var ActionComponent = TaroEntity.extend({
 												type: 'sendPlayerToMap',
 												gameSlug: res.gameSlug,
 												autoJoinToken: res.autoJoinTokens[player._stats.userId || 'guest'],
+												serverId: res.serverId,
 											},
 											player._stats.clientId
 										);
@@ -226,6 +225,60 @@ var ActionComponent = TaroEntity.extend({
 										);
 									}
 								});
+							}
+						}
+
+						break;
+
+					case 'addPlayerToPlayerGroup':
+						var player = self._script.param.getValue(action.player, vars);
+						var playerGroupName = action.playerGroup && action.playerGroup.variableName;
+
+						if (player?._stats?.clientId && taro.game.data.variables.hasOwnProperty(playerGroupName)) {
+							taro.game.data.variables[playerGroupName].value = taro.game.data.variables[playerGroupName].value || [];
+							taro.game.data.variables[playerGroupName].value.push(player);
+							taro.game.lastUpdatedVariableName = playerGroupName;
+						}
+
+						break;
+
+					case 'removePlayerFromPlayerGroup':
+						var player = self._script.param.getValue(action.player, vars);
+						var playerGroupName = action.playerGroup && action.playerGroup.variableName;
+
+						var playerGroupLength = taro.game.data.variables[playerGroupName]?.value?.length;
+						if (playerGroupLength) {
+							for (let i = 0; i < playerGroupLength; i++) {
+								if (taro.game.data.variables[playerGroupName].value[i]?._stats?.clientId == player?._stats?.clientId) {
+									taro.game.data.variables[playerGroupName].value.splice(i, 1);
+								}
+							}
+						}
+
+						break;
+
+					case 'addUnitToUnitGroup':
+						var unit = self._script.param.getValue(action.unit, vars);
+						var unitGroupName = action.unitGroup && action.unitGroup.variableName;
+
+						if (unit?.id() && taro.game.data.variables.hasOwnProperty(unitGroupName)) {
+							taro.game.data.variables[unitGroupName].value = taro.game.data.variables[unitGroupName].value || [];
+							taro.game.data.variables[unitGroupName].value.push(unit);
+							taro.game.lastUpdatedVariableName = unitGroupName;
+						}
+
+						break;
+
+					case 'removeUnitFromUnitGroup':
+						var unit = self._script.param.getValue(action.unit, vars);
+						var unitGroupName = action.unitGroup && action.unitGroup.variableName;
+
+						var unitGroupLength = taro.game.data.variables[unitGroupName]?.value?.length;
+						if (unitGroupLength) {
+							for (let i = 0; i < unitGroupLength; i++) {
+								if (taro.game.data.variables[unitGroupName].value[i]?.id() == unit?.id()) {
+									taro.game.data.variables[unitGroupName].value.splice(i, 1);
+								}
 							}
 						}
 

@@ -735,6 +735,10 @@ var ClientNetworkEvents = {
 		taro.developerMode.updateDialogue(data);
 	},
 
+	_onUpdateDevelopersData: function (data) {
+		taro.developerMode.updateDevelopersData(data);
+	},
+
 	_onErrorLogs: function (logs) {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {
@@ -847,7 +851,7 @@ var ClientNetworkEvents = {
 
 	_onSendPlayerToMap: function (data) {
 		if (data && data.type == 'sendPlayerToMap') {
-			const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&autoJoinToken=${data.autoJoinToken}`;
+			const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&autoJoinToken=${data.autoJoinToken}${data.serverId ? '&serverId=' + data.serverId : ''}`;
 			window.location.href = mapUrl;
 		}
 	},

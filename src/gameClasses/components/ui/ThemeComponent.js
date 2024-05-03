@@ -16,7 +16,7 @@ var ThemeComponent = TaroEntity.extend({
 				})
 			);
 		} else {
-			$('.game-title').html(server ? server.gameName : '');
+			$('.game-title').html(taro.clientSanitizer(server ? server.gameName : ''));
 		}
 	},
 });

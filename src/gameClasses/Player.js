@@ -667,6 +667,7 @@ var Player = TaroEntity.extend({
 
 							case 'scriptData':
 								taro.developerMode.serverScriptData = newValue;
+								taro.developerMode.savedScriptData = newValue;
 								break;
 
 							case 'variableData':

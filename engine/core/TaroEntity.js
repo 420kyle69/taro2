@@ -4434,14 +4434,17 @@ var TaroEntity = TaroObject.extend({
 										this.applyAnimationForState(stateId);
 
 										// whip-out the new item using tween
-										let customTween = {
-											type: 'swing',
-											keyFrames: [
-												[0, [0, 0, -1.57]],
-												[100, [0, 0, 0]],
-											],
-										};
-										this.tween.start(null, this._rotate.z, customTween);
+										// unless item is 'unusable'
+										if (this._stats.type !== 'unusable') {
+											let customTween = {
+												type: 'swing',
+												keyFrames: [
+													[0, [0, 0, -1.57]],
+													[100, [0, 0, 0]],
+												],
+											};
+											this.tween.start(null, this._rotate.z, customTween);
+										}
 									}
 
 									const bodyId = this._stats.states[stateId]?.body;

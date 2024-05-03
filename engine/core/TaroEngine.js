@@ -2406,6 +2406,27 @@ var TaroEngine = TaroEntity.extend({
 		// 	console.log.apply(console, arguments);
 		// }
 	},
+
+	getNumber: function (input, defaultValue = 0) {
+		return !isNaN(parseFloat(input)) ? parseFloat(input) : defaultValue;
+	},
+
+	escapeHtml(input) {
+		return input.replace(/[&<"'>]/g, function(m) {
+			switch (m) {
+				case '&':
+					return '&amp;';
+				case '<':
+					return '&lt;';
+				case '>':
+					return '&gt;'
+				case '"':
+					return '&quot;';
+				default:
+					return '&#039;';
+			}
+		});
+	}
 });
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {

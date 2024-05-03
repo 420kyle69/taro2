@@ -15,4 +15,6 @@ declare class InGameEditor extends TaroClass {
 	toggleEntityPlacementWindow(boolean): void;
 	updateAction(data: ActionData): void;
 	showScriptForEntity(actionId: string): void;
+	updateEntity(data: EditEntityData): void;
+	editGlobalScripts(data: ScriptChangesData)
 }
