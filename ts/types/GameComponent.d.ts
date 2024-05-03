@@ -21,7 +21,7 @@ interface EntityData {
 	};
 	id: string;
 
-	is3DObject: boolean;
+	is3DObject?: boolean;
 }
 
 interface UnitAbility {
