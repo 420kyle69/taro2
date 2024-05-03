@@ -8,7 +8,6 @@ namespace Renderer {
 			constructor(
 				public taroId: string,
 				public ownerId: string,
-				spriteSheet: TextureSheet,
 				public taroEntity: TaroEntityPhysics
 			) {
 				super(taroEntity);
@@ -17,6 +16,13 @@ namespace Renderer {
 					const name = taroEntity._stats.cellSheet.url;
 					this.body = new Model(name);
 				} else {
+					const key = taroEntity._stats.cellSheet.url;
+					const cols = taroEntity._stats.cellSheet.columnCount || 1;
+					const rows = taroEntity._stats.cellSheet.rowCount || 1;
+					const tex = gAssetManager.getTexture(key).clone();
+					const frameWidth = tex.image.width / cols;
+					const frameHeight = tex.image.height / rows;
+					const spriteSheet = new TextureSheet(key, tex, frameWidth, frameHeight);
 					this.body = new AnimatedSprite(spriteSheet);
 				}
 				this.add(this.body);
@@ -25,14 +31,7 @@ namespace Renderer {
 			}
 
 			static create(taroEntity: TaroEntityPhysics) {
-				const key = taroEntity._stats.cellSheet.url;
-				const cols = taroEntity._stats.cellSheet.columnCount || 1;
-				const rows = taroEntity._stats.cellSheet.rowCount || 1;
-				const tex = gAssetManager.getTexture(key).clone();
-				const frameWidth = tex.image.width / cols;
-				const frameHeight = tex.image.height / rows;
-				const spriteSheet = new TextureSheet(key, tex, frameWidth, frameHeight);
-				const entity = new Item(taroEntity._id, taroEntity._stats.ownerId, spriteSheet, taroEntity);
+				const entity = new Item(taroEntity._id, taroEntity._stats.ownerId, taroEntity);
 
 				if (entity.body instanceof AnimatedSprite) {
 					taroEntity.on('depth', (depth) => (entity.body as AnimatedSprite).setDepth(depth));
@@ -97,7 +96,7 @@ namespace Renderer {
 
 				taroEntity.on('play-animation', (id) => {
 					if (entity.body instanceof AnimatedSprite) {
-						const key = `${spriteSheet.key}/${id}/${taroEntity._stats.id}`;
+						const key = `${taroEntity._stats.cellSheet.url}/${id}/${taroEntity._stats.id}`;
 						entity.body.play(key);
 					}
 				});
