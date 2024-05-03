@@ -163,30 +163,32 @@ namespace Renderer {
 												intersects = raycaster.intersectObjects(this.entityManager.entities);
 												if (intersects?.length > 0) {
 													let closest: THREE.Mesh;
+													let clickedList: THREE.Mesh[] = [];
 													for (const intersect of intersects) {
 														if ((intersect.object as THREE.Mesh).isMesh) {
 															closest = intersect.object as THREE.Mesh;
-															break;
+															clickedList.push(closest);
 														}
 													}
-													const region = this.entityManager.regions.find((e) => e.mesh === closest);
-													if (region) {
-														/*const ownerPlayer = taro.$(unit.ownerId);
-									if (ownerPlayer?._stats?.controlledBy === 'human') {
-										if (typeof showUserDropdown !== 'undefined') {
-											showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
-										}
-									}*/
-														const regionData = {
-															name: region.taroEntity._stats.id,
-															x: region.stats.x,
-															y: region.stats.y,
-															width: region.stats.width,
-															height: region.stats.height,
-															alpha: region.stats.alpha,
-															inside: region.stats.inside,
-														};
-														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+													let regionList: RegionData[] = [];
+													clickedList.forEach((clicked) => {
+														const region = this.entityManager.regions.find((e) => e.mesh === clicked);
+														if (region) {
+															regionList.push({
+																name: region.taroEntity._stats.id,
+																x: region.stats.x,
+																y: region.stats.y,
+																width: region.stats.width,
+																height: region.stats.height,
+																alpha: region.stats.alpha,
+																inside: region.stats.inside,
+															});
+														}
+													});
+													if (regionList.length === 1) {
+														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+													} else if (regionList.length > 1) {
+														inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
 													}
 												}
 											}
