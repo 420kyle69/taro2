@@ -14,7 +14,7 @@ namespace Renderer {
 				super(taroEntity);
 
 				if (taroEntity._stats.is3DObject) {
-					const name = taroEntity._stats['3DObjectUrl'];
+					const name = taroEntity._stats.cellSheet.url;
 					this.body = new Model(name);
 				} else {
 					this.body = new AnimatedSprite(spriteSheet);

@@ -444,17 +444,10 @@ namespace Renderer {
 				];
 
 				for (const taroEntity of taroEntities) {
-					if (taroEntity.is3DObject) {
-						const url = taroEntity['3DObjectUrl'];
-						//if (!url) continue; uncomment later when unit can be only sprite or model
-
-						sources.push({ name: url, type: 'gltf', src: Utils.patchAssetUrl(url) });
-					} // code below should be in else block after unit can be only sprite or model
-
 					const url = taroEntity?.cellSheet?.url;
 					if (!url) continue;
 
-					sources.push({ name: url, type: 'texture', src: Utils.patchAssetUrl(url) });
+					sources.push({ name: url, type: taroEntity.is3DObject ? 'gltf' : 'texture', src: Utils.patchAssetUrl(url) });
 
 					AnimationManager.instance().createAnimationsFromTaroData(url, taroEntity);
 				}
@@ -469,7 +462,6 @@ namespace Renderer {
 					sources.push({ name: key, type: 'texture', src: skyboxFacesUrls[key] });
 				}
 
-				console.log(sources);
 				gAssetManager.load(sources, this.initLoadingManager);
 			}
 
