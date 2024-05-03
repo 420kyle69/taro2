@@ -57,4 +57,5 @@ declare interface EntityStats {
 	cameraPointerLock?: boolean;
 	cameraPitchRange?: { min: number; max: number };
 	cameraOffset?: { x: number; y: number; z: number };
+	is3DObject?: boolean;
 }

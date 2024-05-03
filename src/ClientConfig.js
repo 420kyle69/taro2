@@ -9,6 +9,8 @@ var taroClientConfig = {
 		'/lib/rexuiplugin.min.js',
 		'/lib/rexvirtualjoystickplugin.min.js',
 		'/lib/three.min.js',
+		'/lib/DRACOLoader.js',
+		'/lib/GLTFLoader.js',
 		'/lib/OrbitControls.js',
 		'/lib/tween.umd.js',
 		'/lib/three_mesh_bvh.umd.js',
@@ -114,7 +116,7 @@ var taroClientConfig = {
 
 		// Three.js Renderer
 		'renderer/three/Utils.js',
-		'renderer/three/TextureManager.js',
+		'renderer/three/AssetManager.js',
 		'renderer/three/AnimationManager.js',
 		'renderer/three/Node.js',
 		'renderer/three/EntityManager.js',
@@ -129,6 +131,7 @@ var taroClientConfig = {
 		'renderer/three/VoxelEditor.js',
 		'renderer/three/VoxelMarker.js',
 		'renderer/three/MarkerLines.js',
+		'renderer/three/Model.js',
 
 		'renderer/three/Mapper.js',
 		'renderer/three/hud/Element.js',
@@ -139,6 +142,7 @@ var taroClientConfig = {
 		'renderer/three/hud/DynamicFloatingText.js',
 		'renderer/three/hud/ChatBubble.js',
 
+		'renderer/three/entities/Entity.js',
 		'renderer/three/entities/Unit.js',
 		'renderer/three/entities/Item.js',
 		'renderer/three/entities/Region.js',

@@ -1,35 +1,46 @@
 namespace Renderer {
 	export namespace Three {
-		export class Item extends AnimatedSprite {
+		export class Item extends Entity {
 			ownerUnitId: string | undefined;
 			ownerUnit: Unit | undefined;
+			body: AnimatedSprite | Model;
 
 			constructor(
 				public taroId: string,
 				public ownerId: string,
 				spriteSheet: TextureSheet,
-				public taroEntity?: TaroEntityPhysics
+				public taroEntity: TaroEntityPhysics
 			) {
-				super(spriteSheet);
+				super(taroEntity);
+
+				if (taroEntity._stats.is3DObject) {
+					const name = taroEntity._stats.cellSheet.url;
+					this.body = new Model(name);
+				} else {
+					this.body = new AnimatedSprite(spriteSheet);
+				}
+				this.add(this.body);
 
 				this.ownerUnitId = taroEntity._stats.ownerUnitId;
 			}
 
 			static create(taroEntity: TaroEntityPhysics) {
-				const textureMgr = TextureManager.instance();
-				const renderer = Three.instance();
-
-				let spriteSheet = textureMgr.getTextureSheetShallowCopy(taroEntity._stats.cellSheet.url);
+				const key = taroEntity._stats.cellSheet.url;
+				const cols = taroEntity._stats.cellSheet.columnCount || 1;
+				const rows = taroEntity._stats.cellSheet.rowCount || 1;
+				const tex = gAssetManager.getTexture(key).clone();
+				const frameWidth = tex.image.width / cols;
+				const frameHeight = tex.image.height / rows;
+				const spriteSheet = new TextureSheet(key, tex, frameWidth, frameHeight);
 				const entity = new Item(taroEntity._id, taroEntity._stats.ownerId, spriteSheet, taroEntity);
 
-				taroEntity.on('scale', (data: { x: number; y: number }) => entity.scale.set(data.x, 1, data.y), this);
-				taroEntity.on('show', () => (entity.visible = true), this);
-				taroEntity.on('hide', () => (entity.visible = false), this);
-				taroEntity.on('layer', (layer) => entity.setLayer(layer));
-				taroEntity.on('depth', (depth) => entity.setDepth(depth));
-				taroEntity.on('z-offset', (offset) => entity.setZOffset(Utils.pixelToWorld(offset)));
-				taroEntity.on('flip', (flip) => entity.setFlip(flip % 2 === 1, flip > 1));
-				taroEntity.on('billboard', (isBillboard) => entity.setBillboard(isBillboard, renderer.camera));
+				if (entity.body instanceof AnimatedSprite) {
+					taroEntity.on('depth', (depth) => (entity.body as AnimatedSprite).setDepth(depth));
+					taroEntity.on('flip', (flip) => (entity.body as AnimatedSprite).setFlip(flip % 2 === 1, flip > 1));
+					taroEntity.on('billboard', (isBillboard) =>
+						(entity.body as AnimatedSprite).setBillboard(isBillboard, Three.instance().camera)
+					);
+				}
 
 				taroEntity.on(
 					'transform',
@@ -51,18 +62,27 @@ namespace Renderer {
 									entity.position.x += x;
 									entity.position.z += y;
 								} else {
-									entity.sprite.position.x = x;
-									entity.sprite.position.z = y;
+									if (entity.body instanceof AnimatedSprite) {
+										entity.body.sprite.position.x = x;
+										entity.body.sprite.position.z = y;
+									}
 								}
 							}
-						} else if (entity.sprite.position.x != 0 || entity.sprite.position.z != 0) {
-							entity.sprite.position.x = 0;
-							entity.sprite.position.z = 0;
+						} else if (
+							entity.body instanceof AnimatedSprite &&
+							(entity.body.sprite.position.x != 0 || entity.body.sprite.position.z != 0)
+						) {
+							entity.body.sprite.position.x = 0;
+							entity.body.sprite.position.z = 0;
 						}
 
-						entity.setRotationY(-data.rotation);
-						const flip = taroEntity._stats.flip;
-						entity.setFlip(flip % 2 === 1, flip > 1);
+						if (entity.body instanceof AnimatedSprite) {
+							entity.body.setRotationY(-data.rotation);
+							const flip = taroEntity._stats.flip;
+							entity.body.setFlip(flip % 2 === 1, flip > 1);
+						} else {
+							entity.body.rotation.y = -data.rotation;
+						}
 					},
 					this
 				);
@@ -76,42 +96,41 @@ namespace Renderer {
 				);
 
 				taroEntity.on('play-animation', (id) => {
-					const key = `${spriteSheet.key}/${id}/${taroEntity._stats.id}`;
-					const animation = AnimationManager.instance().animations.get(key);
-					if (animation) {
-						entity.loop(animation.frames, animation.fps, animation.repeat);
+					if (entity.body instanceof AnimatedSprite) {
+						const key = `${spriteSheet.key}/${id}/${taroEntity._stats.id}`;
+						entity.body.play(key);
 					}
 				});
 
 				taroEntity.on('update-texture', (data) => {
-					const textureMgr = TextureManager.instance();
+					if (!(entity.body instanceof AnimatedSprite)) return;
+
 					const key = taroEntity._stats.cellSheet.url;
-					const animationMgr = AnimationManager.instance();
-					const sheet = textureMgr.getTextureSheetShallowCopy(key);
+					const cols = taroEntity._stats.cellSheet.columnCount || 1;
+					const rows = taroEntity._stats.cellSheet.rowCount || 1;
+					const tex = gAssetManager.getTexture(key);
 
 					const replaceTexture = (spriteSheet: TextureSheet) => {
-						entity.setTextureSheet(sheet);
+						(entity.body as AnimatedSprite).setTextureSheet(spriteSheet);
 						const bounds = taroEntity._bounds2d;
 						entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 					};
 
-					if (sheet) {
+					if (tex) {
+						const frameWidth = tex.image.width / cols;
+						const frameHeight = tex.image.height / rows;
+						const sheet = new TextureSheet(key, tex.clone(), frameWidth, frameHeight);
 						replaceTexture(sheet);
 					} else {
-						const cols = taroEntity._stats.cellSheet.columnCount;
-						const rows = taroEntity._stats.cellSheet.rowCount;
-						textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
-							animationMgr.createAnimationsFromTaroData(key, taroEntity._stats);
+						const animationMgr = AnimationManager.instance();
+						gAssetManager.load([{ name: key, type: 'texture', src: Utils.patchAssetUrl(key) }], null, () => {
+							animationMgr.createAnimationsFromTaroData(key, taroEntity._stats as unknown as EntityData);
+							const frameWidth = tex.image.width / cols;
+							const frameHeight = tex.image.height / rows;
+							const sheet = new TextureSheet(key, tex.clone(), frameWidth, frameHeight);
 							replaceTexture(sheet);
 						});
 					}
-				});
-
-				taroEntity.on('fading-text', (data: { text: string; color?: string }) => {
-					const size = entity.getSizeInPixels();
-					const offsetInPixels = -25 - size.height * 0.5;
-					const text = new FloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
-					entity.add(text);
 				});
 
 				taroEntity.on('setOwnerUnit', (unitId: string) => {
@@ -121,16 +140,18 @@ namespace Renderer {
 				return entity;
 			}
 
-			onDestroy(): void {
-				if (this.taroEntity) {
-					for (const [key, listener] of Object.entries(this.taroEntity.eventList())) {
-						this.taroEntity.off(key, listener);
-					}
+			update(dt: number) {
+				if (this.body instanceof AnimatedSprite) {
+					this.body.update(dt);
 				}
 			}
 
 			setScale(sx: number, sy: number) {
-				super.setScale(sx, sy);
+				if (this.body instanceof AnimatedSprite) {
+					this.body.setScale(sx, sy);
+				} else {
+					this.body.setSize(sx, 1, sy);
+				}
 			}
 		}
 	}
