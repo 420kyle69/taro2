@@ -23,10 +23,11 @@ namespace Renderer {
 
 			setSize(x: number, y: number, z: number) {
 				const size = this.getSize();
-				size.x = (this.scene.scale.x / size.x) * x;
-				size.y = (this.scene.scale.y / size.y) * y;
-				size.z = (this.scene.scale.z / size.z) * z;
-				this.scene.scale.set(size.x, size.y, size.z);
+				this.scene.scale.set(
+					(this.scene.scale.x / size.x) * x,
+					(this.scene.scale.y / size.y) * y,
+					(this.scene.scale.z / size.z) * z
+				);
 			}
 
 			getCenter() {
@@ -36,9 +37,7 @@ namespace Renderer {
 
 			private scaleSceneToFitWithinUnits(units: number) {
 				const size = this.getSize();
-				const sizeArray = size.toArray();
-				const largestComponentIndex = sizeArray.indexOf(Math.max(...sizeArray));
-				const scale = units / sizeArray[largestComponentIndex];
+				const scale = units / Math.max(...size.toArray());
 				this.scene.scale.setScalar(scale);
 			}
 		}
