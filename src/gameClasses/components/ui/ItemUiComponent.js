@@ -395,9 +395,8 @@ var ItemUiComponent = TaroEntity.extend({
 		var self = this;
 
 		// var buffs = self.getBuffList(itemStats);
-
 		var itemTitle = $('<h4/>', {
-			html: itemStats.name,
+			html: taro.clientSanitizer(itemStats.name),
 		});
 
 		var itemDiv = $('<div/>', {
@@ -469,7 +468,7 @@ var ItemUiComponent = TaroEntity.extend({
 	getItemPopOverContent: function (stats) {
 		var info = '<div>';
 		if (stats.description) {
-			info += `<p class="mb-1"><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
+			info += `<p class="mb-1"><span class="item-description">${stats.description} </span></p>`;
 		}
 		if (stats && stats.bonus) {
 			if (stats.bonus.consume && Object.keys(stats.bonus.consume).length > 0) {
