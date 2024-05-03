@@ -25,22 +25,30 @@ namespace Renderer {
 
 				this.gizmo = new EntityGizmo();
 				taro.client.on('add-entities', () => {
+					this.selectEntityPreview(null);
 					this.activatePlacement(true);
 				});
 				taro.client.on('cursor', () => {
 					this.activatePlacement(false);
 				});
 				taro.client.on('draw-region', () => {
+					this.selectEntityPreview(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('brush', () => {
+					this.selectEntityPreview(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('empty-tile', () => {
+					this.selectEntityPreview(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('fill', () => {
+					this.selectEntityPreview(null);
 					this.activatePlacement(false);
+				});
+				taro.client.on('clear', () => {
+					this.selectEntityPreview(null);
 				});
 				taro.client.on('updateActiveEntity', () => {
 					this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
@@ -179,10 +187,12 @@ namespace Renderer {
 					if (this.selectedEntityPreview) this.selectedEntityPreview.updateOutline(true);
 					this.selectedEntityPreview = null;
 					this.gizmo.control.detach();
+					taro.client.emit('show-transform-modes', false);
 					return;
 				}
 				this.selectedEntityPreview = entityPreview;
 				this.gizmo.attach(entityPreview.preview);
+				taro.client.emit('show-transform-modes', true);
 				entityPreview.updateOutline();
 			}
 
@@ -214,7 +224,7 @@ namespace Renderer {
 			deleteInitEntity(): void {
 				if (this.selectedEntityImage) {
 					this.selectedEntityImage.delete();
-					this.selectEntityImage(null);
+					this.selectEntityPreview(null);
 				}
 			}
 		}

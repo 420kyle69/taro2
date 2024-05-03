@@ -71,6 +71,11 @@ namespace Renderer {
 
 				//window.addEventListener('resize', this.onWindowResize);
 
+				taro.client.on('gizmo-mode', (mode: 'translate' | 'rotate' | 'scale') => {
+					control.setMode(mode);
+					this.updateForDimension();
+				});
+
 				window.addEventListener('keydown', (event) => {
 					switch (event.key) {
 						/*case 'q':
