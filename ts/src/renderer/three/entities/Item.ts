@@ -13,7 +13,12 @@ namespace Renderer {
 			) {
 				super(taroEntity);
 
-				this.body = new AnimatedSprite(spriteSheet);
+				if (taroEntity._stats.is3DObject) {
+					const name = taroEntity._stats['3DObjectUrl'];
+					this.body = new Model(name);
+				} else {
+					this.body = new AnimatedSprite(spriteSheet);
+				}
 				this.add(this.body);
 
 				this.ownerUnitId = taroEntity._stats.ownerUnitId;
