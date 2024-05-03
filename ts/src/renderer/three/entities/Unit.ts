@@ -7,8 +7,7 @@ namespace Renderer {
 				offset: { x: 0, y: 0, z: 0 },
 			};
 
-			body: AnimatedSprite;
-			body3d: Model | undefined = undefined;
+			body: AnimatedSprite | Model;
 
 			hud = new THREE.Group();
 
@@ -24,14 +23,13 @@ namespace Renderer {
 			) {
 				super(taroEntity);
 
-				this.body = new AnimatedSprite(spriteSheet);
-				this.add(this.body);
-
 				if (taroEntity._stats.is3DObject) {
 					const name = taroEntity._stats['3DObjectUrl'];
-					this.body3d = new Model(name);
-					this.add(this.body3d);
+					this.body = new Model(name);
+				} else {
+					this.body = new AnimatedSprite(spriteSheet);
 				}
+				this.add(this.body);
 
 				this.label.visible = false;
 
@@ -73,9 +71,14 @@ namespace Renderer {
 				taroEntity.on('render-attributes', (data) => (entity as Unit).renderAttributes(data));
 				taroEntity.on('update-attribute', (data) => (entity as Unit).attributes.update(data));
 				taroEntity.on('render-chat-bubble', (text) => (entity as Unit).renderChat(text));
-				taroEntity.on('depth', (depth) => entity.body.setDepth(depth));
-				taroEntity.on('flip', (flip) => entity.body.setFlip(flip % 2 === 1, flip > 1));
-				taroEntity.on('billboard', (isBillboard) => entity.body.setBillboard(isBillboard, renderer.camera));
+
+				if (entity.body instanceof AnimatedSprite) {
+					taroEntity.on('depth', (depth) => (entity.body as AnimatedSprite).setDepth(depth));
+					taroEntity.on('flip', (flip) => (entity.body as AnimatedSprite).setFlip(flip % 2 === 1, flip > 1));
+					taroEntity.on('billboard', (isBillboard) =>
+						(entity.body as AnimatedSprite).setBillboard(isBillboard, renderer.camera)
+					);
+				}
 
 				taroEntity.on(
 					'transform',
@@ -83,12 +86,12 @@ namespace Renderer {
 						entity.position.x = Utils.pixelToWorld(data.x);
 						entity.position.z = Utils.pixelToWorld(data.y);
 
-						entity.body.setRotationY(-data.rotation);
-						const flip = taroEntity._stats.flip;
-						entity.body.setFlip(flip % 2 === 1, flip > 1);
-
-						if (entity.body3d) {
-							entity.body3d.rotation.y = -data.rotation;
+						if (entity.body instanceof AnimatedSprite) {
+							entity.body.setRotationY(-data.rotation);
+							const flip = taroEntity._stats.flip;
+							entity.body.setFlip(flip % 2 === 1, flip > 1);
+						} else {
+							entity.body.rotation.y = -data.rotation;
 						}
 					},
 					this
@@ -106,24 +109,33 @@ namespace Renderer {
 					entity.label.visible = true;
 					entity.label.update({ text: data.text, color: data.color, bold: data.bold });
 
-					const size = entity.body.getSizeInPixels();
-					const unitHeightInLabelHeightUnits = size.height / entity.label.height;
+					let unitHeightPx = 0;
+					if (entity.body instanceof AnimatedSprite) {
+						unitHeightPx = entity.body.getSizeInPixels().height;
+					} else {
+						unitHeightPx = Utils.worldToPixel(entity.body.getSize().y);
+					}
+					const unitHeightInLabelHeightUnits = unitHeightPx / entity.label.height;
 					entity.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 				});
 
 				taroEntity.on('play-animation', (id) => {
-					const key = `${spriteSheet.key}/${id}/${taroEntity._stats.id}`;
-					entity.body.play(key);
+					if (entity.body instanceof AnimatedSprite) {
+						const key = `${spriteSheet.key}/${id}/${taroEntity._stats.id}`;
+						entity.body.play(key);
+					}
 				});
 
 				taroEntity.on('update-texture', (data) => {
+					if (!(entity.body instanceof AnimatedSprite)) return;
+
 					const key = taroEntity._stats.cellSheet.url;
 					const cols = taroEntity._stats.cellSheet.columnCount || 1;
 					const rows = taroEntity._stats.cellSheet.rowCount || 1;
 					const tex = gAssetManager.getTexture(key);
 
 					const replaceTexture = (spriteSheet: TextureSheet) => {
-						entity.body.setTextureSheet(spriteSheet);
+						(entity.body as AnimatedSprite).setTextureSheet(spriteSheet);
 						const bounds = taroEntity._bounds2d;
 						entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y));
 					};
@@ -146,8 +158,13 @@ namespace Renderer {
 				});
 
 				taroEntity.on('fading-text', (data: { text: string; color?: string }) => {
-					const size = entity.body.getSizeInPixels();
-					const offsetInPixels = -25 - size.height * 0.5;
+					let unitHeightPx = 0;
+					if (entity.body instanceof AnimatedSprite) {
+						unitHeightPx = entity.body.getSizeInPixels().height;
+					} else {
+						unitHeightPx = Utils.worldToPixel(entity.body.getSize().y);
+					}
+					const offsetInPixels = -25 - unitHeightPx * 0.5;
 					const text = new FloatingText(0, 0, 0, data.text || '', data.color || '#ffffff', 0, -offsetInPixels);
 					entity.add(text);
 				});
@@ -155,8 +172,10 @@ namespace Renderer {
 				return entity;
 			}
 
-			update(dt) {
-				this.body.update(dt);
+			update(dt: number) {
+				if (this.body instanceof AnimatedSprite) {
+					this.body.update(dt);
+				}
 			}
 
 			renderChat(text: string): void {
@@ -179,16 +198,30 @@ namespace Renderer {
 				this.attributes.clear();
 				this.attributes.addAttributes(data);
 
-				const size = this.body.getSizeInPixels();
-				const halfHeight = size.height * 0.5;
+				let unitHeightPx = 0;
+				if (this.body instanceof AnimatedSprite) {
+					unitHeightPx = this.body.getSizeInPixels().height;
+				} else {
+					unitHeightPx = Utils.worldToPixel(this.body.getSize().y);
+				}
+				const halfHeight = unitHeightPx * 0.5;
 				this.attributes.position.z = Utils.pixelToWorld(halfHeight);
 			}
 
 			setScale(sx: number, sy: number) {
-				this.body.setScale(sx, sy);
+				if (this.body instanceof AnimatedSprite) {
+					this.body.setScale(sx, sy);
+				} else {
+					this.body.setSize(sx, 1, sy);
+				}
 
-				const size = this.body.getSizeInPixels();
-				const unitHeightInLabelHeightUnits = size.height / this.label.height;
+				let unitHeightPx = 0;
+				if (this.body instanceof AnimatedSprite) {
+					unitHeightPx = this.body.getSizeInPixels().height;
+				} else {
+					unitHeightPx = Utils.worldToPixel(this.body.getSize().y);
+				}
+				const unitHeightInLabelHeightUnits = unitHeightPx / this.label.height;
 				this.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
 			}
 
