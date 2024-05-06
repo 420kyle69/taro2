@@ -243,7 +243,7 @@ namespace Renderer {
 					this.preview.sprite.scale.setZ(action.height / this.defaultHeight);
 				}
 				if (action.wasDeleted) {
-					this.hide();
+					this.preview.destroy();
 					this.action.wasDeleted = true;
 				}
 				// if (this === this.entityEditor.selectedEntityImage) this.updateOutline();

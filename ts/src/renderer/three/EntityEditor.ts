@@ -12,7 +12,6 @@ namespace Renderer {
 			activeHandler: boolean;
 
 			activeEntity: { id: string; player: string; entityType: string };
-			selectedEntityImage: EntityImage;
 			selectedEntityPreview: EntityPreview;
 
 			COLOR_HANDLER: number;
@@ -184,16 +183,6 @@ namespace Renderer {
 				}
 			}
 
-			selectEntityImage(entityImage: EntityImage): void {
-				if (entityImage === null) {
-					if (this.selectedEntityImage) this.selectedEntityImage.updateOutline(true);
-					this.selectedEntityImage = null;
-					return;
-				}
-				this.selectedEntityImage = entityImage;
-				entityImage.updateOutline();
-			}
-
 			selectEntityPreview(entityPreview: EntityPreview): void {
 				if (entityPreview === null) {
 					if (this.selectedEntityPreview) this.selectedEntityPreview.updateOutline(true);
@@ -234,8 +223,8 @@ namespace Renderer {
 			}
 
 			deleteInitEntity(): void {
-				if (this.selectedEntityImage) {
-					this.selectedEntityImage.delete();
+				if (this.selectedEntityPreview) {
+					this.selectedEntityPreview.delete();
 					this.selectEntityPreview(null);
 				}
 			}
