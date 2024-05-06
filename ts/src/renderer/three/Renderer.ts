@@ -626,7 +626,6 @@ namespace Renderer {
 							}
 
 							// Move defaults to AnimationManager.create?
-							console.log(`${key}/${animationsKey}/${taroEntity.id}`);
 							AnimationManager.instance().create({
 								key: `${key}/${animationsKey}/${taroEntity.id}`,
 								textureSheetKey: key,

@@ -225,7 +225,7 @@ namespace Renderer {
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
-					// TODO: handle the ratation
+					// TODO: handle the rotation
 					this.preview.rotation.set(action.angle, 0, 0);
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
