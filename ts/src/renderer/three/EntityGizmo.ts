@@ -61,6 +61,10 @@ namespace Renderer {
 
 				control.addEventListener('dragging-changed', function (event) {
 					orbit.enabled = !event.value;
+					if (!event.value) {
+						// drag ended
+						renderer.entityEditor.selectedEntityPreview.edit(renderer.entityEditor.selectedEntityPreview.editedAction);
+					}
 				});
 
 				/*const mesh = new THREE.Mesh(geometry, material);
@@ -100,7 +104,6 @@ namespace Renderer {
 			}
 
 			updateForDimension() {
-				console.log('dimension', this.dimension);
 				const control = this.control;
 				if (this.dimension === '2d') {
 					switch (control.mode) {

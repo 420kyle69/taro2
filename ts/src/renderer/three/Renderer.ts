@@ -149,35 +149,48 @@ namespace Renderer {
 									case 'cursor': {
 										const raycaster = new THREE.Raycaster();
 										raycaster.setFromCamera(this.pointer, this.camera.instance);
-										const intersects = raycaster.intersectObjects(this.entityManager.entities);
+
+										let intersects = raycaster.intersectObjects(this.entityManager.entityPreviews);
 										if (intersects?.length > 0) {
-											let closest: THREE.Mesh;
-											let clickedList: THREE.Mesh[] = [];
-											for (const intersect of intersects) {
-												if ((intersect.object as THREE.Mesh).isMesh) {
-													closest = intersect.object as THREE.Mesh;
-													clickedList.push(closest);
-												}
+											const closest = intersects[0].object as THREE.Mesh;
+											const preview = this.entityManager.entityPreviews.find((preview) => preview.sprite === closest);
+											if (preview) {
+												this.entityEditor.selectEntityPreview(preview.entity);
 											}
-											let regionList: RegionData[] = [];
-											clickedList.forEach((clicked) => {
-												const region = this.entityManager.regions.find((e) => e.mesh === clicked);
-												if (region) {
-													regionList.push({
-														name: region.taroEntity._stats.id,
-														x: region.stats.x,
-														y: region.stats.y,
-														width: region.stats.width,
-														height: region.stats.height,
-														alpha: region.stats.alpha,
-														inside: region.stats.inside,
+										} else {
+											if (!this.entityEditor.gizmo.control.dragging) {
+												this.entityEditor.selectEntityPreview(null);
+												intersects = raycaster.intersectObjects(this.entityManager.entities);
+												if (intersects?.length > 0) {
+													let closest: THREE.Mesh;
+													let clickedList: THREE.Mesh[] = [];
+													for (const intersect of intersects) {
+														if ((intersect.object as THREE.Mesh).isMesh) {
+															closest = intersect.object as THREE.Mesh;
+															clickedList.push(closest);
+														}
+													}
+													let regionList: RegionData[] = [];
+													clickedList.forEach((clicked) => {
+														const region = this.entityManager.regions.find((e) => e.mesh === clicked);
+														if (region) {
+															regionList.push({
+																name: region.taroEntity._stats.id,
+																x: region.stats.x,
+																y: region.stats.y,
+																width: region.stats.width,
+																height: region.stats.height,
+																alpha: region.stats.alpha,
+																inside: region.stats.inside,
+															});
+														}
 													});
+													if (regionList.length === 1) {
+														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+													} else if (regionList.length > 1) {
+														inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
+													}
 												}
-											});
-											if (regionList.length === 1) {
-												inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
-											} else if (regionList.length > 1) {
-												inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
 											}
 										}
 

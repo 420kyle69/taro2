@@ -112,7 +112,7 @@ namespace Renderer {
 			updatePreview(): void {
 				const entityData = this.activeEntity;
 				const renderer = Renderer.Three.instance();
-				const textureMgr = TextureManager.instance();
+				const textureMgr = gAssetManager;
 				if (!entityData) {
 					if (this.preview) {
 						this.preview.visible = false;
@@ -153,8 +153,14 @@ namespace Renderer {
 						return;
 					}
 				}
+				const cols = entity.cellSheet.columnCount || 1;
+				const rows = entity.cellSheet.rowCount || 1;
+				const tex = gAssetManager.getTexture(key).clone();
+				const frameWidth = tex.image.width / cols;
+				const frameHeight = tex.image.height / rows;
+				const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
 
-				this.preview = new Renderer.Three.AnimatedSprite(textureMgr.getTextureSheetShallowCopy(key));
+				this.preview = new Renderer.Three.AnimatedSprite(texture);
 				this.preview.setBillboard(entity.isBillboard, renderer.camera);
 				this.preview.setOpacity(0.5);
 				renderer.entityPreviewLayer.add(this.preview);
