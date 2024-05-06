@@ -13,7 +13,7 @@ var Projectile = TaroEntityPhysics.extend({
 		}
 
 		self.entityId = this._id;
-		self._stats = { ...projectileData, ...data };
+		self._stats = _.merge(projectileData, data);
 		self._stats.particleEmitters = {};
 
 		// dont save variables in _stats as _stats is stringified and synced
@@ -37,10 +37,6 @@ var Projectile = TaroEntityPhysics.extend({
 
 		if (taro.isServer) {
 			self.mount(taro.$('baseScene'));
-		}
-
-		if (taro.isClient) {
-			this.initParticleEmitters();
 		}
 
 		this.startRendering();
@@ -92,6 +88,10 @@ var Projectile = TaroEntityPhysics.extend({
 
 			taro.server.totalProjectilesCreated++;
 		} else if (taro.isClient) {
+			if (taro.isClient) {
+				this.initParticleEmitters();
+			}
+
 			if (currentState) {
 				var defaultAnimation = this._stats.animations[currentState.animation];
 				this.addToRenderer(defaultAnimation && defaultAnimation.frames[0] - 1, data.defaultData);
@@ -100,6 +100,10 @@ var Projectile = TaroEntityPhysics.extend({
 
 			self.updateLayer();
 			self.updateTexture();
+
+			if (this._stats.isHidden) {
+				this.hide(true);
+			}
 		}
 		this.playEffect('create');
 

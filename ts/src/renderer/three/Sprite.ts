@@ -5,11 +5,9 @@ namespace Renderer {
 			billboard = false;
 			scaleUnflipped = new THREE.Vector2(1, 1);
 
-			private layer = 3;
 			private depth = 1;
 			private flipX = 1;
 			private flipY = 1;
-			private zOffset = 0;
 			private angleOffset = 0;
 
 			constructor(protected tex: THREE.Texture) {
@@ -39,6 +37,8 @@ namespace Renderer {
 				if (this.billboard) {
 					this.faceCamera(camera);
 					this.correctZOffsetBasedOnCameraAngle();
+				} else {
+					this.resetRotation();
 				}
 			}
 
@@ -55,20 +55,9 @@ namespace Renderer {
 				this.sprite.rotation.y = rad;
 			}
 
-			setLayer(layer: number) {
-				this.layer = layer;
-				this.calcRenderOrder();
-			}
-
 			setDepth(depth: number) {
 				this.depth = depth;
 				this.calcRenderOrder();
-			}
-
-			setZOffset(offset: number) {
-				this.zOffset = offset;
-				this.calcRenderOrder();
-				this.correctZOffsetBasedOnCameraAngle();
 			}
 
 			setTexture(tex: THREE.Texture) {
@@ -94,10 +83,15 @@ namespace Renderer {
 					this.faceCamera(Three.instance().camera);
 					this.correctZOffsetBasedOnCameraAngle();
 				}
+
+				const parent = this.parent as Unit | Item;
+				const isOwnedItem = parent && parent instanceof Item && parent.ownerUnit;
+				if (isOwnedItem) {
+					this.position.y = parent.ownerUnit.body.position.y;
+				}
 			}
 
 			private calcRenderOrder() {
-				this.position.y = Utils.getLayerZOffset(this.layer) + this.zOffset;
 				this.sprite.position.y = Utils.getDepthZOffset(this.depth);
 			}
 
@@ -112,11 +106,20 @@ namespace Renderer {
 				let halfHeight = this.scaleUnflipped.y * 0.5;
 				const adj = Math.cos(angle) * halfHeight;
 				this.angleOffset = Math.tan(angle) * adj;
-				const offset = this.zOffset + this.angleOffset;
+				const offset = this.angleOffset;
 
-				if (!(this instanceof Item) || (this instanceof Item && !this.ownerUnit)) {
-					this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + offset;
+				const parent = this.parent as Unit | Item;
+				const isNotItemOrUnownedItem =
+					(parent && !(parent instanceof Item)) || (parent && parent instanceof Item && !parent.ownerUnit);
+
+				if (isNotItemOrUnownedItem) {
+					this.position.y = Utils.getDepthZOffset(this.depth) + offset;
 				}
+			}
+
+			private resetRotation() {
+				this.rotation.set(0, 0, 0);
+				this.calcRenderOrder();
 			}
 		}
 	}

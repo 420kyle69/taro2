@@ -129,14 +129,14 @@ var UnitUiComponent = TaroEntity.extend({
 			let displayText;
 			if (attr.displayValue) {
 				displayText = `
-					<span class='unit-attribute-name'>${name}: </span>
+					<span class='unit-attribute-name'>${taro.escapeHtml(name)}: </span>
 					<span class='unit-attribute-value'>
-						<span class='unit-attribute-current'>${value}</span><span class='unit-attribute-divisor-sign'> / </span><span class='unit-attribute-max'>${parseFloat(attr.max).toFixed(0)}</span>
+						<span class='unit-attribute-current'>${taro.getNumber(value)}</span><span class='unit-attribute-divisor-sign'> / </span><span class='unit-attribute-max'>${parseFloat(attr.max).toFixed(0)}</span>
 					</span>
 				`;
 			} else {
 				displayText = `
-					<span class='unit-attribute-name'>${name}</span>
+					<span class='unit-attribute-name'>${taro.escapeHtml(name)}</span>
 				`;
 			}
 			$(taro.client.getCachedElementById(`player-${attr.type}`)).html(displayText);

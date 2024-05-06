@@ -506,7 +506,7 @@ var Player = TaroEntity.extend({
 		return isModerator;
 	},
 
-	remove: function (autoSavePlayerData = true) {
+	remove: function () {
 		// AI players cannot be removed
 		if (this._stats.controlledBy == 'human') {
 			// do not send trigger for neutral player
@@ -667,6 +667,7 @@ var Player = TaroEntity.extend({
 
 							case 'scriptData':
 								taro.developerMode.serverScriptData = newValue;
+								taro.developerMode.savedScriptData = newValue;
 								break;
 
 							case 'variableData':

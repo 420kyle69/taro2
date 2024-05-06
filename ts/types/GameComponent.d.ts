@@ -20,6 +20,8 @@ interface EntityData {
 		unitAbilities: Record<string, UnitAbility>;
 	};
 	id: string;
+
+	is3DObject?: boolean;
 }
 
 interface UnitAbility {
@@ -44,6 +46,12 @@ interface ScriptData {
 	>;
 	actions: Record<string, ActionData>;
 	deleted?: boolean;
+}
+
+interface ScriptChangesData {
+	scriptData: Record<string, ScriptData>;
+	action: string;
+	clientId: string;
 }
 
 interface ActionData {

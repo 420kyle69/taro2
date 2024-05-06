@@ -54,7 +54,7 @@ namespace Renderer {
 				if (idx === -1) return;
 
 				this.entities.splice(idx, 1);
-				this.animatedSprites.splice(this.animatedSprites.indexOf(entity as AnimatedSprite, 0), 1);
+				this.animatedSprites.splice(this.animatedSprites.indexOf(entity as unknown as AnimatedSprite, 0), 1);
 			}
 
 			update(dt: number) {

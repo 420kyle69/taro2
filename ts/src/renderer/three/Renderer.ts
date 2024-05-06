@@ -292,7 +292,10 @@ namespace Renderer {
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
 						for (const intersect of intersects) {
 							const closest = intersect.object as THREE.Mesh;
-							const unit = this.entityManager.units.find((unit) => unit.sprite === closest);
+							const unit = this.entityManager.units.find((unit) => {
+								if (!(unit.body instanceof AnimatedSprite)) return false;
+								return unit.body.sprite === closest;
+							});
 							if (unit) {
 								const clientUnit = taro.client.selectedUnit;
 								const otherUnit = taro.$(unit.taroId);
@@ -301,7 +304,8 @@ namespace Renderer {
 									break;
 								}
 
-								if (otherUnit?._stats?.controlledBy === 'human') {
+								const otherOwnerUnit = taro.$(unit.ownerId);
+								if (otherOwnerUnit?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
@@ -378,7 +382,10 @@ namespace Renderer {
 					requestAnimationFrame(this.render.bind(this));
 				};
 
-				this.loadTextures();
+				const isPixelArt = taro.game.data.defaultData.renderingFilter === 'pixelArt';
+				gAssetManager.setFilter(isPixelArt ? THREE.NearestFilter : THREE.LinearFilter);
+
+				this.loadAssets();
 
 				taro.client.on('enterPlayTab', () => {
 					this.mode = Mode.Play;
@@ -584,16 +591,14 @@ namespace Renderer {
 				this.entitiesLayer.visible = visible;
 			}
 
-			private loadTextures() {
-				const textureMgr = TextureManager.instance();
-				textureMgr.setFilter(taro.game.data.defaultData.renderingFilter);
-				textureMgr.setLoadingManager(this.initLoadingManager);
+			private loadAssets() {
+				const sources = [];
 
 				const data = taro.game.data;
 
 				data.map.tilesets.forEach((tileset) => {
 					const key = tileset.image;
-					textureMgr.loadTextureFromUrl(key, Utils.patchAssetUrl(key));
+					sources.push({ name: key, type: 'texture', src: Utils.patchAssetUrl(key) });
 				});
 
 				const taroEntities = [
@@ -603,55 +608,25 @@ namespace Renderer {
 				];
 
 				for (const taroEntity of taroEntities) {
-					const cellSheet = taroEntity.cellSheet;
-					if (!cellSheet) continue;
+					const url = taroEntity?.cellSheet?.url;
+					if (!url) continue;
 
-					const key = cellSheet.url;
-					const cols = cellSheet.columnCount;
-					const rows = cellSheet.rowCount;
-					textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
-						for (let animationsKey in taroEntity.animations) {
-							const animation = taroEntity.animations[animationsKey];
-							const frames = animation.frames;
-							const animationFrames: number[] = [];
+					sources.push({ name: url, type: taroEntity.is3DObject ? 'gltf' : 'texture', src: Utils.patchAssetUrl(url) });
 
-							// Correction for 0-based indexing
-							for (let i = 0; i < frames.length; i++) {
-								animationFrames.push(+frames[i] - 1);
-							}
-
-							// Avoid crash by giving it frame 0 if no frame data provided
-							if (animationFrames.length === 0) {
-								animationFrames.push(0);
-							}
-
-							// Move defaults to AnimationManager.create?
-							console.log(`${key}/${animationsKey}/${taroEntity.id}`);
-							AnimationManager.instance().create({
-								key: `${key}/${animationsKey}/${taroEntity.id}`,
-								textureSheetKey: key,
-								frames: animationFrames,
-								fps: +animation.framesPerSecond || 15,
-								repeat: +animation.loopCount - 1,
-							});
-						}
-					});
+					AnimationManager.instance().createAnimationsFromTaroData(url, taroEntity);
 				}
 
 				for (const taroEntity of Object.values(data.particleTypes)) {
 					const key = taroEntity.url;
-					textureMgr.loadTextureFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
+					sources.push({ name: `particle/${key}`, type: 'texture', src: Utils.patchAssetUrl(key) });
 				}
 
-				const urls = taro.game.data.settings.skybox;
-				textureMgr.loadTextureFromUrl('left', urls.left);
-				textureMgr.loadTextureFromUrl('right', urls.right);
-				textureMgr.loadTextureFromUrl('top', urls.top);
-				textureMgr.loadTextureFromUrl('bottom', urls.bottom);
-				textureMgr.loadTextureFromUrl('front', urls.front);
-				textureMgr.loadTextureFromUrl('back', urls.back);
+				const skyboxFacesUrls = taro.game.data.settings.skybox;
+				for (const key in skyboxFacesUrls) {
+					sources.push({ name: key, type: 'texture', src: skyboxFacesUrls[key] });
+				}
 
-				textureMgr.setLoadingManager(THREE.DefaultLoadingManager);
+				gAssetManager.load(sources, this.initLoadingManager);
 			}
 
 			private forceLoadUnusedCSSFonts() {
@@ -832,7 +807,7 @@ namespace Renderer {
 				this.timeSinceLastRaycast += dt;
 				if (this.timeSinceLastRaycast > this.raycastIntervalSeconds) {
 					this.timeSinceLastRaycast = 0;
-					// this.checkForHiddenEntities();
+					this.checkForHiddenEntities();
 				}
 
 				TWEEN.update();

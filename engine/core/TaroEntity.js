@@ -108,6 +108,7 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_show: function () {
+		this._stats.isHidden = false;
 		if (taro.isClient) {
 			this.emit('show');
 		}
@@ -122,6 +123,7 @@ var TaroEntity = TaroObject.extend({
 	 * method chaining.
 	 */
 	_hide: function () {
+		this._stats.isHidden = true;
 		if (taro.isClient) {
 			this.emit('hide');
 		}
@@ -242,6 +244,8 @@ var TaroEntity = TaroObject.extend({
 			if (!isNaN(body['z-index'].offset) || body['z-index'].offset === undefined) {
 				self.zOffset(body['z-index'].offset ?? 0);
 			}
+
+			self.billboard(!!body['isBillboard']);
 		}
 	},
 
@@ -2032,7 +2036,11 @@ var TaroEntity = TaroObject.extend({
 			if (effect.runScript) {
 				const triggeredBy = {};
 				triggeredBy[`${this._category}Id`] = this._id;
-				this.script.runScript(effect.runScript, { triggeredBy });
+
+				const script = this.script.scripts?.[effect.runScript];
+				const triggeredFrom = script.isWorld ? 'world' : 'map';
+
+				this.script.runScript(effect.runScript, { triggeredBy, triggeredFrom });
 			}
 
 			if (taro.isServer) {
@@ -4426,14 +4434,17 @@ var TaroEntity = TaroObject.extend({
 										this.applyAnimationForState(stateId);
 
 										// whip-out the new item using tween
-										let customTween = {
-											type: 'swing',
-											keyFrames: [
-												[0, [0, 0, -1.57]],
-												[100, [0, 0, 0]],
-											],
-										};
-										this.tween.start(null, this._rotate.z, customTween);
+										// unless item is 'unusable'
+										if (this._stats.type !== 'unusable') {
+											let customTween = {
+												type: 'swing',
+												keyFrames: [
+													[0, [0, 0, -1.57]],
+													[100, [0, 0, 0]],
+												],
+											};
+											this.tween.start(null, this._rotate.z, customTween);
+										}
 									}
 
 									const bodyId = this._stats.states[stateId]?.body;
@@ -4476,7 +4487,6 @@ var TaroEntity = TaroObject.extend({
 								break;
 
 							case 'isHidden':
-								this._stats[attrName] = newValue;
 								if (newValue == true) {
 									this.hide();
 								} else {

@@ -674,11 +674,13 @@ var ServerNetworkEvents = {
 
 		if (player) {
 			var selectedOption = null;
+			let dialogue = null;
 
 			for (var dialogId in taro.game.data.dialogues) {
 				var dialog = taro.game.data.dialogues[dialogId];
 
 				if (dialogId === data.dialogue) {
+					dialogue = dialog;
 					for (var optionId in dialog.options) {
 						var option = dialog.options[optionId];
 
@@ -693,7 +695,9 @@ var ServerNetworkEvents = {
 			if (selectedOption) {
 				taro.game.lastPlayerSelectingDialogueOption = player.id();
 				if (selectedOption.scriptName) {
-					taro.script.runScript(selectedOption.scriptName, {});
+					const isWorldDialogue = dialogue.isWorld;
+					const triggeredFrom = isWorldDialogue ? 'world' : 'map';
+					taro.script.runScript(selectedOption.scriptName, { triggeredFrom });
 				}
 				if (selectedOption.followUpDialogue) {
 					taro.network.send(

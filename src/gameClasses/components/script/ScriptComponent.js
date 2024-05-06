@@ -58,10 +58,24 @@ var ScriptComponent = TaroEntity.extend({
 
 	runScript: function (scriptId, params = {}) {
 		var self = this;
+		
+		const previousScriptId = self.currentScriptId;
 
 		// for logging script history
 		self.currentScriptId = scriptId;
 		if (this.scripts && this.scripts[scriptId]) {
+
+			if (taro.game.isWorldMap) {
+				params.isWorldScript = !!this.scripts[scriptId].isWorld;
+				if (params.isWorldScript && params.triggeredFrom === 'map') {
+					// map can not trigger world scripts
+					const errorPath = `${this._entity._id}/${previousScriptId || scriptId}/${self.currentActionName}`;
+					self.errorLog('can not run world script from map', errorPath);
+					console.log('can not run world script from map', errorPath, this.scripts[scriptId].name);
+					return;
+				}
+			}
+
 			var actions = self.getScriptActions(scriptId);
 
 			// console.log(scriptId, ': ', actions, params);
