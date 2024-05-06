@@ -32,10 +32,10 @@ namespace Renderer {
 
 			setSize2D(x: number, z: number) {
 				const size = this.getSize();
-				console.log('unit:model:setSize2D:before', x, z, size);
+				console.warn('unit:model:setSize2D:before', x, z, size);
 				this.scene.scale.x = (this.scene.scale.x / size.x) * x;
 				this.scene.scale.z = (this.scene.scale.z / size.z) * z;
-				console.log('unit:model:setSize2D:after', x, z, this.scene.scale);
+				console.warn('unit:model:setSize2D:after', x, z, this.scene.scale);
 			}
 
 			getCenter() {
