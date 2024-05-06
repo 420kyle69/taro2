@@ -4,7 +4,6 @@ namespace Renderer {
 			currentCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 			control: TransformControls;
 			dimension: '2d' | '3d' = '3d';
-
 			constructor() {
 				this.init();
 			}
@@ -63,12 +62,12 @@ namespace Renderer {
 					orbit.enabled = !event.value;
 					if (!event.value) {
 						// drag ended
-						const editedAction = {};
+						const editedAction = { actionId: control.object.entity.action.actionId };
 						switch (control.mode) {
 							case 'translate':
 								editedAction['position'] = {
-									x: control.object.position.x,
-									y: control.object.position.z,
+									x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+									y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
 								};
 								break;
 							case 'rotate':
