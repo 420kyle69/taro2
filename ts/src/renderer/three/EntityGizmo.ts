@@ -63,7 +63,25 @@ namespace Renderer {
 					orbit.enabled = !event.value;
 					if (!event.value) {
 						// drag ended
-						renderer.entityEditor.selectedEntityPreview.edit(renderer.entityEditor.selectedEntityPreview.editedAction);
+						const editedAction = {};
+						switch (control.mode) {
+							case 'translate':
+								editedAction['position'] = {
+									x: control.object.position.x,
+									y: control.object.position.z,
+								};
+								break;
+							case 'rotate':
+								editedAction['angle'] = control.object.rotation.y;
+								break;
+							case 'scale':
+								editedAction['width'] = control.object.scale.x;
+								editedAction['height'] = control.object.scale.z;
+								break;
+						}
+						if (editedAction) {
+							renderer.entityEditor.selectedEntityPreview.edit(editedAction);
+						}
 					}
 				});
 
