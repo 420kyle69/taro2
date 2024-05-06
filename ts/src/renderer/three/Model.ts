@@ -33,16 +33,8 @@ namespace Renderer {
 			}
 
 			setSize2D(x: number, z: number) {
-				const size = this.getSize();
-				console.log('size', size, this.scene.scale);
-				console.warn('unit:model:setSize2D:before', x, z, size);
-				console.warn('unit:model:setSize2D:before:scale', x, z, this.scene.scale);
-
-				this.scene.scale.x = this.originalScale.x * (this.originalSize.x / x);
-				this.scene.scale.z = this.originalScale.z * (this.originalSize.z / z);
-
-				console.warn('unit:model:setSize2D:after', x, z, this.getSize());
-				console.warn('unit:model:setSize2D:after:scale', x, z, this.getSize());
+				this.scene.scale.x = this.originalScale.x * (x / this.originalSize.x);
+				this.scene.scale.z = this.originalScale.z * (z / this.originalSize.z);
 			}
 
 			getCenter() {
@@ -53,13 +45,9 @@ namespace Renderer {
 			private scaleSceneToFitWithinUnits(units: number) {
 				const size = this.getSize();
 				const scale = units / Math.max(...size.toArray());
-				console.log('original size', this.getSize());
 				this.scene.scale.setScalar(scale);
-				console.log('scale', this.scene.scale);
 				this.originalSize.copy(this.getSize());
 				this.originalScale.copy(this.scene.scale);
-				console.warn('originalScale', this.originalScale);
-				console.warn('originalSize', this.originalSize);
 			}
 		}
 	}
