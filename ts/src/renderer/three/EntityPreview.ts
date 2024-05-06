@@ -23,6 +23,8 @@ namespace Renderer {
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				this.action = action;
 				let key: string;
+				let cols: number;
+				let rows: number;
 				let entityTypeData: Record<string, any>;
 
 				for (let typeName of ['unit', 'item', 'projectile'].values()) {
@@ -32,6 +34,8 @@ namespace Renderer {
 						entityTypeData = taro.game.data[iterTypes] && taro.game.data[iterTypes][action.entity ?? action[iterType]];
 						if (!entityTypeData) return;
 						key = `${entityTypeData.cellSheet.url}`;
+						cols = entityTypeData.cellSheet.columnCount || 1;
+						rows = entityTypeData.cellSheet.rowCount || 1;
 					}
 				}
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
@@ -39,10 +43,13 @@ namespace Renderer {
 
 				// TODO: add preview here
 				const renderer = Renderer.Three.instance();
-				const textureMgr = TextureManager.instance();
-				const preview = (this.preview = new Renderer.Three.AnimatedSprite(
-					textureMgr.getTextureSheetShallowCopy(key)
-				) as Renderer.Three.AnimatedSprite & { entity: EntityPreview });
+				const tex = gAssetManager.getTexture(key).clone();
+				const frameWidth = tex.image.width / cols;
+				const frameHeight = tex.image.height / rows;
+				const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
+				const preview = (this.preview = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite & {
+					entity: EntityPreview;
+				});
 				preview.entity = this;
 				if (!isNaN(action.angle)) preview.rotateY(action.angle);
 				if (!isNaN(action.width) && !isNaN(action.height))
