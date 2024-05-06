@@ -38,8 +38,8 @@ namespace Renderer {
 				console.warn('unit:model:setSize2D:before', x, z, size);
 				console.warn('unit:model:setSize2D:before:scale', x, z, this.scene.scale);
 
-				this.scene.scale.x = (this.originalScale.x * this.originalSize.x) / x;
-				this.scene.scale.z = (this.originalScale.z * this.originalSize.z) / z;
+				this.scene.scale.x = this.originalScale.x * (this.originalSize.x / x);
+				this.scene.scale.z = this.originalScale.z * (this.originalSize.z / z);
 
 				console.warn('unit:model:setSize2D:after', x, z, this.getSize());
 				console.warn('unit:model:setSize2D:after:scale', x, z, this.getSize());
