@@ -470,10 +470,10 @@ var ShopComponent = TaroEntity.extend({
 		var text = '';
 		switch (type) {
 			case 'requirement':
-				text = `<strong>${itemName} requirements not met.</strong>`;
+				text = `<strong>${taro.clientSanitizer(itemName)} requirements not met.</strong>`;
 				break;
 			case 'price':
-				text = `<strong>Cannot afford ${itemName}.</strong>`;
+				text = `<strong>Cannot afford ${taro.clientSanitizer(itemName)}.</strong>`;
 				break;
 			case 'inventory_full':
 				text = '<strong>No room in inventory.</strong>';

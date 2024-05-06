@@ -20,6 +20,8 @@ interface EntityData {
 		unitAbilities: Record<string, UnitAbility>;
 	};
 	id: string;
+
+	is3DObject?: boolean;
 }
 
 interface UnitAbility {

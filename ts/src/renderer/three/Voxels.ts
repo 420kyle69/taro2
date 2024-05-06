@@ -22,12 +22,23 @@ namespace Renderer {
 				let tilesetSide = taro.getTilesetFromType({ tilesets: taro.game.data.map.tilesets, type: 'side' });
 				if (!tilesetSide) tilesetSide = tilesetMain;
 
-				const textureMgr = TextureManager.instance();
-				const texMain = textureMgr.get(tilesetMain.image);
-				const texSide = textureMgr.get(tilesetSide.image);
+				const texMain = gAssetManager.getTexture(tilesetMain.image);
+				const texSide = gAssetManager.getTexture(tilesetSide.image);
 
-				const topTileset = new TextureSheet(tilesetMain.image, texMain, tilesetMain.tilewidth, tilesetMain.tilewidth);
-				const sidesTileset = new TextureSheet(tilesetSide.image, texSide, tilesetSide.tilewidth, tilesetSide.tilewidth);
+				const topTileset = new TextureSheet(
+					tilesetMain.image,
+					texMain,
+					tilesetMain.tilewidth,
+					tilesetMain.tilewidth,
+					true
+				);
+				const sidesTileset = new TextureSheet(
+					tilesetSide.image,
+					texSide,
+					tilesetSide.tilewidth,
+					tilesetSide.tilewidth,
+					true
+				);
 
 				const voxels = new Voxels(topTileset, sidesTileset);
 				if (config) {

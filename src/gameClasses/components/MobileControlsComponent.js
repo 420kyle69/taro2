@@ -495,7 +495,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					if (ability && ability.iconUrl) {
 						htmlButton.innerHTML = `<img src="${ability.iconUrl}" style="width: 100%; height: 100%; object-fit: cover;"/>`;
 					} else {
-						htmlButton.innerHTML = key;
+						htmlButton.textContent = key;
 					}
 
 					htmlButton.style.backgroundColor = '#33333366';
