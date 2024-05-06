@@ -288,6 +288,9 @@ class DeveloperMode {
 		taro.client.on('fill', () => {
 			this.activeButton = 'fill';
 		});
+		taro.client.on('save', () => {
+			inGameEditor.saveMap();
+		});
 		taro.client.on('setting', () => {
 			inGameEditor.openMapConfiguration();
 		});
