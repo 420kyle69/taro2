@@ -125,6 +125,8 @@ namespace Renderer {
 
 				let rightClickPos: { x: number; y: number } = undefined;
 
+				let lastTime = 0;
+
 				renderer.domElement.addEventListener('mousedown', (event: MouseEvent) => {
 					if (this.mode === Mode.Map) {
 						const developerMode = taro.developerMode;
@@ -156,6 +158,14 @@ namespace Renderer {
 											const preview = this.entityManager.entityPreviews.find((preview) => preview.sprite === closest);
 											if (preview) {
 												this.entityEditor.selectEntityPreview(preview.entity);
+												//double click
+												let clickDelay = taro._currentTime - lastTime;
+												lastTime = taro._currentTime;
+												if (clickDelay < 350) {
+													if (inGameEditor && inGameEditor.showScriptForEntity) {
+														inGameEditor.showScriptForEntity(preview.entity.action.actionId);
+													}
+												}
 											}
 										} else {
 											if (!this.entityEditor.gizmo.control.dragging) {
