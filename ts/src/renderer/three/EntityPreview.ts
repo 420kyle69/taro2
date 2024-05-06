@@ -251,13 +251,14 @@ namespace Renderer {
 
 			hide(): void {
 				this.preview.visible = false;
-				this.updateOutline(true);
+				//this.updateOutline(true);
 			}
 
 			delete(): void {
-				this.hide();
+				//this.hide();
 				let editedAction: ActionData = { actionId: this.action.actionId, wasDeleted: true };
 				this.edit(editedAction);
+				this.preview.destroy();
 			}
 		}
 	}

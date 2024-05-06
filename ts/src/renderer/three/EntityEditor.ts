@@ -81,6 +81,12 @@ namespace Renderer {
 						}
 					});
 				});
+
+				window.addEventListener('keydown', (event) => {
+					if (event.key === 'Delete') {
+						this.deleteInitEntity();
+					}
+				});
 			}
 
 			createHandler(orientation: HandlerType, size: number, alpha: number): void {
