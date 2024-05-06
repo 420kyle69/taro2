@@ -77,12 +77,11 @@ namespace Renderer {
 								editedAction['angle'] = control.object.rotation.y;
 								break;
 							case 'scale':
-								editedAction['width'] = Renderer.Three.Utils.worldToPixel(control.object.scale.x);
-								editedAction['height'] = Renderer.Three.Utils.worldToPixel(control.object.scale.z);
+								editedAction['width'] = control.object.scale.x * entityPreview.defaultWidth;
+								editedAction['height'] = control.object.scale.z * entityPreview.defaultHeight;
 								break;
 						}
 						if (editedAction) {
-							console.log(editedAction);
 							renderer.entityEditor.selectedEntityPreview.edit(editedAction);
 						}
 					}
@@ -121,7 +120,7 @@ namespace Renderer {
 					this.dimension = '2d';
 					this.updateForDimension();
 				}
-				this.control.attach(entity);
+				this.control.attach((entity as AnimatedSprite).sprite);
 			}
 
 			updateForDimension() {

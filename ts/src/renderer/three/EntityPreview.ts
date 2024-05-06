@@ -51,16 +51,18 @@ namespace Renderer {
 					entity: EntityPreview;
 				});
 				preview.entity = this;
+				(preview.sprite as THREE.Mesh & { entity: EntityPreview }).entity = this;
 				if (!isNaN(action.angle)) preview.setRotationY(action.angle);
+
 				if (!isNaN(action.width) && !isNaN(action.height))
-					preview.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
+					preview.sprite.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 					preview.visible = true;
 				} else {
 					preview.visible = false;
 				}
 				this.preview.setBillboard(entityTypeData.isBillboard, renderer.camera);
-				preview.position.set(
+				preview.sprite.position.set(
 					Utils.pixelToWorld(action.position?.x),
 					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
 					Utils.pixelToWorld(action.position?.y)
@@ -225,8 +227,8 @@ namespace Renderer {
 					!isNaN(action.position.y)
 				) {
 					this.action.position = action.position;
-					this.preview.position.x = Utils.pixelToWorld(action.position.x);
-					this.preview.position.z = Utils.pixelToWorld(action.position.y);
+					this.preview.sprite.position.x = Utils.pixelToWorld(action.position.x);
+					this.preview.sprite.position.z = Utils.pixelToWorld(action.position.y);
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
@@ -234,11 +236,11 @@ namespace Renderer {
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;
-					this.preview.scale.setX(action.width / this.defaultWidth);
+					this.preview.sprite.scale.setX(action.width / this.defaultWidth);
 				}
 				if (!isNaN(this.action.height) && !isNaN(action.height)) {
 					this.action.height = action.height;
-					this.preview.scale.setZ(action.height / this.defaultHeight);
+					this.preview.sprite.scale.setZ(action.height / this.defaultHeight);
 				}
 				if (action.wasDeleted) {
 					this.hide();
