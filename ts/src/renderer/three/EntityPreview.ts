@@ -51,7 +51,7 @@ namespace Renderer {
 					entity: EntityPreview;
 				});
 				preview.entity = this;
-				if (!isNaN(action.angle)) preview.rotateY(action.angle);
+				if (!isNaN(action.angle)) preview.setRotationY(action.angle);
 				if (!isNaN(action.width) && !isNaN(action.height))
 					preview.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
@@ -70,7 +70,6 @@ namespace Renderer {
 				renderer.entityManager.entityPreviews.push(preview);
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });
-
 				//TODO: add select here
 				// 	image.on('pointerdown', () => {
 				// 		if (this.devModeTools.activeButton !== 'cursor') return;
@@ -231,8 +230,7 @@ namespace Renderer {
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
-					// TODO: handle the rotation
-					this.preview.rotation.set(action.angle, 0, 0);
+					this.preview.setRotationY(action.angle);
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;

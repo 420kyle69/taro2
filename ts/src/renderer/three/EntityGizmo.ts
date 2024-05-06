@@ -54,6 +54,7 @@ namespace Renderer {
 				const orbit = renderer.camera.controls;
 
 				const control = (this.control = new TransformControls(currentCamera, renderer.renderer.domElement));
+				console.log(control);
 				//control.visible = true;
 
 				//control.addEventListener('change', this.render);
@@ -62,23 +63,26 @@ namespace Renderer {
 					orbit.enabled = !event.value;
 					if (!event.value) {
 						// drag ended
-						const editedAction = { actionId: control.object.entity.action.actionId };
+						const entityPreview: EntityPreview = control.object.entity;
+						const editedAction = { actionId: entityPreview.action.actionId };
 						switch (control.mode) {
 							case 'translate':
 								editedAction['position'] = {
 									x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
 									y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+									function: 'xyCoordinate',
 								};
 								break;
 							case 'rotate':
 								editedAction['angle'] = control.object.rotation.y;
 								break;
 							case 'scale':
-								editedAction['width'] = control.object.scale.x;
-								editedAction['height'] = control.object.scale.z;
+								editedAction['width'] = Renderer.Three.Utils.worldToPixel(control.object.scale.x);
+								editedAction['height'] = Renderer.Three.Utils.worldToPixel(control.object.scale.z);
 								break;
 						}
 						if (editedAction) {
+							console.log(editedAction);
 							renderer.entityEditor.selectedEntityPreview.edit(editedAction);
 						}
 					}
