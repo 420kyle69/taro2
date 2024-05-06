@@ -48,6 +48,9 @@ var GameComponent = TaroEntity.extend({
 
 		taro.script.trigger('gameStart');
 		self.hasStarted = true;
+		self.isWorld = !!(taro.game?.data?.defaultData?.isWorld);
+		self.isWorldMap = !!(taro.game?.data?.defaultData?.worldId);
+		
 		taro.timer.startGameClock();
 
 		taro._physicsTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.frameRate || 20));

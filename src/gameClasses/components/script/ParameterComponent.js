@@ -2582,7 +2582,7 @@ var ParameterComponent = TaroEntity.extend({
 		this._functions = {
 			/* general */
 
-			/* general - number */
+			/* number */
 
 			calculate: function (text, vars) {
 				return self.calculate(text.items, vars);
@@ -2595,8 +2595,13 @@ var ParameterComponent = TaroEntity.extend({
 				return randomNumber;
 			},
 
-			/* general - string */
+			/* string */
 
+			gameId: function (text, vars) {
+				// return taro.server.gameId;
+				return taro.game.data.defaultData._id;
+			},
+			
 			objectToString: function (text, vars) {
 				var object = self.getValue(text.object, vars);
 				var str = typeof object === 'string' ? object : JSON.stringify(object); // remove opening & ending quotes

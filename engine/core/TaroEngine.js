@@ -2268,6 +2268,8 @@ var TaroEngine = TaroEntity.extend({
 	},
 
 	mergeGameJson: function (worldJson, gameJson) {
+		// merge following keys except those with value fase, mergeable keys will have isWorld true for all keys in the object if inherited from world
+		// unitTypes: ['scripts'] - indicates that all unitTypes[unitId].scripts will have isWorld property set to true if inherited from world
 		const mergeableKeys = {
 			entityTypeVariables: true,
 			shops: true,
@@ -2275,13 +2277,13 @@ var TaroEngine = TaroEntity.extend({
 			states: true,
 			map: false,
 			buffTypes: true,
-			projectileTypes: true,
-			itemTypes: true,
+			projectileTypes: ['scripts'],
+			itemTypes: ['scripts'],
 			music: true,
 			dialogues: true,
 			sound: true,
 			scripts: true,
-			unitTypes: true,
+			unitTypes: ['scripts'],
 			abilities: true,
 			variables: true,
 			attributeTypes: true,
@@ -2329,17 +2331,39 @@ var TaroEngine = TaroEntity.extend({
 						gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
 
 						// set isWorld property for all keys
-						for (let key in worldJson.data[mergeableKey]) {
+						for (let key in gameJson.data[mergeableKey]) {
 							if (
-								worldJson.data[mergeableKey].hasOwnProperty(key) &&
-								worldJson.data[mergeableKey][key] &&
-								typeof worldJson.data[mergeableKey][key] === 'object'
+								gameJson.data[mergeableKey].hasOwnProperty(key) &&
+								typeof gameJson.data[mergeableKey][key] === 'object'
 							) {
 								if (!gameJson.data[mergeableKey]) {
 									gameJson.data[mergeableKey] = {};
 								}
 
+								// set isWorld property for all top level keys
 								gameJson.data[mergeableKey][key].isWorld = true;
+
+								if (typeof gameJson.data[mergeableKey][key] === 'object') {
+									for (let index in gameJson.data[mergeableKey][key]) {
+										if (
+											gameJson.data[mergeableKey][key].hasOwnProperty(index) &&
+											typeof gameJson.data[mergeableKey][key][index] === 'object' &&
+											Array.isArray(mergeableKeys[mergeableKey]) &&
+											mergeableKeys[mergeableKey].includes(index) 
+										) {
+
+											for (let subIndex in gameJson.data[mergeableKey][key][index]) {
+												if (
+													gameJson.data[mergeableKey][key][index].hasOwnProperty(subIndex) &&
+													typeof gameJson.data[mergeableKey][key][index][subIndex] === 'object'
+												) {
+													// set isWorld property for all top level keys
+													gameJson.data[mergeableKey][key][index][subIndex].isWorld = true;
+												}
+											}
+										}
+									}
+								}
 							}
 						}
 
@@ -2382,6 +2406,27 @@ var TaroEngine = TaroEntity.extend({
 		// 	console.log.apply(console, arguments);
 		// }
 	},
+
+	getNumber: function (input, defaultValue = 0) {
+		return !isNaN(parseFloat(input)) ? parseFloat(input) : defaultValue;
+	},
+
+	escapeHtml(input) {
+		return input.replace(/[&<"'>]/g, function(m) {
+			switch (m) {
+				case '&':
+					return '&amp;';
+				case '<':
+					return '&lt;';
+				case '>':
+					return '&gt;'
+				case '"':
+					return '&quot;';
+				default:
+					return '&#039;';
+			}
+		});
+	}
 });
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
