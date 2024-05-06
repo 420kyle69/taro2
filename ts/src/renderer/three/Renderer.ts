@@ -248,8 +248,8 @@ namespace Renderer {
 												entityType: entityData.entityType,
 												position: {
 													function: 'xyCoordinate',
-													x: Math.floor(worldPoint.x),
-													y: Math.floor(worldPoint.z),
+													x: Math.floor(Utils.worldToPixel(worldPoint.x)),
+													y: Math.floor(Utils.worldToPixel(worldPoint.z)),
 												},
 												width: width,
 												height: height,
@@ -758,19 +758,6 @@ namespace Renderer {
 					const zOffset = this.camera.target ? this.camera.target.position.y : 0;
 					const dynamicText = DynamicFloatingText.create(config, zOffset);
 					this.entitiesLayer.add(dynamicText);
-				});
-
-				taro.client.on('editInitEntity', (data: ActionData) => {
-					// let found = false;
-					// this.entityPreview.forEach((image) => {
-					// 	if (image.entity.action.actionId === data.actionId) {
-					// 		found = true;
-					// 		image.entity.update(data);
-					// 	}
-					// });
-					// if (!found) {
-					// 	this.createEntityPreview(data);
-					// }
 				});
 			}
 

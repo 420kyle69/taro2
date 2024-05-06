@@ -68,7 +68,6 @@ namespace Renderer {
 				renderer.entityPreviewLayer.add(preview);
 
 				renderer.entityManager.entityPreviews.push(preview);
-
 				let lastTime = 0;
 				let editedAction: ActionData = (this.editedAction = { actionId: action.actionId });
 
@@ -227,8 +226,8 @@ namespace Renderer {
 					!isNaN(action.position.y)
 				) {
 					this.action.position = action.position;
-					this.preview.position.x = action.position.x;
-					this.preview.position.z = action.position.y;
+					this.preview.position.x = Utils.pixelToWorld(action.position.x);
+					this.preview.position.z = Utils.pixelToWorld(action.position.y);
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
@@ -237,11 +236,11 @@ namespace Renderer {
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;
-					this.preview.scale.setX(action.width);
+					this.preview.scale.setX(action.width / this.defaultWidth);
 				}
 				if (!isNaN(this.action.height) && !isNaN(action.height)) {
 					this.action.height = action.height;
-					this.preview.scale.setY(action.height);
+					this.preview.scale.setZ(action.height / this.defaultHeight);
 				}
 				if (action.wasDeleted) {
 					this.hide();

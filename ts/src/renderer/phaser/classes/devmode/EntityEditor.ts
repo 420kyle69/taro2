@@ -342,6 +342,7 @@ class EntityEditor {
 					actionId: taro.newIdHex(),
 					wasCreated: true,
 				};
+				console.log(action);
 				if (entityData.entityType === 'unitTypes') {
 					action.player = {
 						variableName: entityData.player,
