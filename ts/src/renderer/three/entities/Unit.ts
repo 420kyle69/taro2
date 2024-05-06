@@ -98,6 +98,7 @@ namespace Renderer {
 				taroEntity.on(
 					'size',
 					(data: { width: number; height: number }) => {
+						console.log('unit:size', data);
 						entity.setScale(Utils.pixelToWorld(data.width), Utils.pixelToWorld(data.height));
 					},
 					this
@@ -207,6 +208,7 @@ namespace Renderer {
 			}
 
 			setScale(sx: number, sy: number) {
+				console.log('unit:setScale', sx, sy, this.body instanceof AnimatedSprite);
 				if (this.body instanceof AnimatedSprite) {
 					this.body.setScale(sx, sy);
 				} else {
