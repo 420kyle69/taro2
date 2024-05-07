@@ -470,7 +470,6 @@ namespace Renderer {
 			}
 
 			createEntityPreview(action: ActionData): void {
-				console.log(action);
 				if (
 					!action.disabled &&
 					action.position?.function === 'xyCoordinate' &&
