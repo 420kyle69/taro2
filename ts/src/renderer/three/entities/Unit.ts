@@ -121,6 +121,11 @@ namespace Renderer {
 					if (entity.body instanceof AnimatedSprite) {
 						const key = `${taroEntity._stats.cellSheet.url}/${id}/${taroEntity._stats.id}`;
 						entity.body.play(key);
+					} else {
+						const anim = entity.taroEntity._stats.animations[id];
+						if (anim?.name) {
+							entity.body.play(anim.name);
+						}
 					}
 				});
 
@@ -171,9 +176,7 @@ namespace Renderer {
 			}
 
 			update(dt: number) {
-				if (this.body instanceof AnimatedSprite) {
-					this.body.update(dt);
-				}
+				this.body.update(dt);
 			}
 
 			renderChat(text: string): void {

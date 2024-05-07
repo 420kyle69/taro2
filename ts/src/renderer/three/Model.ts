@@ -8,6 +8,9 @@ namespace Renderer {
 			private originalSize = new THREE.Vector3();
 			private originalScale = new THREE.Vector3();
 
+			private mixer: THREE.AnimationMixer;
+			private clips: THREE.AnimationClip[];
+
 			constructor(name: string) {
 				super();
 
@@ -16,6 +19,11 @@ namespace Renderer {
 				this.add(this.scene);
 
 				this.scaleSceneToFitWithinUnits(1);
+
+				const mixer = new THREE.AnimationMixer(this.scene);
+				this.mixer = mixer;
+
+				this.clips = model.animations;
 			}
 
 			getSize() {
@@ -31,6 +39,20 @@ namespace Renderer {
 			getCenter() {
 				this.aabb.setFromObject(this.scene);
 				return this.aabb.getCenter(this.center);
+			}
+
+			update(dt) {
+				this.mixer.update(dt);
+			}
+
+			play(name: string) {
+				const clip = THREE.AnimationClip.findByName(this.clips, name);
+				if (!clip) return;
+
+				this.mixer.stopAllAction();
+
+				const action = this.mixer.clipAction(clip);
+				action.play();
 			}
 
 			private scaleSceneToFitWithinUnits(units: number) {
