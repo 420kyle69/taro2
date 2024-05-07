@@ -23,15 +23,6 @@ namespace Renderer {
 				return this.aabb.getSize(this.size);
 			}
 
-			setSize(x: number, y: number, z: number) {
-				const size = this.getSize();
-				this.scene.scale.set(
-					(this.scene.scale.x / size.x) * x,
-					(this.scene.scale.y / size.y) * y,
-					(this.scene.scale.z / size.z) * z
-				);
-			}
-
 			setSize2D(x: number, z: number) {
 				this.scene.scale.x = this.originalScale.x * (x / this.originalSize.x);
 				this.scene.scale.z = this.originalScale.z * (z / this.originalSize.z);
