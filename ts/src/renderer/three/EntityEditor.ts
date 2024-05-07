@@ -95,6 +95,9 @@ namespace Renderer {
 			updatePreview(): void {
 				const entityData = this.activeEntity;
 				const renderer = Renderer.Three.instance();
+				if (this.preview) {
+					this.preview.destroy();
+				}
 				if (!entityData) {
 					if (this.preview) {
 						this.preview.visible = false;
