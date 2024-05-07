@@ -5,6 +5,8 @@ namespace Renderer {
 			private aabb = new THREE.Box3();
 			private size = new THREE.Vector3();
 			private center = new THREE.Vector3();
+			private originalSize = new THREE.Vector3();
+			private originalScale = new THREE.Vector3();
 
 			constructor(name: string) {
 				super();
@@ -31,9 +33,8 @@ namespace Renderer {
 			}
 
 			setSize2D(x: number, z: number) {
-				const size = this.getSize();
-				this.scene.scale.x = (this.scene.scale.x / size.x) * x;
-				this.scene.scale.z = (this.scene.scale.z / size.z) * z;
+				this.scene.scale.x = this.originalScale.x * (x / this.originalSize.x);
+				this.scene.scale.z = this.originalScale.z * (z / this.originalSize.z);
 			}
 
 			getCenter() {
@@ -45,6 +46,8 @@ namespace Renderer {
 				const size = this.getSize();
 				const scale = units / Math.max(...size.toArray());
 				this.scene.scale.setScalar(scale);
+				this.originalSize.copy(this.getSize());
+				this.originalScale.copy(this.scene.scale);
 			}
 		}
 	}
