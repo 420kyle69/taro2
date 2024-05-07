@@ -477,10 +477,11 @@ var MobileControlsComponent = TaroEntity.extend({
 					htmlButton.id = key + '_button';
 					htmlButton.style.position = 'absolute';
 					htmlButton.style.left = `${xOnClientScreen}px`;
+				
 					htmlButton.style.top = `${yOnClientScreen}px`;
 					htmlButton.style.transform = `translate(-50%, -50%)`;
-					htmlButton.style.width = '44px';
-					htmlButton.style.height = '44px';
+					htmlButton.style.width = '60px';
+					htmlButton.style.height = '60px';
 					htmlButton.style.fontSize = '16px';
 					htmlButton.style.color = '#fff';
 
@@ -492,14 +493,15 @@ var MobileControlsComponent = TaroEntity.extend({
 					}
 
 					if (ability && ability.iconUrl) {
-						htmlButton.innerHTML = `<img src="${ability.iconUrl}" style="width: 100%; height: 100%; object-fit: contain;"/>`;
+						htmlButton.innerHTML = `<img src="${ability.iconUrl}" style="width: 100%; height: 100%; object-fit: cover;"/>`;
 					} else {
-						htmlButton.innerHTML = key;
+						htmlButton.textContent = key;
 					}
 
-					htmlButton.style.backgroundColor = '#00000080';
-					htmlButton.style.border = '4px solid #fff';
-					htmlButton.style.borderRadius = '50%';
+					htmlButton.style.backgroundColor = '#33333366';
+					htmlButton.style.border = '2px solid #555 ';
+					htmlButton.style.backdropFilter = 'blur(4px)';
+					htmlButton.style.borderRadius = '8px';
 					htmlButton.style.zIndex = '1000';
 					htmlButton.style.cursor = 'pointer';
 

@@ -60,8 +60,6 @@ class EntitiesToRender {
 					var rotate = entity._rotate.z;
 				}
 
-				var rotateRelative = rotate;
-
 				// if item is being carried by a unit
 				if (ownerUnit) {
 					// if the ownerUnit is not visible, then hide the item
@@ -77,14 +75,12 @@ class EntitiesToRender {
 					// rotate weldjoint items to the owner unit's rotation
 					if (entity._stats.currentBody && entity._stats.currentBody.jointType == 'weldJoint') {
 						rotate = ownerUnit._rotate.z;
-						rotateRelative = ownerUnit._rotate.z;
 						// immediately rotate my unit's items to the angleToTarget
 					} else if (
 						ownerUnit == taro.client.selectedUnit &&
 						entity._stats.controls?.mouseBehaviour?.rotateToFaceMouseCursor
 					) {
 						rotate = ownerUnit.angleToTarget; // angleToTarget is updated at 60fps
-						rotateRelative = ownerUnit.angleToTargetRelative;
 					}
 					entity._rotate.z = rotate; // update the item's rotation immediately for more accurate aiming (instead of 20fps)
 
@@ -113,14 +109,14 @@ class EntitiesToRender {
 					entity._category == 'item'
 				) {
 					// var timeStart = performance.now();
-					entity.transformTexture(x, y, rotateRelative); // uses absolute position without anchorOffset for items. That info is later retrieved in the render function
+					entity.transformTexture(x, y, rotate); // uses absolute position without anchorOffset for items. That info is later retrieved in the render function
 
 					// entity isn't moving anymore. prevent rendering to conserve cpu
 					if (
 						entity.isTransforming() &&
 						entity.nextKeyFrame[1][0] == x &&
 						entity.nextKeyFrame[1][1] == y &&
-						entity.nextKeyFrame[1][2] == rotateRelative
+						entity.nextKeyFrame[1][2] == rotate
 					) {
 						// if (entity != taro.client.selectedUnit) console.log(entity._category, "not moving)")
 						entity.isTransforming(false);

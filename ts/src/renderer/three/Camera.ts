@@ -14,6 +14,8 @@ namespace Renderer {
 
 			isEditorMode = false;
 
+			private debugMode = false;
+
 			private orthographicCamera: THREE.OrthographicCamera;
 			private perspectiveCamera: THREE.PerspectiveCamera;
 			private fovInitial: number;
@@ -120,10 +122,11 @@ namespace Renderer {
 
 				window.addEventListener('keypress', (evt) => {
 					if (evt.key === '~') {
-						this.setEditorMode(!this.isEditorMode);
+						this.debugMode = !this.debugMode;
+						this.setEditorMode(this.debugMode);
 					}
 
-					if (!this.isEditorMode) return;
+					if (!this.debugMode) return;
 
 					if (evt.key === 'l') {
 						this.isLocked ? this.unlock() : this.lock();

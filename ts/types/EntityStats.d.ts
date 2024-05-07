@@ -6,7 +6,6 @@ declare interface EntityStats {
 	userId: string;
 	defaultData: any;
 	isMobile: boolean;
-	isBillboard?: boolean;
 
 	name: string;
 	nameLabelColor?: string;
@@ -58,4 +57,5 @@ declare interface EntityStats {
 	cameraPointerLock?: boolean;
 	cameraPitchRange?: { min: number; max: number };
 	cameraOffset?: { x: number; y: number; z: number };
+	is3DObject?: boolean;
 }

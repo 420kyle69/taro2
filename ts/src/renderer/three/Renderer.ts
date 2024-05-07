@@ -146,32 +146,38 @@ namespace Renderer {
 									case 'cursor': {
 										const raycaster = new THREE.Raycaster();
 										raycaster.setFromCamera(this.pointer, this.camera.instance);
-
 										const intersects = raycaster.intersectObjects(this.entityManager.entities);
 										if (intersects?.length > 0) {
-											const closest = intersects[0].object as THREE.Mesh;
-											const region = this.entityManager.entities.find(
-												(e) => e instanceof Region && e.mesh === closest
-											) as Region;
-											if (region) {
-												/*const ownerPlayer = taro.$(unit.ownerId);
-										if (ownerPlayer?._stats?.controlledBy === 'human') {
-											if (typeof showUserDropdown !== 'undefined') {
-												showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
+											let closest: THREE.Mesh;
+											let clickedList: THREE.Mesh[] = [];
+											for (const intersect of intersects) {
+												if ((intersect.object as THREE.Mesh).isMesh) {
+													closest = intersect.object as THREE.Mesh;
+													clickedList.push(closest);
+												}
 											}
-										}*/
-												const regionData = {
-													name: region.taroEntity._stats.id,
-													x: region.stats.x,
-													y: region.stats.y,
-													width: region.stats.width,
-													height: region.stats.height,
-													alpha: region.stats.alpha,
-													inside: region.stats.inside,
-												};
-												inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
+											let regionList: RegionData[] = [];
+											clickedList.forEach((clicked) => {
+												const region = this.entityManager.regions.find((e) => e.mesh === clicked);
+												if (region) {
+													regionList.push({
+														name: region.taroEntity._stats.id,
+														x: region.stats.x,
+														y: region.stats.y,
+														width: region.stats.width,
+														height: region.stats.height,
+														alpha: region.stats.alpha,
+														inside: region.stats.inside,
+													});
+												}
+											});
+											if (regionList.length === 1) {
+												inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+											} else if (regionList.length > 1) {
+												inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
 											}
 										}
+
 										break;
 									}
 									case 'eraser': {
@@ -205,16 +211,28 @@ namespace Renderer {
 						raycaster.setFromCamera(this.pointer, this.camera.instance);
 
 						const intersects = raycaster.intersectObjects(this.entityManager.entities);
-						if (intersects.length > 0) {
-							const closest = intersects[0].object as THREE.Mesh;
-							const unit = this.entityManager.entities.find((e) => e instanceof Unit && e.sprite === closest);
+						for (const intersect of intersects) {
+							const closest = intersect.object as THREE.Mesh;
+							const unit = this.entityManager.units.find((unit) => {
+								if (!(unit.body instanceof AnimatedSprite)) return false;
+								return unit.body.sprite === closest;
+							});
 							if (unit) {
-								const ownerPlayer = taro.$(unit.ownerId);
-								if (ownerPlayer?._stats?.controlledBy === 'human') {
+								const clientUnit = taro.client.selectedUnit;
+								const otherUnit = taro.$(unit.taroId);
+
+								if (clientUnit === otherUnit) {
+									break;
+								}
+
+								const otherOwnerUnit = taro.$(unit.ownerId);
+								if (otherOwnerUnit?._stats?.controlledBy === 'human') {
 									if (typeof showUserDropdown !== 'undefined') {
 										showUserDropdown({ ownerId: unit.ownerId, unitId: unit.taroId, pointer: { event } });
 									}
 								}
+
+								break;
 							}
 						}
 					}
@@ -285,7 +303,10 @@ namespace Renderer {
 					requestAnimationFrame(this.render.bind(this));
 				};
 
-				this.loadTextures();
+				const isPixelArt = taro.game.data.defaultData.renderingFilter === 'pixelArt';
+				gAssetManager.setFilter(isPixelArt ? THREE.NearestFilter : THREE.LinearFilter);
+
+				this.loadAssets();
 
 				taro.client.on('enterPlayTab', () => {
 					this.mode = Mode.Play;
@@ -412,16 +433,14 @@ namespace Renderer {
 				this.entitiesLayer.visible = visible;
 			}
 
-			private loadTextures() {
-				const textureMgr = TextureManager.instance();
-				textureMgr.setFilter(taro.game.data.defaultData.renderingFilter);
-				textureMgr.setLoadingManager(this.initLoadingManager);
+			private loadAssets() {
+				const sources = [];
 
 				const data = taro.game.data;
 
 				data.map.tilesets.forEach((tileset) => {
 					const key = tileset.image;
-					textureMgr.loadTextureFromUrl(key, Utils.patchAssetUrl(key));
+					sources.push({ name: key, type: 'texture', src: Utils.patchAssetUrl(key) });
 				});
 
 				const taroEntities = [
@@ -431,55 +450,25 @@ namespace Renderer {
 				];
 
 				for (const taroEntity of taroEntities) {
-					const cellSheet = taroEntity.cellSheet;
-					if (!cellSheet) continue;
+					const url = taroEntity?.cellSheet?.url;
+					if (!url) continue;
 
-					const key = cellSheet.url;
-					const cols = cellSheet.columnCount;
-					const rows = cellSheet.rowCount;
+					sources.push({ name: url, type: taroEntity.is3DObject ? 'gltf' : 'texture', src: Utils.patchAssetUrl(url) });
 
-					textureMgr.loadTextureSheetFromUrl(key, Utils.patchAssetUrl(key), cols, rows, () => {
-						for (let animationsKey in taroEntity.animations) {
-							const animation = taroEntity.animations[animationsKey];
-							const frames = animation.frames;
-							const animationFrames: number[] = [];
-
-							// Correction for 0-based indexing
-							for (let i = 0; i < frames.length; i++) {
-								animationFrames.push(+frames[i] - 1);
-							}
-
-							// Avoid crash by giving it frame 0 if no frame data provided
-							if (animationFrames.length === 0) {
-								animationFrames.push(0);
-							}
-
-							// Move defaults to AnimationManager.create?
-							AnimationManager.instance().create({
-								key: `${key}/${animationsKey}/${taroEntity.id}`,
-								textureSheetKey: key,
-								frames: animationFrames,
-								fps: +animation.framesPerSecond || 15,
-								repeat: +animation.loopCount - 1,
-							});
-						}
-					});
+					AnimationManager.instance().createAnimationsFromTaroData(url, taroEntity);
 				}
 
 				for (const taroEntity of Object.values(data.particleTypes)) {
 					const key = taroEntity.url;
-					textureMgr.loadTextureFromUrl(`particle/${key}`, Utils.patchAssetUrl(key));
+					sources.push({ name: `particle/${key}`, type: 'texture', src: Utils.patchAssetUrl(key) });
 				}
 
-				const urls = taro.game.data.settings.skybox;
-				textureMgr.loadTextureFromUrl('left', urls.left);
-				textureMgr.loadTextureFromUrl('right', urls.right);
-				textureMgr.loadTextureFromUrl('top', urls.top);
-				textureMgr.loadTextureFromUrl('bottom', urls.bottom);
-				textureMgr.loadTextureFromUrl('front', urls.front);
-				textureMgr.loadTextureFromUrl('back', urls.back);
+				const skyboxFacesUrls = taro.game.data.settings.skybox;
+				for (const key in skyboxFacesUrls) {
+					sources.push({ name: key, type: 'texture', src: skyboxFacesUrls[key] });
+				}
 
-				textureMgr.setLoadingManager(THREE.DefaultLoadingManager);
+				gAssetManager.load(sources, this.initLoadingManager);
 			}
 
 			private forceLoadUnusedCSSFonts() {
@@ -633,6 +622,7 @@ namespace Renderer {
 				this.entityManager.update(dt);
 				this.particleSystem.update(dt, time, this.camera.instance);
 				this.camera.update();
+				this.voxelEditor.update();
 
 				if (this.camera.target) {
 					this.sky.position.copy(this.camera.target.position);
@@ -641,7 +631,7 @@ namespace Renderer {
 				this.timeSinceLastRaycast += dt;
 				if (this.timeSinceLastRaycast > this.raycastIntervalSeconds) {
 					this.timeSinceLastRaycast = 0;
-					// this.checkForHiddenEntities();
+					this.checkForHiddenEntities();
 				}
 
 				TWEEN.update();

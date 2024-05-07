@@ -138,6 +138,10 @@ var Unit = TaroEntityPhysics.extend({
 			self._scaleTexture();
 
 			self.flip(self._stats.flip);
+
+			if (this._stats.isHidden) {
+				this.hide(true);
+			}
 		}
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);
@@ -356,15 +360,15 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	hide: function () {
-		if (!this._stats.isHidden) {
+	hide: function (force = false) {
+		if (!this._stats.isHidden || force) {
 			this.stopMoving();
 
 			// hide all items carried by this unit
 			this._stats.itemIds.forEach((itemId) => {
 				const item = taro.$(itemId);
 				if (itemId != undefined && item) {
-					item._hide(); // don't use .hide() to avoid unnecessary streaming. we know that hiding unit's items will also hide.
+					item.hide(); // don't use .hide() to avoid unnecessary streaming. we know that hiding unit's items will also hide.
 				}
 			});
 
@@ -380,8 +384,8 @@ var Unit = TaroEntityPhysics.extend({
 		}
 	},
 
-	show: function () {
-		if (this._stats.isHidden) {
+	show: function (force = false) {
+		if (this._stats.isHidden || force) {
 			if (this._stats.aiEnabled) {
 				this.ai.enable();
 			}
@@ -389,8 +393,8 @@ var Unit = TaroEntityPhysics.extend({
 			// update visibility of all items based on their current state
 			this._stats.itemIds.forEach((itemId) => {
 				const item = taro.$(itemId);
-				if (itemId != undefined && item) {
-					item._show(); // don't use .show() to avoid unnecessary streaming. we know that showing unit's items will also show.
+				if (itemId != undefined && item && item._stats.slotIndex < this._stats.inventorySize) {
+					item.updateBody(); // don't use .show() to avoid unnecessary streaming. we know that showing unit's items will also show.
 				}
 			});
 
@@ -784,6 +788,11 @@ var Unit = TaroEntityPhysics.extend({
 			oldItem.setState('unselected');
 			if (taro.isClient) {
 				oldItem.applyAnimationForState('unselected');
+				// don't wait for server to tell us to hide the item
+				// otherwise item remains rendered in center of unit for a few frames
+				if (this == taro.client.selectedUnit && !oldItem._stats.currentBody) {
+					oldItem.hide();
+				}
 			}
 		}
 
@@ -803,6 +812,10 @@ var Unit = TaroEntityPhysics.extend({
 
 			// whip-out the new item using tween
 			if (taro.isClient) {
+				// don't wait for server to tell us to show the item
+				if (this == taro.client.selectedUnit && newItem._stats.currentBody) {
+					newItem.show();
+				}
 				//emit size event
 				newItem.emit('size', {
 					width: newItem._stats.currentBody.width, // this could be causing item size issues by using currentBody dimensions
@@ -811,15 +824,18 @@ var Unit = TaroEntityPhysics.extend({
 
 				newItem.applyAnimationForState('selected');
 
-				let customTween = {
-					type: 'swing',
-					keyFrames: [
-						[0, [0, 0, -1.57]],
-						[100, [0, 0, 0]],
-					],
-				};
+				// don't whip-out tween if item is unusable (e.g. clothes/armor)
+				if (newItem._stats.type !== 'unusable') {
+					let customTween = {
+						type: 'swing',
+						keyFrames: [
+							[0, [0, 0, -1.57]],
+							[100, [0, 0, 0]],
+						],
+					};
 
-				newItem.tween.start(null, this._rotate.z, customTween);
+					newItem.tween.start(null, this._rotate.z, customTween);
+				}
 			}
 		}
 
@@ -1280,18 +1296,17 @@ var Unit = TaroEntityPhysics.extend({
 					var slotIndex = availableSlot - 1;
 
 					// Item
-					item.streamUpdateData([
-						{ ownerUnitId: self.id() },
-						{ slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
-						{ quantity: itemData.quantity },
-					]);
+					item.streamUpdateData([{ ownerUnitId: self.id() }]);
+					item.changeSlotIndex(slotIndex);
+					// { slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
+					item.streamUpdateData([{ quantity: itemData.quantity }]);
 
-					self.inventory.insertItem(item, availableSlot - 1);
 					if (slotIndex == self._stats.currentItemIndex) {
 						item.setState('selected');
 					} else {
 						item.setState('unselected');
 					}
+					self.inventory.insertItem(item, availableSlot - 1);
 
 					// Unit
 					self.streamUpdateData([{ itemIds: self._stats.itemIds }], self._stats.clientId);
@@ -1467,15 +1482,12 @@ var Unit = TaroEntityPhysics.extend({
 				}
 
 				item.setOwnerUnit(undefined);
+				item.show();
 				item.setState('dropped', defaultData);
 
 				// Move item if dropping item at a position
 				if (position) {
 					item.teleportTo(position.x, position.y, item._rotate.z);
-				}
-
-				if (item._stats.hidden) {
-					item.streamUpdateData([{ hidden: false }]);
 				}
 
 				self.inventory.removeItem(itemIndex, item.id());
@@ -1966,8 +1978,8 @@ var Unit = TaroEntityPhysics.extend({
 		// independent of currentItemIndex change, set currentItem. null is empty slot
 		// use currentItem to set the _stats property for currentItemId
 		// important for item drop/pickup/remove
-		const currentItem = taro.$(this._stats.itemIds[currentItemIndex]) || null;
-		this._stats.currentItemId = currentItem ? currentItem.id() : null;
+
+		this._stats.currentItemId = this._stats.itemIds[currentItemIndex] || null;
 
 		// client log of item state after pickup will still show 'dropped'. Currently state has not finished updating. It IS 'selected'/'unselected'
 

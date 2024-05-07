@@ -960,7 +960,7 @@ var ParameterComponent = TaroEntity.extend({
 						}
 
 						break;
-					
+
 					case 'getItemInInventorySlot':
 					case 'getItemAtSlot':
 						var unit = self.getValue(text.unit, vars);
@@ -2582,7 +2582,7 @@ var ParameterComponent = TaroEntity.extend({
 		this._functions = {
 			/* general */
 
-			/* general - number */
+			/* number */
 
 			calculate: function (text, vars) {
 				return self.calculate(text.items, vars);
@@ -2595,8 +2595,13 @@ var ParameterComponent = TaroEntity.extend({
 				return randomNumber;
 			},
 
-			/* general - string */
+			/* string */
 
+			gameId: function (text, vars) {
+				// return taro.server.gameId;
+				return taro.game.data.defaultData._id;
+			},
+			
 			objectToString: function (text, vars) {
 				var object = self.getValue(text.object, vars);
 				var str = typeof object === 'string' ? object : JSON.stringify(object); // remove opening & ending quotes
@@ -3061,6 +3066,24 @@ var ParameterComponent = TaroEntity.extend({
 					}
 				}
 			},
+
+			getUIElementProperty: function (text, vars) {
+				if (taro.isClient) {
+					let key = self.getValue(text.key, vars);
+					let elementId = self.getValue(text.elementId, vars);
+
+					return document.getElementById(elementId)?.[key];
+				}
+			},
+
+			getClientReceivedData: function (text, vars) {
+				if (taro.isServer) {
+					var player = self.getValue(text.player, vars);
+					if (player) {
+						return player.lastClientReceivedData || {};
+					}
+				}
+			}
 		};
 	},
 });
