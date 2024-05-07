@@ -9,55 +9,9 @@ namespace Renderer {
 			}
 			init() {
 				const renderer = Three.instance();
-				//const cameraPersp
-				//renderer.setPixelRatio(window.devicePixelRatio);
-				//renderer.setSize(window.innerWidth, window.innerHeight);
-				//document.body.appendChild(renderer.renderer.domElement);
-
-				/*const aspect = window.innerWidth / window.innerHeight;
-
-				const frustumSize = 5;*/
-
-				/*const cameraPersp = new THREE.PerspectiveCamera(50, aspect, 0.1, 100);
-				const cameraOrtho = new THREE.OrthographicCamera(
-					-frustumSize * aspect,
-					frustumSize * aspect,
-					frustumSize,
-					-frustumSize,
-					0.1,
-					100
-				);*/
 				const currentCamera = (this.currentCamera = renderer.camera.instance);
-
-				//currentCamera.position.set(5, 2.5, 5);
-
-				/*scene = new THREE.Scene();
-				scene.add(new THREE.GridHelper(5, 10, 0x888888, 0x444444));
-
-				const ambientLight = new THREE.AmbientLight(0xffffff);
-				scene.add(ambientLight);
-
-				const light = new THREE.DirectionalLight(0xffffff, 4);
-				light.position.set(1, 1, 1);
-				scene.add(light);
-
-				const texture = new THREE.TextureLoader().load('textures/crate.gif', render);
-				texture.colorSpace = THREE.SRGBColorSpace;
-				texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-
-				const geometry = new THREE.BoxGeometry();
-				const material = new THREE.MeshLambertMaterial({ map: texture });*/
-
-				/*const orbit = new OrbitControls(currentCamera, renderer.renderer.domElement);
-				orbit.update();
-				orbit.addEventListener('change', this.render);*/
 				const orbit = renderer.camera.controls;
-
 				const control = (this.control = new TransformControls(currentCamera, renderer.renderer.domElement));
-				console.log(control);
-				//control.visible = true;
-
-				//control.addEventListener('change', this.render);
 
 				control.addEventListener('dragging-changed', function (event) {
 					orbit.enabled = !event.value;
@@ -87,13 +41,7 @@ namespace Renderer {
 					}
 				});
 
-				/*const mesh = new THREE.Mesh(geometry, material);
-				scene.add(mesh);
-
-				control.attach(mesh);*/
 				renderer.scene.add(control);
-
-				//window.addEventListener('resize', this.onWindowResize);
 
 				taro.client.on('gizmo-mode', (mode: 'translate' | 'rotate' | 'scale') => {
 					control.setMode(mode);
@@ -149,22 +97,6 @@ namespace Renderer {
 					control.showZ = true;
 				}
 			}
-
-			/*onWindowResize() {
-				const aspect = window.innerWidth / window.innerHeight;
-
-				const camera = this.currentCamera;
-				if (camera.isPerspectiveCamera) {
-					camera.aspect = aspect;
-					camera.updateProjectionMatrix();
-				} else {
-					camera.left = camera.bottom * aspect;
-					camera.right = camera.top * aspect;
-					camera.updateProjectionMatrix();
-				}
-
-				this.renderer.setSize(window.innerWidth, window.innerHeight);
-			}*/
 		}
 	}
 }
