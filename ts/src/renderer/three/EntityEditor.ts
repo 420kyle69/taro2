@@ -5,16 +5,8 @@ namespace Renderer {
 			preview: Renderer.Three.AnimatedSprite | undefined;
 			gizmo: EntityGizmo;
 
-			//outline: Phaser.GameObjects.Graphics;
-			//outlineHover: Phaser.GameObjects.Graphics;
-			//selectionContainer: Phaser.GameObjects.Container;
-			//handlers: Record<string, Phaser.GameObjects.Rectangle & { orientation?: HandlerType }>;
-			activeHandler: boolean;
-
 			activeEntity: { id: string; player: string; entityType: string };
 			selectedEntityPreview: EntityPreview;
-
-			COLOR_HANDLER: number;
 
 			constructor() {
 				this.preview = undefined;
@@ -88,36 +80,21 @@ namespace Renderer {
 				});
 			}
 
-			createHandler(orientation: HandlerType, size: number, alpha: number): void {
-				//this.handlers[orientation] = this.gameScene.add.rectangle(0, 0, size, size, this.COLOR_HANDLER, alpha);
-				//this.handlers[orientation].orientation = orientation;
-			}
-
 			activatePlacement(active: boolean): void {
-				console.log('activatePlacement', active);
 				if (active) {
 					//show entities list
 					this.activeEntityPlacement = true;
 					inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(true);
-
-					/*if (!this.devModeTools.paletteButton.hidden) {
-                        this.devModeTools.palette.toggle();
-                    }*/
 				} else {
 					//hide entities list
 					this.activeEntityPlacement = false;
 					inGameEditor.toggleEntityPlacementWindow && inGameEditor.toggleEntityPlacementWindow(false);
-
-					/*if (this.devModeTools.paletteButton.hidden) {
-                        this.devModeTools.palette.toggle();
-                    }*/
 				}
 			}
 
 			updatePreview(): void {
 				const entityData = this.activeEntity;
 				const renderer = Renderer.Three.instance();
-				const textureMgr = gAssetManager;
 				if (!entityData) {
 					if (this.preview) {
 						this.preview.visible = false;
@@ -185,7 +162,6 @@ namespace Renderer {
 
 			selectEntityPreview(entityPreview: EntityPreview): void {
 				if (entityPreview === null) {
-					if (this.selectedEntityPreview) this.selectedEntityPreview.updateOutline(true);
 					this.selectedEntityPreview = null;
 					this.gizmo.control.detach();
 					taro.client.emit('show-transform-modes', false);
@@ -194,7 +170,6 @@ namespace Renderer {
 				this.selectedEntityPreview = entityPreview;
 				this.gizmo.attach(entityPreview.preview);
 				taro.client.emit('show-transform-modes', true);
-				entityPreview.updateOutline();
 			}
 
 			rescaleInitEntity(

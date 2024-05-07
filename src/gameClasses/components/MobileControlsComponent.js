@@ -401,6 +401,11 @@ var MobileControlsComponent = TaroEntity.extend({
 					let usingMouseKeyDown = false;
 					let usingMouseKeyUp = false;
 
+					let isFireGunCalled = false;
+					let isFiring = false;
+
+					let startFiringGun;
+
 					// handle look wheel inputs and fire
 					const handleShoot = (data) => {
 						let joystickData = {
@@ -412,16 +417,23 @@ var MobileControlsComponent = TaroEntity.extend({
 
 							// when fire stick is moved to the red ring...
 							if (joystickData.power > 1 && !usingMouseKeyDown) {
-								// start firing
-								usingMouseKeyDown = true;
-								usingMouseKeyUp = false;
-
 								document.getElementsByClassName('back')[0].style.backgroundColor = 'red';
 								document.getElementsByClassName('front')[0].style.backgroundColor = 'red';
 
-								// calling mouse up to trigger end of click
-								taro.client.myPlayer.control.keyDown('mouse', 'button1');
-							} else if (!usingMouseKeyUp && usingMouseKeyDown && joystickData.power < 1) {
+								if (!isFireGunCalled) {
+									isFireGunCalled = true;
+									usingMouseKeyDown = true;
+									startFiringGun = setInterval(() => {
+										if (isFiring) {
+											isFiring = false;
+											taro.client.myPlayer.control.keyUp('mouse', 'button1');
+											taro.client.myPlayer.control.keyDown('mouse', 'button1');
+										} else {
+											isFiring = true;
+										}
+									}, 100);
+								}
+							} else if (joystickData.power < 1) {
 								usingMouseKeyUp = true;
 								usingMouseKeyDown = false;
 								// otherwise stop firing
@@ -429,6 +441,8 @@ var MobileControlsComponent = TaroEntity.extend({
 								document.getElementsByClassName('back')[0].style.backgroundColor = 'black';
 								document.getElementsByClassName('front')[0].style.backgroundColor = 'black';
 
+								clearInterval(startFiringGun);
+								isFireGunCalled = false;
 								// calling mouse up to trigger end of click
 								taro.client.myPlayer.control.keyUp('mouse', 'button1');
 							}
@@ -444,6 +458,8 @@ var MobileControlsComponent = TaroEntity.extend({
 							document.getElementsByClassName('back')[0].style.backgroundColor = 'black';
 							document.getElementsByClassName('front')[0].style.backgroundColor = 'black';
 
+							clearInterval(startFiringGun);
+							isFireGunCalled = false;
 							// calling mouse up to trigger end of click
 							taro.client.myPlayer.control.keyUp('mouse', 'button1');
 						}
@@ -477,7 +493,7 @@ var MobileControlsComponent = TaroEntity.extend({
 					htmlButton.id = key + '_button';
 					htmlButton.style.position = 'absolute';
 					htmlButton.style.left = `${xOnClientScreen}px`;
-				
+
 					htmlButton.style.top = `${yOnClientScreen}px`;
 					htmlButton.style.transform = `translate(-50%, -50%)`;
 					htmlButton.style.width = '60px';
