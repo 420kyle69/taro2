@@ -1,14 +1,15 @@
 namespace Renderer {
 	export namespace Three {
-		export class EntityPreview {
+		export class EntityPreview extends Node {
 			entityEditor: EntityEditor;
 			action: ActionData;
 			editedAction: ActionData;
 			preview: Renderer.Three.AnimatedSprite & { entity: EntityPreview };
 			defaultWidth: number;
 			defaultHeight: number;
-
+			isBillboard = false;
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
+				super();
 				this.action = action;
 				let key: string;
 				let cols: number;
@@ -28,7 +29,7 @@ namespace Renderer {
 				}
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
-
+				this.isBillboard = entityTypeData?.isBillboard ?? false;
 				// TODO: add preview here
 				const renderer = Renderer.Three.instance();
 				const tex = gAssetManager.getTexture(key).clone();
@@ -40,22 +41,24 @@ namespace Renderer {
 				});
 				preview.entity = this;
 				(preview.sprite as THREE.Mesh & { entity: EntityPreview }).entity = this;
-				if (!isNaN(action.angle)) preview.setRotationY(action.angle);
+				console.log(action.angle);
+				if (!isNaN(action.angle)) this.rotation.y = action.angle;
 
 				if (!isNaN(action.width) && !isNaN(action.height))
-					preview.sprite.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
+					this.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 					preview.visible = true;
 				} else {
 					preview.visible = false;
 				}
-				this.preview.setBillboard(entityTypeData.isBillboard, renderer.camera);
-				preview.sprite.position.set(
+				this.add(this.preview);
+				this.position.set(
 					Utils.pixelToWorld(action.position?.x),
 					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
 					Utils.pixelToWorld(action.position?.y)
 				);
-				renderer.entityPreviewLayer.add(preview);
+				this.preview.setBillboard(entityTypeData.isBillboard, renderer.camera);
+				renderer.entityPreviewLayer.add(this);
 				renderer.entityManager.entityPreviews.push(preview);
 			}
 
@@ -82,30 +85,30 @@ namespace Renderer {
 					!isNaN(action.position.y)
 				) {
 					this.action.position = action.position;
-					this.preview.sprite.position.x = Utils.pixelToWorld(action.position.x);
-					this.preview.sprite.position.z = Utils.pixelToWorld(action.position.y);
+					this.position.x = Utils.pixelToWorld(action.position.x);
+					this.position.z = Utils.pixelToWorld(action.position.y);
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
-					this.preview.setRotationY(action.angle);
+					this.rotation.y = action.angle;
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;
-					this.preview.sprite.scale.setX(action.width / this.defaultWidth);
+					this.scale.setX(action.width / this.defaultWidth);
 				}
 				if (!isNaN(this.action.height) && !isNaN(action.height)) {
 					this.action.height = action.height;
-					this.preview.sprite.scale.setZ(action.height / this.defaultHeight);
+					this.scale.setZ(action.height / this.defaultHeight);
 				}
 				if (action.wasDeleted) {
-					this.preview.destroy();
+					this.destroy();
 					this.action.wasDeleted = true;
 				}
 				// if (this === this.entityEditor.selectedEntityImage) this.updateOutline();
 			}
 
 			hide(): void {
-				this.preview.visible = false;
+				this.visible = false;
 				//this.updateOutline(true);
 			}
 
@@ -113,7 +116,7 @@ namespace Renderer {
 				//this.hide();
 				let editedAction: ActionData = { actionId: this.action.actionId, wasDeleted: true };
 				this.edit(editedAction);
-				this.preview.destroy();
+				this.destroy();
 			}
 		}
 	}

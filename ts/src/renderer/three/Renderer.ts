@@ -159,6 +159,7 @@ namespace Renderer {
 											if (
 												preview &&
 												(this.entityEditor.selectedEntityPreview === null ||
+													this.entityEditor.selectedEntityPreview === undefined ||
 													this.entityEditor.selectedEntityPreview.preview.uuid !== preview.uuid)
 											) {
 												this.entityEditor.selectEntityPreview(preview.entity);

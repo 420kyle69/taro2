@@ -7,7 +7,6 @@ namespace Renderer {
 
 			activeEntity: { id: string; player: string; entityType: string };
 			selectedEntityPreview: EntityPreview;
-
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
@@ -161,6 +160,7 @@ namespace Renderer {
 						this.preview.position.setY(Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1);
 						this.preview.position.setZ(worldPoint.z);
 					}
+					this.preview.setBillboard(this.preview.billboard, renderer.camera);
 				}
 			}
 
@@ -172,7 +172,7 @@ namespace Renderer {
 					return;
 				}
 				this.selectedEntityPreview = entityPreview;
-				this.gizmo.attach(entityPreview.preview);
+				this.gizmo.attach(entityPreview);
 				taro.client.emit('show-transform-modes', true);
 			}
 

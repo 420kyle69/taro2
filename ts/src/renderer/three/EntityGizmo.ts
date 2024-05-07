@@ -4,7 +4,7 @@ namespace Renderer {
 			currentCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 			control: TransformControls;
 			dimension: '2d' | '3d' = '3d';
-
+			prev_rotation: number;
 			constructor() {
 				this.init();
 			}
@@ -16,10 +16,13 @@ namespace Renderer {
 				const control = (this.control = new TransformControls(currentCamera, renderer.renderer.domElement));
 
 				control.addEventListener('dragging-changed', function (event) {
+					if (event.value) {
+						this.prev_rotation = control.object.rotation.y;
+					}
 					orbit.enabled = !event.value;
 					if (!event.value) {
 						// drag ended
-						const entityPreview: EntityPreview = control.object.entity;
+						const entityPreview: EntityPreview = control.object;
 						const editedAction = { actionId: entityPreview.action.actionId };
 						switch (control.mode) {
 							case 'translate':
@@ -30,7 +33,8 @@ namespace Renderer {
 								};
 								break;
 							case 'rotate':
-								editedAction['angle'] = control.object.rotation.y;
+								editedAction['angle'] =
+									control.object.rotation.y > 0 ? control.object.rotation.y : 2 * Math.PI - control.object.rotation.y;
 								break;
 							case 'scale':
 								editedAction['width'] = control.object.scale.x * entityPreview.defaultWidth;
@@ -46,6 +50,10 @@ namespace Renderer {
 				renderer.scene.add(control);
 
 				taro.client.on('gizmo-mode', (mode: 'translate' | 'rotate' | 'scale') => {
+					const entityPreview: EntityPreview = control.object;
+					if (entityPreview?.isBillboard && mode === 'rotate') {
+						return;
+					}
 					control.setMode(mode);
 					this.updateForDimension();
 				});
@@ -61,7 +69,7 @@ namespace Renderer {
 				});
 			}
 
-			attach(entity: AnimatedSprite | THREE.Mesh) {
+			attach(entity: Node) {
 				if (entity instanceof AnimatedSprite) {
 					this.dimension = '2d';
 					this.updateForDimension();
@@ -70,7 +78,7 @@ namespace Renderer {
 					this.dimension = '2d';
 					this.updateForDimension();
 				}
-				this.control.attach((entity as AnimatedSprite).sprite);
+				this.control.attach(entity);
 			}
 
 			updateForDimension() {
