@@ -14,6 +14,7 @@ var taroClientConfig = {
 		'/lib/OrbitControls.js',
 		'/lib/tween.umd.js',
 		'/lib/three_mesh_bvh.umd.js',
+		'/lib/SkeletonUtils.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',

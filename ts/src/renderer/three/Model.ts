@@ -12,7 +12,7 @@ namespace Renderer {
 				super();
 
 				const model = gAssetManager.getModel(name);
-				this.scene = model.scene.clone();
+				this.scene = SkeletonUtils.clone(model.scene);
 				this.add(this.scene);
 
 				this.scaleSceneToFitWithinUnits(1);
