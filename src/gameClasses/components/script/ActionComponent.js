@@ -177,7 +177,12 @@ var ActionComponent = TaroEntity.extend({
 							let userIds = [];
 							for (var l = 0; l < players.length; l++) {
 								var player = players[l];
-								if (player && player._stats && player._stats.clientId && !userIds.includes(player._stats.userId || 'guest')) {
+								if (
+									player &&
+									player._stats &&
+									player._stats.clientId &&
+									!userIds.includes(player._stats.userId || 'guest')
+								) {
 									userIds.push(player._stats.userId || 'guest');
 								}
 							}
@@ -674,12 +679,11 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'setPlayerAttribute':
 						var attrId = self._script.param.getValue(action.attribute, vars);
-						var player = self._script.param.getValue(action.entity, vars);						
+						var player = self._script.param.getValue(action.entity, vars);
 
 						if (player && player._category == 'player' && player._stats.attributes) {
 							var attribute = player._stats.attributes[attrId];
 							if (attribute != undefined) {
-								
 								var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
 								const isWorldPlayerAttribute = playerType && playerType.isWorld;
 
@@ -689,7 +693,7 @@ var ActionComponent = TaroEntity.extend({
 									console.log('can not update world player attribute from map', path, attrId);
 									break;
 								}
-								
+
 								var decimalPlace = parseInt(attribute.decimalPlaces) || 0;
 								var value = parseFloat(self._script.param.getValue(action.value, vars)).toFixed(decimalPlace);
 								player.attribute.update(attrId, value); // update attribute, and check for attribute becoming 0
@@ -802,15 +806,15 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 						var variable = self._script.param.getValue(action.variable, vars);
 						var value = self._script.param.getValue(action.value, vars);
-						
+
 						if (variable) {
 							var variableId = variable.key;
 
 							var playerType = taro.game.getAsset('playerTypes', player._stats.playerTypeId);
 							const isWorldPlayerVariable = playerType && playerType.isWorld;
-							
+
 							const canBeUpdatedByMap = playerType?.variables?.[variableId]?.canBeUpdatedByMap;
-							
+
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldPlayerVariable && !canBeUpdatedByMap) {
 								self._script.errorLog('can not update world player variable from map');
 								console.log('can not update world player variable from map', path, variableId);
@@ -2478,9 +2482,13 @@ var ActionComponent = TaroEntity.extend({
 						if (taro.game.isWorldMap && !vars.isWorldScript) {
 							let itemAttributes = [];
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
-							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(
+								Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []
+							);
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.unitAttribute || {}) || []);
-							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(
+								Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []
+							);
 
 							let itemGivesBonuses = false;
 							for (const itemAttribute of itemAttributes) {
@@ -2528,9 +2536,13 @@ var ActionComponent = TaroEntity.extend({
 						if (taro.game.isWorldMap && !vars.isWorldScript) {
 							let itemAttributes = [];
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
-							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(
+								Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []
+							);
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.unitAttribute || {}) || []);
-							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(
+								Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []
+							);
 
 							let itemGivesBonuses = false;
 							for (const itemAttribute of itemAttributes) {
@@ -2574,9 +2586,13 @@ var ActionComponent = TaroEntity.extend({
 						if (taro.game.isWorldMap && !vars.isWorldScript) {
 							let itemAttributes = [];
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.unitAttribute || {}) || []);
-							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(
+								Object.keys(itemData?.bonus?.consume?.playerAttribute || {}) || []
+							);
 							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.unitAttribute || {}) || []);
-							itemAttributes = itemAttributes.concat(Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []);
+							itemAttributes = itemAttributes.concat(
+								Object.keys(itemData?.bonus?.passive?.playerAttribute || {}) || []
+							);
 
 							let itemGivesBonuses = false;
 							for (const itemAttribute of itemAttributes) {
@@ -3042,13 +3058,16 @@ var ActionComponent = TaroEntity.extend({
 							let createdEntity = null;
 
 							if (entityType === 'itemTypes') {
-
 								if (taro.game.isWorldMap && !vars.isWorldScript) {
 									let itemAttributes = [];
 									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.consume?.unitAttribute || {}) || []);
-									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.consume?.playerAttribute || {}) || []);
+									itemAttributes = itemAttributes.concat(
+										Object.keys(data?.bonus?.consume?.playerAttribute || {}) || []
+									);
 									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.passive?.unitAttribute || {}) || []);
-									itemAttributes = itemAttributes.concat(Object.keys(data?.bonus?.passive?.playerAttribute || {}) || []);
+									itemAttributes = itemAttributes.concat(
+										Object.keys(data?.bonus?.passive?.playerAttribute || {}) || []
+									);
 
 									let itemGivesBonuses = false;
 									for (const itemAttribute of itemAttributes) {
@@ -4046,7 +4065,7 @@ var ActionComponent = TaroEntity.extend({
 								elementId,
 								action: 'setUIElementProperty',
 								value: typeof value === 'string' ? sanitizerFunction(value) : '',
-								key
+								key,
 							};
 							if (taro.isServer) {
 								taro.network.send('ui', data, player._stats.clientId);
@@ -4056,15 +4075,15 @@ var ActionComponent = TaroEntity.extend({
 						}
 						break;
 					}
-					
+
 					case 'sendDataFromClientToServer': {
 						if (taro.isClient) {
 							const player = self._script.param.getValue(action.player, vars);
 							const data = self._script.param.getValue(action.data, vars);
 
 							if (player && player._stats.clientId === taro.network.id()) {
-								taro.network.send('sendDataFromClient', { 
-									data
+								taro.network.send('sendDataFromClient', {
+									data,
 								});
 							}
 						}
