@@ -88,9 +88,7 @@ var Projectile = TaroEntityPhysics.extend({
 
 			taro.server.totalProjectilesCreated++;
 		} else if (taro.isClient) {
-			if (taro.isClient) {
-				this.initParticleEmitters();
-			}
+			this.initParticleEmitters();
 
 			if (currentState) {
 				var defaultAnimation = this._stats.animations[currentState.animation];
