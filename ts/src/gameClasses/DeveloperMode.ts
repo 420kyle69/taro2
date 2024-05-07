@@ -269,24 +269,19 @@ class DeveloperMode {
 
 		this.activeButton = 'cursor';
 		taro.client.on('cursor', () => {
-			//this.cursor();
 			this.activeButton = 'cursor';
 		});
 		taro.client.on('draw-region', () => {
-			//this.drawRegion();
 			this.activeButton = 'draw-region';
 			this.regionTool = true;
 		});
 		taro.client.on('add-entities', () => {
-			//this.addEntities();
 			this.activeButton = 'add-entities';
 		});
 		taro.client.on('brush', () => {
-			//this.brush();
 			this.activeButton = 'brush';
 		});
 		taro.client.on('empty-tile', () => {
-			//this.emptyTile();
 			this.activeButton = 'eraser';
 		});
 		taro.client.on('fill', () => {
@@ -1088,7 +1083,7 @@ class DeveloperMode {
 						case 'delete':
 							//this.deleteUnit(data);
 							break;
-						
+
 						case 'update-developers-data':
 							this.updateDevelopersData(data);
 							break;
@@ -1298,7 +1293,7 @@ interface EditEntityData {
 	clientId?: string;
 	extraData?: {
 		[key: string]: any;
-	}
+	};
 }
 
 type devModeTab = 'play' | 'map' | 'entities' | 'moderate' | 'debug';
