@@ -156,7 +156,11 @@ namespace Renderer {
 										if (intersects?.length > 0) {
 											const closest = intersects[0].object as THREE.Mesh;
 											const preview = this.entityManager.entityPreviews.find((preview) => preview.sprite === closest);
-											if (preview) {
+											if (
+												preview &&
+												(this.entityEditor.selectedEntityPreview === null ||
+													this.entityEditor.selectedEntityPreview.preview.uuid !== preview.uuid)
+											) {
 												this.entityEditor.selectEntityPreview(preview.entity);
 												//double click
 												let clickDelay = taro._currentTime - lastTime;
