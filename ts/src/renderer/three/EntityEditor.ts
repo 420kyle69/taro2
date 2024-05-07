@@ -137,15 +137,19 @@ namespace Renderer {
 				}
 				const cols = entity.cellSheet.columnCount || 1;
 				const rows = entity.cellSheet.rowCount || 1;
-				const tex = gAssetManager.getTexture(key).clone();
-				const frameWidth = tex.image.width / cols;
-				const frameHeight = tex.image.height / rows;
-				const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
+				if (entity.is3DObject) {
+					//TODO: add 3d preview
+				} else {
+					const tex = gAssetManager.getTexture(key).clone();
+					const frameWidth = tex.image.width / cols;
+					const frameHeight = tex.image.height / rows;
+					const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
 
-				this.preview = new Renderer.Three.AnimatedSprite(texture);
-				this.preview.setBillboard(entity.isBillboard, renderer.camera);
-				this.preview.setOpacity(0.5);
-				renderer.entityPreviewLayer.add(this.preview);
+					this.preview = new Renderer.Three.AnimatedSprite(texture);
+					this.preview.setBillboard(entity.isBillboard, renderer.camera);
+					this.preview.setOpacity(0.5);
+					renderer.entityPreviewLayer.add(this.preview);
+				}
 			}
 
 			update(): void {
