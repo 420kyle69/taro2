@@ -8,8 +8,6 @@ namespace Renderer {
 			activeEntity: { id: string; player: string; entityType: string };
 			selectedEntityPreview: EntityPreview;
 
-			COLOR_HANDLER: number;
-
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
@@ -83,7 +81,6 @@ namespace Renderer {
 			}
 
 			activatePlacement(active: boolean): void {
-				console.log('activatePlacement', active);
 				if (active) {
 					//show entities list
 					this.activeEntityPlacement = true;
@@ -98,7 +95,6 @@ namespace Renderer {
 			updatePreview(): void {
 				const entityData = this.activeEntity;
 				const renderer = Renderer.Three.instance();
-				const textureMgr = gAssetManager;
 				if (!entityData) {
 					if (this.preview) {
 						this.preview.visible = false;

@@ -4,9 +4,11 @@ namespace Renderer {
 			currentCamera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
 			control: TransformControls;
 			dimension: '2d' | '3d' = '3d';
+
 			constructor() {
 				this.init();
 			}
+
 			init() {
 				const renderer = Three.instance();
 				const currentCamera = (this.currentCamera = renderer.camera.instance);

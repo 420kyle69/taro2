@@ -8,18 +8,6 @@ namespace Renderer {
 			defaultWidth: number;
 			defaultHeight: number;
 
-			dragMode: 'position' | 'angle' | 'scale';
-			startDragX: number;
-			startDragY: number;
-			rotation: number;
-			scale: number;
-			scaleX: number;
-			scaleY: number;
-			displayWidth: number;
-			displayHeight: number;
-			x: number;
-			y: number;
-
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				this.action = action;
 				let key: string;
