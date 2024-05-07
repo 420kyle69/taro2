@@ -45,13 +45,15 @@ namespace Renderer {
 				this.mixer.update(dt);
 			}
 
-			play(name: string) {
+			play(name: string, loopCount = 0) {
 				const clip = THREE.AnimationClip.findByName(this.clips, name);
 				if (!clip) return;
 
 				this.mixer.stopAllAction();
 
 				const action = this.mixer.clipAction(clip);
+				action.setLoop(THREE.LoopRepeat, loopCount === 0 ? Infinity : loopCount);
+				action.clampWhenFinished = true;
 				action.play();
 			}
 

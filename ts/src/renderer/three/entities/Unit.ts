@@ -123,8 +123,10 @@ namespace Renderer {
 						entity.body.play(key);
 					} else {
 						const anim = entity.taroEntity._stats.animations[id];
-						if (anim?.name) {
-							entity.body.play(anim.name);
+						if (anim) {
+							const name = anim.name || '';
+							const loopCount = anim.loopCount || 0;
+							entity.body.play(anim.name, loopCount);
 						}
 					}
 				});
