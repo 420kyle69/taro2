@@ -22,8 +22,8 @@ namespace Renderer {
 					orbit.enabled = !event.value;
 					if (!event.value) {
 						// drag ended
-						const entityPreview: EntityPreview = control.object;
-						const editedAction = { actionId: entityPreview.action.actionId };
+						const initEntity: InitEntity = control.object;
+						const editedAction = { actionId: initEntity.action.actionId };
 						switch (control.mode) {
 							case 'translate':
 								editedAction['position'] = {
@@ -40,12 +40,12 @@ namespace Renderer {
 								editedAction['angle'] = degrees;
 								break;
 							case 'scale':
-								editedAction['width'] = control.object.scale.x * entityPreview.defaultWidth;
-								editedAction['height'] = control.object.scale.z * entityPreview.defaultHeight;
+								editedAction['width'] = control.object.scale.x * initEntity.defaultWidth;
+								editedAction['height'] = control.object.scale.z * initEntity.defaultHeight;
 								break;
 						}
 						if (editedAction) {
-							renderer.entityEditor.selectedEntityPreview.edit(editedAction);
+							renderer.entityEditor.selectedInitEntity.edit(editedAction);
 						}
 					}
 				});
@@ -53,8 +53,8 @@ namespace Renderer {
 				renderer.scene.add(control);
 
 				taro.client.on('gizmo-mode', (mode: 'translate' | 'rotate' | 'scale') => {
-					const entityPreview: EntityPreview = control.object;
-					if (entityPreview?.isBillboard && mode === 'rotate') {
+					const initEntity: InitEntity = control.object;
+					if (initEntity?.isBillboard && mode === 'rotate') {
 						return;
 					}
 					control.setMode(mode);

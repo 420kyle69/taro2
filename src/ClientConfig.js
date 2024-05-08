@@ -131,7 +131,7 @@ var taroClientConfig = {
 		'renderer/three/TextureSheet.js',
 		'renderer/three/EntityGizmo.js',
 		'renderer/three/EntityEditor.js',
-		'renderer/three/EntityPreview.js',
+		'renderer/three/InitEntity.js',
 		'renderer/three/VoxelEditor.js',
 		'renderer/three/VoxelMarker.js',
 		'renderer/three/MarkerLines.js',

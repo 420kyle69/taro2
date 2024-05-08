@@ -6,68 +6,68 @@ namespace Renderer {
 			gizmo: EntityGizmo;
 
 			activeEntity: { id: string; player: string; entityType: string };
-			selectedEntityPreview: EntityPreview;
+			selectedInitEntity: InitEntity;
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
-				renderer.entityPreviewLayer.add(this.preview);
+				renderer.initEntityLayer.add(this.preview);
 				this.activatePlacement(false);
 
 				this.gizmo = new EntityGizmo();
 				taro.client.on('add-entities', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(true);
 				});
 				taro.client.on('cursor', () => {
 					this.activatePlacement(false);
 				});
 				taro.client.on('draw-region', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('brush', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('empty-tile', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('fill', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('clear', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 				});
 				taro.client.on('updateActiveEntity', () => {
 					this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
 					this.updatePreview();
 				});
-				const enitityPreviews = renderer.entityManager.entityPreviews;
+				const initEntities = renderer.entityManager.initEntities;
 				taro.client.on('editInitEntity', (data: ActionData) => {
 					let found = false;
-					enitityPreviews.forEach((preview) => {
-						if (preview.action.actionId === data.actionId) {
+					initEntities.forEach((initEntity) => {
+						if (initEntity.action.actionId === data.actionId) {
 							found = true;
-							preview.update(data);
+							initEntity.update(data);
 						}
 					});
 					if (!found) {
-						renderer.createEntityPreview(data);
+						renderer.createInitEntity(data);
 					}
 				});
 				taro.client.on('updateInitEntities', () => {
 					taro.developerMode.initEntities.forEach((action) => {
 						let found = false;
-						enitityPreviews.forEach((preview) => {
-							if (preview.action.actionId === action.actionId) {
+						initEntities.forEach((initEntity) => {
+							if (initEntity.action.actionId === action.actionId) {
 								found = true;
-								preview.update(action);
+								initEntity.update(action);
 							}
 						});
 						if (!found) {
-							renderer.createEntityPreview(action);
+							renderer.createInitEntity(action);
 						}
 					});
 				});
@@ -150,7 +150,7 @@ namespace Renderer {
 					this.preview = new Renderer.Three.AnimatedSprite(texture);
 					this.preview.setBillboard(entity.isBillboard, renderer.camera);
 					this.preview.setOpacity(0.5);
-					renderer.entityPreviewLayer.add(this.preview);
+					renderer.initEntityLayer.add(this.preview);
 				}
 			}
 
@@ -167,15 +167,15 @@ namespace Renderer {
 				}
 			}
 
-			selectEntityPreview(entityPreview: EntityPreview): void {
-				if (entityPreview === null) {
-					this.selectedEntityPreview = null;
+			selectInitEntity(initEntity: InitEntity): void {
+				if (initEntity === null) {
+					this.selectedInitEntity = null;
 					this.gizmo.control.detach();
 					taro.client.emit('show-transform-modes', false);
 					return;
 				}
-				this.selectedEntityPreview = entityPreview;
-				this.gizmo.attach(entityPreview);
+				this.selectedInitEntity = initEntity;
+				this.gizmo.attach(initEntity);
 				taro.client.emit('show-transform-modes', true);
 			}
 
@@ -205,9 +205,9 @@ namespace Renderer {
 			}
 
 			deleteInitEntity(): void {
-				if (this.selectedEntityPreview) {
-					this.selectedEntityPreview.delete();
-					this.selectEntityPreview(null);
+				if (this.selectedInitEntity) {
+					this.selectedInitEntity.delete();
+					this.selectInitEntity(null);
 				}
 			}
 		}
