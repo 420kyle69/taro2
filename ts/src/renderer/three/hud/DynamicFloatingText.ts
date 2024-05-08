@@ -16,8 +16,8 @@ namespace Renderer {
 				super();
 
 				const label = new Label({ x, y, z, text, color, renderOnTop: true });
-				const xOffsetInLabelWidthUnits = offsetX / label.height;
-				const yOffsetInLabelHeightUnits = offsetX / label.height;
+				const xOffsetInLabelWidthUnits = offsetX / label.width;
+				const yOffsetInLabelHeightUnits = offsetY / label.height;
 				label.setCenter(xOffsetInLabelWidthUnits, yOffsetInLabelHeightUnits);
 				this.add(label);
 				this.label = label;
