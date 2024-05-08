@@ -115,7 +115,7 @@ namespace Renderer {
 					const replaceTexture = (spriteSheet: TextureSheet) => {
 						(entity.body as AnimatedSprite).setTextureSheet(spriteSheet);
 						const bounds = taroEntity._bounds2d;
-						entity.setScale(Utils.pixelToWorld(bounds.x), 1, Utils.pixelToWorld(bounds.y));
+						entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y), 1);
 					};
 
 					if (tex) {
