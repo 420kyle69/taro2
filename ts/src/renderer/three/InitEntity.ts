@@ -30,7 +30,6 @@ namespace Renderer {
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
 				this.isBillboard = entityTypeData?.isBillboard ?? false;
-				// TODO: add preview here
 				const renderer = Renderer.Three.instance();
 				const tex = gAssetManager.getTexture(key).clone();
 				const frameWidth = tex.image.width / cols;
