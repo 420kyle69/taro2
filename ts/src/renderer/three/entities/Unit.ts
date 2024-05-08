@@ -98,7 +98,10 @@ namespace Renderer {
 				taroEntity.on(
 					'size',
 					(data: { width: number; height: number }) => {
-						entity.setScale(Utils.pixelToWorld(data.width), Utils.pixelToWorld(data.height));
+						const width = Utils.pixelToWorld(data.width || 0);
+						const height = Utils.pixelToWorld(data.height || 0);
+						const depth = Utils.pixelToWorld(entity.taroEntity._stats?.currentBody?.depth || 0);
+						entity.setScale(width, height, depth);
 					},
 					this
 				);
@@ -211,11 +214,11 @@ namespace Renderer {
 				this.attributes.position.z = Utils.pixelToWorld(halfHeight);
 			}
 
-			setScale(sx: number, sy: number) {
+			setScale(sx: number, sy: number, sz: number) {
 				if (this.body instanceof AnimatedSprite) {
 					this.body.setScale(sx, sy);
 				} else {
-					this.body.setSize2D(sx, sy);
+					this.body.setSize(sx, sy, sz);
 				}
 
 				let unitHeightPx = 0;

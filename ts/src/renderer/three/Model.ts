@@ -18,21 +18,25 @@ namespace Renderer {
 				this.scene = SkeletonUtils.clone(model.scene);
 				this.add(this.scene);
 
-				this.scaleSceneToFitWithinUnits(1);
+				this.originalSize.copy(this.getSize());
+				this.originalScale.copy(this.scene.scale);
 
 				const mixer = new THREE.AnimationMixer(this.scene);
 				this.mixer = mixer;
 
 				this.clips = model.animations;
+
+				this.aabb.setFromObject(this.scene);
 			}
 
 			getSize() {
-				this.aabb.setFromObject(this.scene);
+				this.aabb.setFromObject(this.scene, true);
 				return this.aabb.getSize(this.size);
 			}
 
-			setSize2D(x: number, z: number) {
+			setSize(x: number, y: number, z: number) {
 				this.scene.scale.x = this.originalScale.x * (x / this.originalSize.x);
+				this.scene.scale.y = this.originalScale.y * (y / this.originalSize.y);
 				this.scene.scale.z = this.originalScale.z * (z / this.originalSize.z);
 			}
 
@@ -55,14 +59,6 @@ namespace Renderer {
 				action.setLoop(THREE.LoopRepeat, loopCount === 0 ? Infinity : loopCount);
 				action.clampWhenFinished = true;
 				action.play();
-			}
-
-			private scaleSceneToFitWithinUnits(units: number) {
-				const size = this.getSize();
-				const scale = units / Math.max(...size.toArray());
-				this.scene.scale.setScalar(scale);
-				this.originalSize.copy(this.getSize());
-				this.originalScale.copy(this.scene.scale);
 			}
 		}
 	}
