@@ -12,6 +12,7 @@ var taroClientConfig = {
 		'/lib/DRACOLoader.js',
 		'/lib/GLTFLoader.js',
 		'/lib/OrbitControls.js',
+		'/lib/TransformControls.js',
 		'/lib/tween.umd.js',
 		'/lib/three_mesh_bvh.umd.js',
 
@@ -128,6 +129,9 @@ var taroClientConfig = {
 		'renderer/three/AnimatedSprite.js',
 		'renderer/three/Skybox.js',
 		'renderer/three/TextureSheet.js',
+		'renderer/three/EntityGizmo.js',
+		'renderer/three/EntityEditor.js',
+		'renderer/three/EntityPreview.js',
 		'renderer/three/VoxelEditor.js',
 		'renderer/three/VoxelMarker.js',
 		'renderer/three/MarkerLines.js',
