@@ -106,12 +106,10 @@ namespace Renderer {
 					this.destroy();
 					this.action.wasDeleted = true;
 				}
-				// if (this === this.entityEditor.selectedEntityImage) this.updateOutline();
 			}
 
 			hide(): void {
 				this.visible = false;
-				//this.updateOutline(true);
 			}
 
 			delete(): void {

@@ -163,6 +163,9 @@ namespace Renderer {
 													this.entityEditor.selectedEntityPreview.preview.uuid !== preview.uuid)
 											) {
 												this.entityEditor.selectEntityPreview(preview.entity);
+												if (preview.entity.isBillboard) {
+													taro.client.emit('entity-billboard', true);
+												}
 												//double click
 												let clickDelay = taro._currentTime - lastTime;
 												lastTime = taro._currentTime;
