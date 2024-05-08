@@ -61,7 +61,7 @@ namespace Renderer {
 				);
 				this.preview.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				renderer.entityPreviewLayer.add(this);
-				renderer.entityManager.entityPreviews.push(preview);
+				renderer.entityManager.entityPreviews.push(this);
 			}
 
 			edit(action: ActionData): void {
@@ -103,7 +103,8 @@ namespace Renderer {
 					this.scale.setZ(action.height / this.defaultHeight);
 				}
 				if (action.wasDeleted) {
-					this.destroy();
+					const renderer = Renderer.Three.instance();
+					renderer.entityManager.destroyPreview(this);
 					this.action.wasDeleted = true;
 				}
 			}
@@ -113,10 +114,10 @@ namespace Renderer {
 			}
 
 			delete(): void {
-				//this.hide();
 				let editedAction: ActionData = { actionId: this.action.actionId, wasDeleted: true };
 				this.edit(editedAction);
-				this.destroy();
+				const renderer = Renderer.Three.instance();
+				renderer.entityManager.destroyPreview(this);
 			}
 		}
 	}

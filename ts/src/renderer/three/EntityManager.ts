@@ -6,7 +6,7 @@ namespace Renderer {
 			items: Item[] = [];
 			projectiles: Unit[] = [];
 			regions: Region[] = [];
-			entityPreviews: (Renderer.Three.AnimatedSprite & { entity: EntityPreview })[] = [];
+			entityPreviews: EntityPreview[] = [];
 
 			private animatedSprites: AnimatedSprite[] = [];
 			private unownedItems = new Map<string, Item>();
@@ -45,6 +45,14 @@ namespace Renderer {
 				this.entities.push(entity);
 
 				return entity;
+			}
+			destroyPreview(preview: EntityPreview) {
+				preview.destroy();
+
+				const idx = this.entityPreviews.indexOf(preview, 0);
+				if (idx === -1) return;
+
+				this.entityPreviews.splice(idx, 1);
 			}
 
 			destroy(entity: Unit) {

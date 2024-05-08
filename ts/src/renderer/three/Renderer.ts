@@ -121,7 +121,7 @@ namespace Renderer {
 				});
 
 				// TODO: add undo/redo
-				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => { });
+				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
 
 				let rightClickPos: { x: number; y: number } = undefined;
 
@@ -155,21 +155,23 @@ namespace Renderer {
 										let intersects = raycaster.intersectObjects(this.entityManager.entityPreviews);
 										if (intersects?.length > 0) {
 											const closest = intersects[0].object as THREE.Mesh;
-											const preview = this.entityManager.entityPreviews.find((preview) => preview.sprite === closest);
+											const preview = this.entityManager.entityPreviews.find(
+												(preview) => preview.preview.sprite === closest
+											);
 											if (
 												preview &&
 												(this.entityEditor.selectedEntityPreview === null ||
 													this.entityEditor.selectedEntityPreview === undefined ||
 													this.entityEditor.selectedEntityPreview.preview.uuid !== preview.uuid)
 											) {
-												this.entityEditor.selectEntityPreview(preview.entity);
-												taro.client.emit('entity-billboard', !!preview.entity.isBillboard);
+												this.entityEditor.selectEntityPreview(preview);
+												taro.client.emit('entity-billboard', !!preview.isBillboard);
 												//double click
 												let clickDelay = taro._currentTime - lastTime;
 												lastTime = taro._currentTime;
 												if (clickDelay < 350) {
 													if (inGameEditor && inGameEditor.showScriptForEntity) {
-														inGameEditor.showScriptForEntity(preview.entity.action.actionId);
+														inGameEditor.showScriptForEntity(preview.action.actionId);
 													}
 												}
 											}
@@ -590,9 +592,9 @@ namespace Renderer {
 				});
 			}
 
-			private onEnterEntitiesMode() { }
+			private onEnterEntitiesMode() {}
 
-			private onExitEntitiesMode() { }
+			private onExitEntitiesMode() {}
 
 			private showEntities() {
 				this.setEntitiesVisible(true);
