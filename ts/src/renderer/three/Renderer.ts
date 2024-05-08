@@ -554,7 +554,6 @@ namespace Renderer {
 				if (this.showRepublishWarning) {
 					inGameEditor.showRepublishToInitEntitiesWarning();
 				}
-
 				if (this.entityManager.entityPreviews.length === 0) {
 					// create images for entities created in initialize script
 					Object.values(taro.game.data.scripts).forEach((script) => {
@@ -572,8 +571,8 @@ namespace Renderer {
 
 				taro.network.send<any>('updateClientInitEntities', true);
 
-				this.entityManager.entityPreviews.forEach((preview) => {
-					preview.visible = true;
+				this.entityManager.entityPreviews.forEach((entityPreview) => {
+					entityPreview.preview.visible = true;
 				});
 			}
 
@@ -587,8 +586,8 @@ namespace Renderer {
 					this.entityEditor.selectEntityPreview(null);
 				}
 
-				this.entityManager.entityPreviews.forEach((preview) => {
-					preview.visible = false;
+				this.entityManager.entityPreviews.forEach((entityPreview) => {
+					entityPreview.preview.visible = false;
 				});
 			}
 
