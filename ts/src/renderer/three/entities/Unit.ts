@@ -39,7 +39,7 @@ namespace Renderer {
 
 				this.label.visible = false;
 
-				this.add(this.hud);
+				this.body.attach(this.hud);
 				this.hud.add(this.label);
 				this.hud.add(this.attributes);
 			}
