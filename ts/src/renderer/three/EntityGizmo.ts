@@ -33,8 +33,11 @@ namespace Renderer {
 								};
 								break;
 							case 'rotate':
-								editedAction['angle'] =
-									control.object.rotation.y > 0 ? control.object.rotation.y : 2 * Math.PI - control.object.rotation.y;
+								control.object.rotation.order = 'YXZ';
+								const heading = control.object.rotation.y;
+								const radians = heading > 0 ? heading : 2 * Math.PI + heading;
+								const degrees = THREE.MathUtils.radToDeg(radians);
+								editedAction['angle'] = degrees;
 								break;
 							case 'scale':
 								editedAction['width'] = control.object.scale.x * entityPreview.defaultWidth;

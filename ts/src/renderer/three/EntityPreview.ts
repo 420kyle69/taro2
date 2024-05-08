@@ -41,8 +41,10 @@ namespace Renderer {
 				});
 				preview.entity = this;
 				(preview.sprite as THREE.Mesh & { entity: EntityPreview }).entity = this;
-				console.log(action.angle);
-				if (!isNaN(action.angle)) this.rotation.y = action.angle;
+				if (!isNaN(action.angle)) {
+					this.rotation.order = 'YXZ';
+					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+				}
 
 				if (!isNaN(action.width) && !isNaN(action.height))
 					this.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
@@ -90,7 +92,7 @@ namespace Renderer {
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
-					this.rotation.y = action.angle;
+					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;
