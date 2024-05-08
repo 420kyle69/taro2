@@ -34,7 +34,7 @@ namespace Renderer {
 			public entityManager = new EntityManager();
 			private entitiesLayer = new THREE.Group();
 			private regionsLayer = new THREE.Group();
-			public entityPreviewLayer = new THREE.Group();
+			public initEntityLayer = new THREE.Group();
 
 			private sky: Skybox;
 			private voxels: Voxels;
@@ -152,32 +152,32 @@ namespace Renderer {
 										const raycaster = new THREE.Raycaster();
 										raycaster.setFromCamera(this.pointer, this.camera.instance);
 
-										let intersects = raycaster.intersectObjects(this.entityManager.entityPreviews);
+										let intersects = raycaster.intersectObjects(this.entityManager.initEntities);
 										if (intersects?.length > 0) {
 											const closest = intersects[0].object as THREE.Mesh;
-											const preview = this.entityManager.entityPreviews.find(
-												(preview) => preview.preview.sprite === closest
+											const initEntity = this.entityManager.initEntities.find(
+												(initEntity) => initEntity.body.sprite === closest
 											);
 											if (
-												preview &&
-												(this.entityEditor.selectedEntityPreview === null ||
-													this.entityEditor.selectedEntityPreview === undefined ||
-													this.entityEditor.selectedEntityPreview.preview.uuid !== preview.uuid)
+												initEntity &&
+												(this.entityEditor.selectedInitEntity === null ||
+													this.entityEditor.selectedInitEntity === undefined ||
+													this.entityEditor.selectedInitEntity.body.uuid !== initEntity.uuid)
 											) {
-												this.entityEditor.selectEntityPreview(preview);
-												taro.client.emit('entity-billboard', !!preview.isBillboard);
+												this.entityEditor.selectInitEntity(initEntity);
+												taro.client.emit('entity-billboard', !!initEntity.isBillboard);
 												//double click
 												let clickDelay = taro._currentTime - lastTime;
 												lastTime = taro._currentTime;
 												if (clickDelay < 350) {
 													if (inGameEditor && inGameEditor.showScriptForEntity) {
-														inGameEditor.showScriptForEntity(preview.action.actionId);
+														inGameEditor.showScriptForEntity(initEntity.action.actionId);
 													}
 												}
 											}
 										} else {
 											if (!this.entityEditor.gizmo.control.dragging) {
-												this.entityEditor.selectEntityPreview(null);
+												this.entityEditor.selectInitEntity(null);
 												intersects = raycaster.intersectObjects(this.entityManager.entities);
 												if (intersects?.length > 0) {
 													let closest: THREE.Mesh;
@@ -281,7 +281,7 @@ namespace Renderer {
 													function: 'getVariable',
 												};
 											}
-											this.createEntityPreview(action);
+											this.createInitEntity(action);
 											taro.network.send<any>('editInitEntity', action);
 										}
 									}
@@ -473,7 +473,7 @@ namespace Renderer {
 				return intersect;
 			}
 
-			createEntityPreview(action: ActionData): void {
+			createInitEntity(action: ActionData): void {
 				if (
 					!action.disabled &&
 					action.position?.function === 'xyCoordinate' &&
@@ -487,12 +487,12 @@ namespace Renderer {
 							!isNaN(action.height) &&
 							!isNaN(action.angle))
 					) {
-						if (action.actionId && !action.wasDeleted) new EntityPreview(action);
+						if (action.actionId && !action.wasDeleted) new InitEntity(action);
 						else {
 							this.showRepublishWarning = true;
 						}
 					} else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
-						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'unit');
+						if (action.actionId && !action.wasDeleted) new InitEntity(action, 'unit');
 						else {
 							this.showRepublishWarning = true;
 						}
@@ -502,17 +502,17 @@ namespace Renderer {
 						!isNaN(action.width) &&
 						!isNaN(action.height)
 					) {
-						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'unit');
+						if (action.actionId && !action.wasDeleted) new InitEntity(action, 'unit');
 						else {
 							this.showRepublishWarning = true;
 						}
 					} else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
-						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'item');
+						if (action.actionId && !action.wasDeleted) new InitEntity(action, 'item');
 						else {
 							this.showRepublishWarning = true;
 						}
 					} else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
-						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'projectile');
+						if (action.actionId && !action.wasDeleted) new InitEntity(action, 'projectile');
 						else {
 							this.showRepublishWarning = true;
 						}
@@ -554,12 +554,12 @@ namespace Renderer {
 				if (this.showRepublishWarning) {
 					inGameEditor.showRepublishToInitEntitiesWarning();
 				}
-				if (this.entityManager.entityPreviews.length === 0) {
+				if (this.entityManager.initEntities.length === 0) {
 					// create images for entities created in initialize script
 					Object.values(taro.game.data.scripts).forEach((script) => {
 						if (script.triggers?.[0]?.type === 'gameStart') {
 							Object.values(script.actions).forEach((action) => {
-								this.createEntityPreview(action);
+								this.createInitEntity(action);
 							});
 						}
 					});
@@ -571,8 +571,8 @@ namespace Renderer {
 
 				taro.network.send<any>('updateClientInitEntities', true);
 
-				this.entityManager.entityPreviews.forEach((entityPreview) => {
-					entityPreview.preview.visible = true;
+				this.entityManager.initEntities.forEach((initEntity) => {
+					initEntity.body.visible = true;
 				});
 			}
 
@@ -582,12 +582,12 @@ namespace Renderer {
 				this.voxelEditor.voxels.updateLayer(new Map(), this.voxelEditor.currentLayerIndex);
 				this.voxelEditor.showAllLayers();
 
-				if (this.entityEditor.selectedEntityPreview) {
-					this.entityEditor.selectEntityPreview(null);
+				if (this.entityEditor.selectedInitEntity) {
+					this.entityEditor.selectInitEntity(null);
 				}
 
-				this.entityManager.entityPreviews.forEach((entityPreview) => {
-					entityPreview.preview.visible = false;
+				this.entityManager.initEntities.forEach((initEntity) => {
+					initEntity.body.visible = false;
 				});
 			}
 
@@ -675,8 +675,8 @@ namespace Renderer {
 				this.regionsLayer.position.y = 0.51;
 				this.scene.add(this.regionsLayer);
 
-				this.entityPreviewLayer.position.y = 0.51;
-				this.scene.add(this.entityPreviewLayer);
+				this.initEntityLayer.position.y = 0.51;
+				this.scene.add(this.initEntityLayer);
 
 				const createEntity = (taroEntity: TaroEntityPhysics, type: 'unit' | 'item' | 'projectile' | 'region') => {
 					const entity = this.entityManager.create(taroEntity, type);

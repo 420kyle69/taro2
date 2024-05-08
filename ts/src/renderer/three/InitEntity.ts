@@ -1,10 +1,10 @@
 namespace Renderer {
 	export namespace Three {
-		export class EntityPreview extends Node {
+		export class InitEntity extends Node {
 			entityEditor: EntityEditor;
 			action: ActionData;
 			editedAction: ActionData;
-			preview: Renderer.Three.AnimatedSprite & { entity: EntityPreview };
+			body: Renderer.Three.AnimatedSprite & { entity: InitEntity };
 			defaultWidth: number;
 			defaultHeight: number;
 			isBillboard = false;
@@ -36,11 +36,11 @@ namespace Renderer {
 				const frameWidth = tex.image.width / cols;
 				const frameHeight = tex.image.height / rows;
 				const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
-				const preview = (this.preview = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite & {
-					entity: EntityPreview;
+				const body = (this.body = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite & {
+					entity: InitEntity;
 				});
-				preview.entity = this;
-				(preview.sprite as THREE.Mesh & { entity: EntityPreview }).entity = this;
+				body.entity = this;
+				(body.sprite as THREE.Mesh & { entity: InitEntity }).entity = this;
 				if (!isNaN(action.angle)) {
 					this.rotation.order = 'YXZ';
 					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
@@ -49,19 +49,19 @@ namespace Renderer {
 				if (!isNaN(action.width) && !isNaN(action.height))
 					this.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
-					preview.visible = true;
+					body.visible = true;
 				} else {
-					preview.visible = false;
+					body.visible = false;
 				}
-				this.add(this.preview);
+				this.add(this.body);
 				this.position.set(
 					Utils.pixelToWorld(action.position?.x),
 					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
 					Utils.pixelToWorld(action.position?.y)
 				);
-				this.preview.setBillboard(entityTypeData.isBillboard, renderer.camera);
-				renderer.entityPreviewLayer.add(this);
-				renderer.entityManager.entityPreviews.push(this);
+				this.body.setBillboard(entityTypeData.isBillboard, renderer.camera);
+				renderer.initEntityLayer.add(this);
+				renderer.entityManager.initEntities.push(this);
 			}
 
 			edit(action: ActionData): void {
@@ -104,7 +104,7 @@ namespace Renderer {
 				}
 				if (action.wasDeleted) {
 					const renderer = Renderer.Three.instance();
-					renderer.entityManager.destroyPreview(this);
+					renderer.entityManager.destroyInitEntity(this);
 					this.action.wasDeleted = true;
 				}
 			}
@@ -117,7 +117,7 @@ namespace Renderer {
 				let editedAction: ActionData = { actionId: this.action.actionId, wasDeleted: true };
 				this.edit(editedAction);
 				const renderer = Renderer.Three.instance();
-				renderer.entityManager.destroyPreview(this);
+				renderer.entityManager.destroyInitEntity(this);
 			}
 		}
 	}
