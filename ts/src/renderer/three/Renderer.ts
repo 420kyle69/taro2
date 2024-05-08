@@ -121,7 +121,7 @@ namespace Renderer {
 				});
 
 				// TODO: add undo/redo
-				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => { });
+				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
 
 				let rightClickPos: { x: number; y: number } = undefined;
 
@@ -485,12 +485,12 @@ namespace Renderer {
 							!isNaN(action.height) &&
 							!isNaN(action.angle))
 					) {
-						if (action.actionId) new EntityPreview(action);
+						if (action.actionId && !action.wasDeleted) new EntityPreview(action);
 						else {
 							this.showRepublishWarning = true;
 						}
 					} else if (action.type === 'createUnitAtPosition' && !isNaN(action.angle)) {
-						if (action.actionId) new EntityPreview(action, 'unit');
+						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'unit');
 						else {
 							this.showRepublishWarning = true;
 						}
@@ -500,17 +500,17 @@ namespace Renderer {
 						!isNaN(action.width) &&
 						!isNaN(action.height)
 					) {
-						if (action.actionId) new EntityPreview(action, 'unit');
+						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'unit');
 						else {
 							this.showRepublishWarning = true;
 						}
 					} else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
-						if (action.actionId) new EntityPreview(action, 'item');
+						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'item');
 						else {
 							this.showRepublishWarning = true;
 						}
 					} else if (action.type === 'createProjectileAtPosition' && !isNaN(action.angle)) {
-						if (action.actionId) new EntityPreview(action, 'projectile');
+						if (action.actionId && !action.wasDeleted) new EntityPreview(action, 'projectile');
 						else {
 							this.showRepublishWarning = true;
 						}
@@ -590,9 +590,9 @@ namespace Renderer {
 				});
 			}
 
-			private onEnterEntitiesMode() { }
+			private onEnterEntitiesMode() {}
 
-			private onExitEntitiesMode() { }
+			private onExitEntitiesMode() {}
 
 			private showEntities() {
 				this.setEntitiesVisible(true);
