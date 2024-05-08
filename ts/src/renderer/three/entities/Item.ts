@@ -150,7 +150,7 @@ namespace Renderer {
 
 			setScale(sx: number, sy: number, sz: number) {
 				if (this.body instanceof AnimatedSprite) {
-					this.body.setScale(sx, sy);
+					this.body.setScale(sx, sz);
 				} else {
 					this.body.setSize(sx, sy, sz);
 				}
