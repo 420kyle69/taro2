@@ -115,7 +115,7 @@ namespace Renderer {
 					const replaceTexture = (spriteSheet: TextureSheet) => {
 						(entity.body as AnimatedSprite).setTextureSheet(spriteSheet);
 						const bounds = taroEntity._bounds2d;
-						entity.setScale(Utils.pixelToWorld(bounds.x), 1, Utils.pixelToWorld(bounds.y));
+						entity.setScale(Utils.pixelToWorld(bounds.x), Utils.pixelToWorld(bounds.y), 1);
 					};
 
 					if (tex) {
@@ -150,7 +150,7 @@ namespace Renderer {
 
 			setScale(sx: number, sy: number, sz: number) {
 				if (this.body instanceof AnimatedSprite) {
-					this.body.setScale(sx, sz);
+					this.body.setScale(sx, sy);
 				} else {
 					this.body.setSize(sx, sy, sz);
 				}
