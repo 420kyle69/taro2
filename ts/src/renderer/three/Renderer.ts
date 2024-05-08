@@ -121,7 +121,7 @@ namespace Renderer {
 				});
 
 				// TODO: add undo/redo
-				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
+				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => { });
 
 				let rightClickPos: { x: number; y: number } = undefined;
 
@@ -163,9 +163,7 @@ namespace Renderer {
 													this.entityEditor.selectedEntityPreview.preview.uuid !== preview.uuid)
 											) {
 												this.entityEditor.selectEntityPreview(preview.entity);
-												if (preview.entity.isBillboard) {
-													taro.client.emit('entity-billboard', true);
-												}
+												taro.client.emit('entity-billboard', !!preview.entity.isBillboard);
 												//double click
 												let clickDelay = taro._currentTime - lastTime;
 												lastTime = taro._currentTime;
@@ -592,9 +590,9 @@ namespace Renderer {
 				});
 			}
 
-			private onEnterEntitiesMode() {}
+			private onEnterEntitiesMode() { }
 
-			private onExitEntitiesMode() {}
+			private onExitEntitiesMode() { }
 
 			private showEntities() {
 				this.setEntitiesVisible(true);

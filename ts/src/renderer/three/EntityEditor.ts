@@ -73,7 +73,7 @@ namespace Renderer {
 				});
 
 				window.addEventListener('keydown', (event) => {
-					if (event.key === 'Delete') {
+					if (event.key === 'Delete' || event.key === 'Backspace') {
 						this.deleteInitEntity();
 					}
 				});
