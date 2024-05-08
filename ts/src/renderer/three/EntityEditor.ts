@@ -48,9 +48,9 @@ namespace Renderer {
 				taro.client.on('editInitEntity', (data: ActionData) => {
 					let found = false;
 					enitityPreviews.forEach((preview) => {
-						if (preview.entity.action.actionId === data.actionId) {
+						if (preview.action.actionId === data.actionId) {
 							found = true;
-							preview.entity.update(data);
+							preview.update(data);
 						}
 					});
 					if (!found) {
@@ -61,9 +61,9 @@ namespace Renderer {
 					taro.developerMode.initEntities.forEach((action) => {
 						let found = false;
 						enitityPreviews.forEach((preview) => {
-							if (preview.entity.action.actionId === action.actionId) {
+							if (preview.action.actionId === action.actionId) {
 								found = true;
-								preview.entity.update(action);
+								preview.update(action);
 							}
 						});
 						if (!found) {
