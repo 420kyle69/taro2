@@ -162,6 +162,13 @@ var MobileControlsComponent = TaroEntity.extend({
 		htmlButton.style.height = '60px';
 		htmlButton.style.fontSize = '16px';
 		htmlButton.style.color = '#fff';
+		
+		htmlButton.style.backgroundColor = '#33333366';
+		htmlButton.style.border = '2px solid #555 ';
+		htmlButton.style.backdropFilter = 'blur(4px)';
+		htmlButton.style.borderRadius = '8px';
+		htmlButton.style.zIndex = '1000';
+		htmlButton.style.cursor = 'pointer';
 
 		const abilityId = keybinding.keyDown?.abilityId || keybinding.keyUp?.abilityId;
 		let ability = null;
@@ -176,12 +183,6 @@ var MobileControlsComponent = TaroEntity.extend({
 			htmlButton.textContent = type;
 		}
 
-		htmlButton.style.backgroundColor = '#33333366';
-		htmlButton.style.border = '2px solid #555 ';
-		htmlButton.style.backdropFilter = 'blur(4px)';
-		htmlButton.style.borderRadius = '8px';
-		htmlButton.style.zIndex = '1000';
-		htmlButton.style.cursor = 'pointer';
 
 		document.body.appendChild(htmlButton);
 
