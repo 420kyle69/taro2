@@ -153,22 +153,22 @@ var MobileControlsComponent = TaroEntity.extend({
 		// create a new button using html
 		const htmlButton = document.createElement('button');
 		htmlButton.id = type + '_button';
-		htmlButton.style.position = 'absolute';
-		htmlButton.style.left = `${xOnClientScreen}px`;
-
-		htmlButton.style.top = `${yOnClientScreen}px`;
-		htmlButton.style.transform = `translate(-50%, -50%)`;
-		htmlButton.style.width = '60px';
-		htmlButton.style.height = '60px';
-		htmlButton.style.fontSize = '16px';
-		htmlButton.style.color = '#fff';
-		
-		htmlButton.style.backgroundColor = '#33333366';
-		htmlButton.style.border = '2px solid #555 ';
-		htmlButton.style.backdropFilter = 'blur(4px)';
-		htmlButton.style.borderRadius = '8px';
-		htmlButton.style.zIndex = '1000';
-		htmlButton.style.cursor = 'pointer';
+		htmlButton.style.cssText = `
+    position: absolute;
+    left: ${xOnClientScreen}px;
+    top: ${yOnClientScreen}px;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #33333366;
+    border: 2px solid #555;
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+    z-index: 1000;
+    cursor: pointer;
+`;
 
 		const abilityId = keybinding.keyDown?.abilityId || keybinding.keyUp?.abilityId;
 		let ability = null;
@@ -182,7 +182,6 @@ var MobileControlsComponent = TaroEntity.extend({
 		} else {
 			htmlButton.textContent = type;
 		}
-
 
 		document.body.appendChild(htmlButton);
 
