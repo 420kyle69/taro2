@@ -180,6 +180,33 @@ var InventoryComponent = TaroEntity.extend({
 		return actualQuantity == undefined || actualQuantity >= requiredQty;
 	},
 
+	getMappedSlot: function (slotNumber, itemTypeId) {
+		let mappedSlot = slotNumber;
+		var existingItem = this.getItemBySlotNumber(mappedSlot);
+		if (existingItem == undefined) {
+			return mappedSlot;
+		}
+
+		// even if there's an existing item in the designated slot, if we're in a middle of purchasing an item and the item uses the existing item as a recipe, then allow buying the item
+		var ownerPlayer = this._entity.getOwner();
+		if (ownerPlayer) {
+			var lastOpenedShop = ownerPlayer._stats.lastOpenedShop;
+			if (lastOpenedShop) {
+				var shopItems = taro.game.data.shops[lastOpenedShop] ? taro.game.data.shops[lastOpenedShop].itemTypes : [];
+				var shopData = shopItems[itemTypeId];
+				if (shopData) {
+					if (
+						existingItem &&
+						existingItem._stats.removeWhenEmpty &&
+						existingItem._stats.quantity == shopData.price.requiredItemTypes[existingItem._stats.itemTypeId]
+					) {
+						return mappedSlot;
+					}
+				}
+			}
+		}
+	},
+
 	/**
 	 * Return the inventory's first available slot considering the given item's type. If inventory has matching items already, then it'll consider how new item's quantity will be distributed, and eventually be added
 	 * @param {*} itemData
@@ -197,29 +224,17 @@ var InventoryComponent = TaroEntity.extend({
 		var mappedSlot = undefined;
 		if (mappedSlots != undefined && mappedSlots.length > 0) {
 			for (var i = 0; i < mappedSlots.length; i++) {
-				mappedSlot = mappedSlots[i];
-				var existingItem = this.getItemBySlotNumber(mappedSlot);
-				if (existingItem == undefined) {
-					return mappedSlot;
-				}
-
-				// even if there's an existing item in the designated slot, if we're in a middle of purchasing an item and the item uses the existing item as a recipe, then allow buying the item
-				var ownerPlayer = this._entity.getOwner();
-				if (ownerPlayer) {
-					var lastOpenedShop = ownerPlayer._stats.lastOpenedShop;
-					if (lastOpenedShop) {
-						var shopItems = taro.game.data.shops[lastOpenedShop] ? taro.game.data.shops[lastOpenedShop].itemTypes : [];
-						var itemData = taro.shop.getItemById(itemTypeId);
-						var shopData = shopItems[itemTypeId];
-						if (shopData) {
-							if (
-								existingItem &&
-								existingItem._stats.removeWhenEmpty &&
-								existingItem._stats.quantity == shopData.price.requiredItemTypes[existingItem._stats.itemTypeId]
-							) {
-								return mappedSlot;
-							}
+				if (mappedSlots[i] === "backpack-slots") {
+					for (let j = this._entity._stats.inventorySize + 1; j <= this._entity._stats.inventorySize + this._entity._stats.backpackSize; j++) {
+						mappedSlot = this.getMappedSlot(j, itemTypeId);
+						if (mappedSlot) {
+							return mappedSlot;
 						}
+					}
+				} else {
+					mappedSlot = this.getMappedSlot(mappedSlots[i], itemTypeId);
+					if (mappedSlot) {
+						return mappedSlot;
 					}
 				}
 			}

@@ -659,8 +659,11 @@ var Unit = TaroEntityPhysics.extend({
 					itemData.controls && Array.isArray(itemData.controls.permittedInventorySlots)
 						? itemData.controls.permittedInventorySlots
 						: undefined;
-				if (targetSlots != undefined && targetSlots[0] > 0) {
-					var existingItem = self.inventory.getItemBySlotNumber(targetSlots[0]);
+				if (targetSlots != undefined && (targetSlots[0] > 0 || targetSlots[0] === 'backpack-slots')) {
+					targetSlots[0] === 'backpack-slots';
+					var existingItem = self.inventory.getItemBySlotNumber(
+						targetSlots[0] === 'backpack-slots' ? this._stats.inventorySize + 1 : targetSlots[0]
+					);
 					if (existingItem && shopData.replaceItemInTargetSlot) {
 						existingItem.remove();
 					}
@@ -2213,6 +2216,12 @@ var Unit = TaroEntityPhysics.extend({
 				if (self._stats.aiEnabled) {
 					self.distanceToTarget = self.ai.getDistanceToTarget();
 					self.ai.update();
+					// enable AI unit flipping based on target
+					if (!isNaN(this.angleToTarget) && this.angleToTarget > 0 && this.angleToTarget < Math.PI) {
+						this.flip(0);
+					} else {
+						this.flip(1);
+					}
 				}
 
 				if (ownerPlayer._stats.controlledBy == 'human' && !this._stats.aiEnabled) {

@@ -99,11 +99,6 @@ var Player = TaroEntity.extend({
 	joinGame: function (idle = false) {
 		var self = this;
 		if (self._stats.playerJoined != true || idle) {
-			// notify GS manager that a user has joined, do not notify if player joins again after pausing the game
-			if (self._stats.userId) {
-				taro.workerComponent.userJoined(self._stats.userId);
-			}
-
 			// do not send trigger for neutral player (old comment)
 			// idle added for idle mode
 			// checking if taro.script exists because AI players are created right before ScriptComponent init

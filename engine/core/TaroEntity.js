@@ -4345,7 +4345,6 @@ var TaroEntity = TaroObject.extend({
 						case 'flip':
 							this._stats[attrName] = newValue;
 							// ignore flip command from server for my own unit, because it's already done locally
-							if (this.category == 'item') console.log('flip', newValue);
 							if (
 								taro.isClient &&
 								this != taro.client.selectedUnit &&

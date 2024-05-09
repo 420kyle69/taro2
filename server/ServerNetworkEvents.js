@@ -48,7 +48,7 @@ var ServerNetworkEvents = {
 			taro.devLog(`BE(out): clientDisconnect: ${clientId} ${client._id}`);
 
 			if (player) {
-				console.log(`_onclientDisconnect${clientId} (${player._stats.name})${Date.now() - client.lastEventAt}`);
+				console.log(`_onclientDisconnect ${clientId} (${player._stats.name}) ${Date.now() - client.lastEventAt}`);
 				player.updatePlayerHighscore();
 
 				if (player._stats.userId) {

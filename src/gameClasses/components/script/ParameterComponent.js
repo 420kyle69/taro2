@@ -2601,7 +2601,7 @@ var ParameterComponent = TaroEntity.extend({
 				// return taro.server.gameId;
 				return taro.game.data.defaultData._id;
 			},
-			
+
 			objectToString: function (text, vars) {
 				var object = self.getValue(text.object, vars);
 				var str = typeof object === 'string' ? object : JSON.stringify(object); // remove opening & ending quotes
@@ -3083,7 +3083,7 @@ var ParameterComponent = TaroEntity.extend({
 						return player.lastClientReceivedData || {};
 					}
 				}
-			}
+			},
 		};
 	},
 });

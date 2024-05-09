@@ -832,45 +832,45 @@ var MenuUiComponent = TaroEntity.extend({
 
 		// user is disconnected and we no longer trying to reconnect them silently
 		// let's reload the page and try autojoining them instead
-		if (!window.reconnectInProgress) {
-			const reason = message;
-			const whitelistedReasons = [
-				'Game has been unpublished',
-				'You have been banned',
-				'Restricted IP detected',
-				'Duplicate IP detected',
-				'Client already exists',
-				'User connected to another server',
-				'You do not have permission to join this game',
-				'Guest players not allowed to join this game',
-				'User kicked for spamming network commands',
-				'Your IP has been banned for command spamming',
-				'Your IP has been blacklisted',
-			];
+		// if (!window.reconnectInProgress) {
+		// 	const reason = message;
+		// 	const whitelistedReasons = [
+		// 		'Game has been unpublished',
+		// 		'You have been banned',
+		// 		'Restricted IP detected',
+		// 		'Duplicate IP detected',
+		// 		'Client already exists',
+		// 		'User connected to another server',
+		// 		'You do not have permission to join this game',
+		// 		'Guest players not allowed to join this game',
+		// 		'User kicked for spamming network commands',
+		// 		'Your IP has been banned for command spamming',
+		// 		'Your IP has been blacklisted',
+		// 	];
 
-			if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
-				const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
-				const isTabActive = document.hasFocus();
-				if (
-					(!autojoinAttempted ||
-						Date.now() - autojoinAttempted > 15 * 60 * 1000 ||
-						message.includes('Game has been republished')) &&
-					isTabActive
-				) {
-					if (window.trackEvent) {
-						window.trackEvent('Auto Refresh', {
-							reason,
-							gameSlug: window.gameSlug,
-						});
-					}
-					// store in sessionStorage
-					window.sessionStorage.setItem('autojoinAttempted', Date.now());
+		// 	if (whitelistedReasons.findIndex((m) => m.includes(reason)) === -1) {
+		// 		const autojoinAttempted = window.sessionStorage.getItem('autojoinAttempted');
+		// 		const isTabActive = document.hasFocus();
+		// 		if (
+		// 			(!autojoinAttempted ||
+		// 				Date.now() - autojoinAttempted > 15 * 60 * 1000 ||
+		// 				message.includes('Game has been republished')) &&
+		// 			isTabActive
+		// 		) {
+		// 			if (window.trackEvent) {
+		// 				window.trackEvent('Auto Refresh', {
+		// 					reason,
+		// 					gameSlug: window.gameSlug,
+		// 				});
+		// 			}
+		// 			// store in sessionStorage
+		// 			window.sessionStorage.setItem('autojoinAttempted', Date.now());
 
-					// autojoin in 5 seconds
-					this.refreshIn('connection-lost-refresh', 5);
-				}
-			}
-		}
+		// 			// autojoin in 5 seconds
+		// 			this.refreshIn('connection-lost-refresh', 5);
+		// 		}
+		// 	}
+		// }
 	},
 
 	refreshIn: function (id, seconds) {
