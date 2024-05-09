@@ -186,11 +186,10 @@ var MobileControlsComponent = TaroEntity.extend({
 		document.body.appendChild(htmlButton);
 
 		htmlButton.addEventListener('touchstart', function () {
-			console.log('called touch');
 			if (taro.isClient) {
 				taro.network.send('playerKeyDown', {
 					device: 'key',
-					key: taro.toLowerCase(),
+					key: type.toLowerCase(),
 				});
 			}
 		});
@@ -199,7 +198,7 @@ var MobileControlsComponent = TaroEntity.extend({
 			if (taro.isClient) {
 				taro.network.send('playerKeyUp', {
 					device: 'key',
-					key: taro.toLowerCase(),
+					key: type.toLowerCase(),
 				});
 			}
 		});
