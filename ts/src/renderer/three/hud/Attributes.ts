@@ -6,6 +6,7 @@ namespace Renderer {
 		export class Attributes extends Node {
 			private numAttributesBelow = 0;
 			private numAttributesAbove = 0;
+			private margin = 0;
 
 			constructor() {
 				super();
@@ -37,14 +38,14 @@ namespace Renderer {
 				const bar = new ProgressBar(config);
 
 				bar.name = data.type || data.key;
-				const emptyRows = 2; // For spacing
+				const marginInBarHeights = this.margin / Utils.pixelToWorld(bar.height);
 
 				if (config.anchorPosition === 'below') {
-					bar.setCenter(0.5, (this.numAttributesBelow + 1 + emptyRows) * -1);
+					bar.setCenter(0.5, -marginInBarHeights + (this.numAttributesBelow + 1) * -1);
 					this.add(bar);
 					this.numAttributesBelow++;
 				} else {
-					bar.setCenter(0.5, this.numAttributesAbove + 2 + emptyRows);
+					bar.setCenter(0.5, marginInBarHeights + this.numAttributesAbove + 2);
 					this.add(bar);
 					this.numAttributesAbove++;
 				}
@@ -88,6 +89,10 @@ namespace Renderer {
 				for (const bar of this.children as ProgressBar[]) {
 					bar.setOpacity(opacity);
 				}
+			}
+
+			setMargin(margin: number) {
+				this.margin = margin;
 			}
 		}
 	}

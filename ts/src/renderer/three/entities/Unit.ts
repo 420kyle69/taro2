@@ -203,25 +203,29 @@ namespace Renderer {
 			renderAttributes(data) {
 				this.attributes.clear();
 				this.attributes.addAttributes(data);
+			}
 
+			setScale(sx: number, sy: number, sz: number) {
+				if (this.body instanceof AnimatedSprite) {
+					this.body.setScale(sx, sy);
+					// this.body.setScale(5, 5);
+				} else {
+					this.body.setSize(sx, sy, sz);
+				}
+
+				// Update attributes
 				let unitHeightPx = 0;
 				if (this.body instanceof AnimatedSprite) {
 					unitHeightPx = this.body.getSizeInPixels().height;
 				} else {
 					unitHeightPx = Utils.worldToPixel(this.body.getSize().y);
 				}
+
 				const halfHeight = unitHeightPx * 0.5;
-				this.attributes.position.z = Utils.pixelToWorld(halfHeight);
-			}
+				this.attributes.setMargin(Utils.pixelToWorld(halfHeight));
 
-			setScale(sx: number, sy: number, sz: number) {
-				if (this.body instanceof AnimatedSprite) {
-					this.body.setScale(sx, sy);
-				} else {
-					this.body.setSize(sx, sy, sz);
-				}
-
-				let unitHeightPx = 0;
+				// Update label
+				unitHeightPx = 0;
 				if (this.body instanceof AnimatedSprite) {
 					unitHeightPx = this.body.getSizeInPixels().height;
 				} else {
