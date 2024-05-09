@@ -4,7 +4,8 @@ namespace Renderer {
 		// inheritance. The Attributes class should have a private instance of Node.
 		// This happens all over the place because I didn't know about this.
 		export class Attributes extends Node {
-			private numAttributes = 0;
+			private numAttributesBelow = 0;
+			private numAttributesAbove = 0;
 
 			constructor() {
 				super();
@@ -19,7 +20,8 @@ namespace Renderer {
 
 				super.clear();
 
-				this.numAttributes = 0;
+				this.numAttributesBelow = 0;
+				this.numAttributesAbove = 0;
 
 				return this;
 			}
@@ -33,11 +35,19 @@ namespace Renderer {
 			addAttribute(data: AttributeData) {
 				const config = Mapper.ProgressBar(data);
 				const bar = new ProgressBar(config);
+
 				bar.name = data.type || data.key;
 				const emptyRows = 2; // For spacing
-				bar.setCenter(0.5, (this.numAttributes + 1 + emptyRows) * -1);
-				this.add(bar);
-				this.numAttributes++;
+
+				if (config.anchorPosition === 'below') {
+					bar.setCenter(0.5, (this.numAttributesBelow + 1 + emptyRows) * -1);
+					this.add(bar);
+					this.numAttributesBelow++;
+				} else {
+					bar.setCenter(0.5, this.numAttributesAbove + 2 + emptyRows);
+					this.add(bar);
+					this.numAttributesAbove++;
+				}
 			}
 
 			update(data: { attr: AttributeData; shouldRender: boolean }) {

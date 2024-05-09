@@ -55,6 +55,13 @@ namespace Renderer {
 					config.letterSpacing = attr.letterSpacing;
 				}
 
+				if (attr.anchorPosition) {
+					const isAbove = attr.anchorPosition === 'above-unit';
+					config.anchorPosition = isAbove ? 'above' : 'below';
+				} else {
+					config.anchorPosition = 'below';
+				}
+
 				return config;
 			}
 		}

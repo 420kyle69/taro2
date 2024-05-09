@@ -21,6 +21,7 @@ namespace Renderer {
 			fontSize: 14,
 			letterSpacing: -0.8,
 			renderOnTop: true,
+			anchorPosition: 'below' as 'below' | 'above',
 		};
 
 		export type ProgressBarParams = Partial<typeof defaultConfig>;
@@ -41,6 +42,7 @@ namespace Renderer {
 			fontSize: number;
 			letterSpacing: number;
 			renderOnTop: boolean;
+			anchorPosition: 'below' | 'above';
 
 			constructor(params: ProgressBarParams) {
 				const config = { ...defaultConfig, ...params };
