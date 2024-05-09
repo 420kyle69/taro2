@@ -190,7 +190,7 @@ var MobileControlsComponent = TaroEntity.extend({
 			if (taro.isClient) {
 				taro.network.send('playerKeyDown', {
 					device: 'key',
-					key: key.toLowerCase(),
+					key: taro.toLowerCase(),
 				});
 			}
 		});
@@ -199,7 +199,7 @@ var MobileControlsComponent = TaroEntity.extend({
 			if (taro.isClient) {
 				taro.network.send('playerKeyUp', {
 					device: 'key',
-					key: key.toLowerCase(),
+					key: taro.toLowerCase(),
 				});
 			}
 		});
