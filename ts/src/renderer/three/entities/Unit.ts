@@ -218,7 +218,7 @@ namespace Renderer {
 				if (this.body instanceof AnimatedSprite) {
 					this.body.setScale(sx, sy);
 				} else {
-					this.body.setSize(sx, sy, sz);
+					this.body.setSize(sx, sz, sy);
 				}
 
 				let unitHeightPx = 0;
