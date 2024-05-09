@@ -92,7 +92,7 @@ namespace Renderer {
 						const width = Utils.pixelToWorld(data.width || 0);
 						const height = Utils.pixelToWorld(data.height || 0);
 						const depth = Utils.pixelToWorld(entity.taroEntity._stats?.currentBody?.depth || 0);
-						entity.setScale(width, depth, height);
+						entity.setScale(width, height, depth);
 					},
 					this
 				);
