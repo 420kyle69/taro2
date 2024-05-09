@@ -153,22 +153,24 @@ var MobileControlsComponent = TaroEntity.extend({
 		// create a new button using html
 		const htmlButton = document.createElement('button');
 		htmlButton.id = type + '_button';
-		htmlButton.style.cssText = `
-    position: absolute;
-    left: ${xOnClientScreen}px;
-    top: ${yOnClientScreen}px;
-    transform: translate(-50%, -50%);
-    width: 60px;
-    height: 60px;
-    font-size: 16px;
-    color: #fff;
-    background-color: #33333366;
-    border: 2px solid #555;
-    backdrop-filter: blur(4px);
-    border-radius: 8px;
-    z-index: 1000;
-    cursor: pointer;
-`;
+
+		// setting style for button
+		Object.assign(htmlButton.style, {
+			position: 'absolute',
+			left: `${xOnClientScreen}px`,
+			top: `${yOnClientScreen}px`,
+			transform: 'translate(-50%, -50%)',
+			width: '60px',
+			height: '60px',
+			fontSize: '16px',
+			color: '#fff',
+			backgroundColor: '#33333366',
+			border: '2px solid #555',
+			backdropFilter: 'blur(4px)',
+			borderRadius: '8px',
+			zIndex: '1000',
+			cursor: 'pointer',
+		});
 
 		const abilityId = keybinding.keyDown?.abilityId || keybinding.keyUp?.abilityId;
 		let ability = null;
