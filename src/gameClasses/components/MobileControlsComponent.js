@@ -136,70 +136,74 @@ var MobileControlsComponent = TaroEntity.extend({
 				break;
 			default:
 				{
-					if (document.getElementById(key + '_button')) {
-						break;
-					}
-
-					// buttons position
-					const [xOnClientScreen, yOnClientScreen] = [(x * window.innerWidth) / 960, (y * window.innerHeight) / 540];
-
-					// create a new button using html
-					const htmlButton = document.createElement('button');
-					htmlButton.id = key + '_button';
-					htmlButton.style.position = 'absolute';
-					htmlButton.style.left = `${xOnClientScreen}px`;
-
-					htmlButton.style.top = `${yOnClientScreen}px`;
-					htmlButton.style.transform = `translate(-50%, -50%)`;
-					htmlButton.style.width = '60px';
-					htmlButton.style.height = '60px';
-					htmlButton.style.fontSize = '16px';
-					htmlButton.style.color = '#fff';
-
-					const abilityId = keybinding.keyDown?.abilityId || keybinding.keyUp?.abilityId;
-					let ability = null;
-					if (abilityId) {
-						ability = abilities[abilityId];
-					} else {
-					}
-
-					if (ability && ability.iconUrl) {
-						htmlButton.innerHTML = `<img src="${ability.iconUrl}" style="width: 100%; height: 100%; object-fit: cover;"/>`;
-					} else {
-						htmlButton.textContent = key;
-					}
-
-					htmlButton.style.backgroundColor = '#33333366';
-					htmlButton.style.border = '2px solid #555 ';
-					htmlButton.style.backdropFilter = 'blur(4px)';
-					htmlButton.style.borderRadius = '8px';
-					htmlButton.style.zIndex = '1000';
-					htmlButton.style.cursor = 'pointer';
-
-					document.body.appendChild(htmlButton);
-
-					htmlButton.addEventListener('touchstart', function () {
-						if (taro.isClient) {
-							taro.network.send('playerKeyDown', {
-								device: 'key',
-								key: key.toLowerCase(),
-							});
-						}
-					});
-
-					htmlButton.addEventListener('touchend', function () {
-						if (taro.isClient) {
-							taro.network.send('playerKeyUp', {
-								device: 'key',
-								key: key.toLowerCase(),
-							});
-						}
-					});
+					this.generateHTMLButton(key, x, y, keybinding, abilities);
 				}
 				break;
 		}
 	},
 
+	generateHTMLButton: function (type, x, y, keybinding, abilities) {
+		if (document.getElementById(type + '_button')) {
+			return;
+		}
+
+		// buttons position
+		const [xOnClientScreen, yOnClientScreen] = [(x * window.innerWidth) / 960, (y * window.innerHeight) / 540];
+
+		// create a new button using html
+		const htmlButton = document.createElement('button');
+		htmlButton.id = type + '_button';
+		htmlButton.style.position = 'absolute';
+		htmlButton.style.left = `${xOnClientScreen}px`;
+
+		htmlButton.style.top = `${yOnClientScreen}px`;
+		htmlButton.style.transform = `translate(-50%, -50%)`;
+		htmlButton.style.width = '60px';
+		htmlButton.style.height = '60px';
+		htmlButton.style.fontSize = '16px';
+		htmlButton.style.color = '#fff';
+
+		const abilityId = keybinding.keyDown?.abilityId || keybinding.keyUp?.abilityId;
+		let ability = null;
+		if (abilityId) {
+			ability = abilities[abilityId];
+		} else {
+		}
+
+		if (ability && ability.iconUrl) {
+			htmlButton.innerHTML = `<img src="${ability.iconUrl}" style="width: 100%; height: 100%; object-fit: cover;"/>`;
+		} else {
+			htmlButton.textContent = type;
+		}
+
+		htmlButton.style.backgroundColor = '#33333366';
+		htmlButton.style.border = '2px solid #555 ';
+		htmlButton.style.backdropFilter = 'blur(4px)';
+		htmlButton.style.borderRadius = '8px';
+		htmlButton.style.zIndex = '1000';
+		htmlButton.style.cursor = 'pointer';
+
+		document.body.appendChild(htmlButton);
+
+		htmlButton.addEventListener('touchstart', function () {
+			console.log('called touch');
+			if (taro.isClient) {
+				taro.network.send('playerKeyDown', {
+					device: 'key',
+					key: key.toLowerCase(),
+				});
+			}
+		});
+
+		htmlButton.addEventListener('touchend', function () {
+			if (taro.isClient) {
+				taro.network.send('playerKeyUp', {
+					device: 'key',
+					key: key.toLowerCase(),
+				});
+			}
+		});
+	},
 	createJoystick: function (type, x, y) {
 		// building joystick zone
 		let joystickZone = document.createElement('div');
