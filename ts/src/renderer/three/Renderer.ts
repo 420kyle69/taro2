@@ -160,7 +160,7 @@ namespace Renderer {
 											);
 											if (!initEntity) {
 												let parent = intersects[0].object.parent as any;
-												while (parent.entity) {
+												while (!parent.entity) {
 													parent = parent.parent;
 												}
 												initEntity = (parent as Renderer.Three.Model & { entity: InitEntity }).entity;
