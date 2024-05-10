@@ -169,7 +169,7 @@ namespace Renderer {
 												initEntity &&
 												(this.entityEditor.selectedInitEntity === null ||
 													this.entityEditor.selectedInitEntity === undefined ||
-													this.entityEditor.selectedInitEntity.body.uuid !== initEntity.uuid)
+													this.entityEditor.selectedInitEntity.uuid !== initEntity.uuid)
 											) {
 												this.entityEditor.selectInitEntity(initEntity);
 												taro.client.emit('entity-billboard', !!initEntity.isBillboard);
