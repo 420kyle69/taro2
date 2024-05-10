@@ -155,9 +155,16 @@ namespace Renderer {
 										let intersects = raycaster.intersectObjects(this.entityManager.initEntities);
 										if (intersects?.length > 0) {
 											const closest = intersects[0].object as THREE.Mesh;
-											const initEntity = this.entityManager.initEntities.find(
-												(initEntity) => initEntity.body.sprite === closest
+											let initEntity = this.entityManager.initEntities.find(
+												(initEntity) => (initEntity.body as AnimatedSprite).sprite === closest
 											);
+											if (!initEntity) {
+												let parent = intersects[0].object.parent as any;
+												while (parent.entity) {
+													parent = parent.parent;
+												}
+												initEntity = (parent as Renderer.Three.Model & { entity: InitEntity }).entity;
+											}
 											if (
 												initEntity &&
 												(this.entityEditor.selectedInitEntity === null ||

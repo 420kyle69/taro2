@@ -4,7 +4,7 @@ namespace Renderer {
 			entityEditor: EntityEditor;
 			action: ActionData;
 			editedAction: ActionData;
-			body: Renderer.Three.AnimatedSprite & { entity: InitEntity };
+			body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
 			defaultWidth: number;
 			defaultHeight: number;
 			isBillboard = false;
@@ -31,15 +31,23 @@ namespace Renderer {
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
 				this.isBillboard = entityTypeData?.isBillboard ?? false;
 				const renderer = Renderer.Three.instance();
-				const tex = gAssetManager.getTexture(key).clone();
-				const frameWidth = tex.image.width / cols;
-				const frameHeight = tex.image.height / rows;
-				const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
-				const body = (this.body = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite & {
-					entity: InitEntity;
-				});
+				let body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
+				if (entityTypeData.is3DObject) {
+					body = this.body = new Renderer.Three.Model(key) as Renderer.Three.Model & {
+						entity: InitEntity;
+					};
+				} else {
+					const tex = gAssetManager.getTexture(key).clone();
+					const frameWidth = tex.image.width / cols;
+					const frameHeight = tex.image.height / rows;
+					const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
+					body = this.body = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite & {
+						entity: InitEntity;
+					};
+					(body.sprite as THREE.Mesh & { entity: InitEntity }).entity = this;
+					body.setBillboard(entityTypeData.isBillboard, renderer.camera);
+				}
 				body.entity = this;
-				(body.sprite as THREE.Mesh & { entity: InitEntity }).entity = this;
 				if (!isNaN(action.angle)) {
 					this.rotation.order = 'YXZ';
 					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
@@ -58,7 +66,6 @@ namespace Renderer {
 					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
 					Utils.pixelToWorld(action.position?.y)
 				);
-				this.body.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				renderer.initEntityLayer.add(this);
 				renderer.entityManager.initEntities.push(this);
 			}

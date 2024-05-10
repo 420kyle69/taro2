@@ -2,7 +2,7 @@ namespace Renderer {
 	export namespace Three {
 		export class EntityEditor {
 			activeEntityPlacement: boolean;
-			preview: Renderer.Three.AnimatedSprite | undefined;
+			preview: Renderer.Three.AnimatedSprite | Renderer.Three.Model;
 			gizmo: EntityGizmo;
 
 			activeEntity: { id: string; player: string; entityType: string };
@@ -141,13 +141,16 @@ namespace Renderer {
 				const rows = entity.cellSheet.rowCount || 1;
 				if (entity.is3DObject) {
 					//TODO: add 3d preview
+					this.preview = new Renderer.Three.Model(key);
+					this.preview.setOpacity(0.5);
+					renderer.initEntityLayer.add(this.preview);
 				} else {
 					const tex = gAssetManager.getTexture(key).clone();
 					const frameWidth = tex.image.width / cols;
 					const frameHeight = tex.image.height / rows;
 					const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
 
-					this.preview = new Renderer.Three.AnimatedSprite(texture);
+					this.preview = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite;
 					this.preview.setBillboard(entity.isBillboard, renderer.camera);
 					this.preview.setOpacity(0.5);
 					renderer.initEntityLayer.add(this.preview);
@@ -163,7 +166,9 @@ namespace Renderer {
 						this.preview.position.setY(Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1);
 						this.preview.position.setZ(worldPoint.z);
 					}
-					this.preview.setBillboard(this.preview.billboard, renderer.camera);
+					if (this.preview instanceof Renderer.Three.AnimatedSprite) {
+						this.preview.setBillboard(this.preview.billboard, renderer.camera);
+					}
 				}
 			}
 
