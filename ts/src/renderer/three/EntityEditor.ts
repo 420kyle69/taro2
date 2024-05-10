@@ -140,7 +140,6 @@ namespace Renderer {
 				const cols = entity.cellSheet.columnCount || 1;
 				const rows = entity.cellSheet.rowCount || 1;
 				if (entity.is3DObject) {
-					//TODO: add 3d preview
 					this.preview = new Renderer.Three.Model(key);
 					this.preview.setOpacity(0.5);
 					renderer.initEntityLayer.add(this.preview);
