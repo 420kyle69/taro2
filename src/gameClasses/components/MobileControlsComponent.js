@@ -123,7 +123,6 @@ var MobileControlsComponent = TaroEntity.extend({
 		var settings = {};
 
 		this.controls[key] = settings;
-		console.log(key);
 
 		switch (key) {
 			case 'movementWheel':
@@ -176,7 +175,11 @@ var MobileControlsComponent = TaroEntity.extend({
 		let ability = null;
 		if (abilityId) {
 			ability = abilities[abilityId];
-		} else {
+		}
+
+		// check if ability is desktop only
+		if (ability && ability.visibility == 'desktop') {
+			return;
 		}
 
 		if (ability && ability.iconUrl) {
