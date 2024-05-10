@@ -4006,6 +4006,7 @@ var TaroEntity = TaroObject.extend({
 							attributes: rfdc()(item._stats.attributes),
 							variables: rfdc()(itemVariable),
 							quantity: item._stats.quantity,
+							slotIndex: item._stats.slotIndex,
 						};
 
 						pv.push(itemStatsToBeSaved);
