@@ -230,7 +230,7 @@ var MobileControlsComponent = TaroEntity.extend({
 							timerElement.innerHTML = cooldown - cooldownCount;
 						}
 					}, 1000);
-				} else {
+				} else if (!ability && !ability.cooldown) {
 					taro.client.emit('key-down', {
 						device: 'key',
 						key: type.toLowerCase(),
@@ -241,7 +241,6 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		htmlButton.addEventListener('touchend', function () {
 			if (taro.isClient) {
-				console.log('reached emit key up');
 				taro.client.emit('key-up', {
 					device: 'key',
 					key: type.toLowerCase(),
