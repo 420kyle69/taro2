@@ -1205,7 +1205,7 @@ var Unit = TaroEntityPhysics.extend({
 		@param slotIndex force-assign item into this inventory slot. usually assigned from when buying a shop item with replaceItemInTargetSlot (optional)
 		@return {boolean} return true if unit was able to pickup/use item. return false otherwise.
 	 */
-	pickUpItem: function (item, persistedItem = false) {
+	pickUpItem: function (item, slotIndex = null, persistedItem = false) {
 		var self = this;
 		// all Server only
 		// console.log(`running Unit.pickUpItem() on ${taro.isClient ? 'Client' : 'Server'}`);
@@ -1288,7 +1288,7 @@ var Unit = TaroEntityPhysics.extend({
 					}
 				}
 
-				if (availableSlot != undefined) {
+				if (slotIndex !== null || availableSlot != undefined) {
 					if (!isItemInstance) {
 						// itemData.stateId = (availableSlot-1 == this._stats.currentItemIndex) ? 'selected' : 'unselected';
 						item = new Item(itemData);
@@ -1296,7 +1296,7 @@ var Unit = TaroEntityPhysics.extend({
 						item.script.trigger('entityCreated');
 					}
 
-					var slotIndex = availableSlot - 1;
+					slotIndex = slotIndex !== null ? slotIndex : availableSlot - 1;
 
 					// Item
 					item.streamUpdateData([{ ownerUnitId: self.id() }]);
@@ -1309,7 +1309,7 @@ var Unit = TaroEntityPhysics.extend({
 					} else {
 						item.setState('unselected');
 					}
-					self.inventory.insertItem(item, availableSlot - 1);
+					self.inventory.insertItem(item, slotIndex);
 
 					// Unit
 					self.streamUpdateData([{ itemIds: self._stats.itemIds }], self._stats.clientId);
@@ -1921,7 +1921,7 @@ var Unit = TaroEntityPhysics.extend({
 					if (itemData) {
 						itemData.quantity = persistedItem.quantity;
 						itemData.itemTypeId = persistedItem.itemTypeId;
-						if (self.pickUpItem(itemData, true)) {
+						if (self.pickUpItem(itemData, persistedItem.slotIndex, true)) {
 							var givenItem = taro.$(taro.game.lastCreatedItemId);
 							if (givenItem && givenItem.getOwnerUnit() == this) {
 								givenItem.loadPersistentData(persistedItem);
