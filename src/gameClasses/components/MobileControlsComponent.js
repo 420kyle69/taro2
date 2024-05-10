@@ -195,13 +195,14 @@ var MobileControlsComponent = TaroEntity.extend({
 				let timerElement = document.getElementById(type + '_button_timer');
 				let button = document.getElementById(type + '_button');
 
+				if (timerElement) return;
+				taro.client.emit('key-down', {
+					device: 'key',
+					key: type.toLowerCase(),
+				});
+
 				if (ability && ability.cooldown && !timerElement) {
 					let cooldown = ability.cooldown;
-
-					taro.client.emit('key-down', {
-						device: 'key',
-						key: type.toLowerCase(),
-					});
 
 					// cooldown logic
 					let cooldownCount = 0;
@@ -230,11 +231,6 @@ var MobileControlsComponent = TaroEntity.extend({
 							timerElement.innerHTML = cooldown - cooldownCount;
 						}
 					}, 1000);
-				} else if (!ability && !ability.cooldown) {
-					taro.client.emit('key-down', {
-						device: 'key',
-						key: type.toLowerCase(),
-					});
 				}
 			}
 		});
