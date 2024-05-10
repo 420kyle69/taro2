@@ -123,7 +123,6 @@ var MobileControlsComponent = TaroEntity.extend({
 		var settings = {};
 
 		this.controls[key] = settings;
-		console.log(key);
 
 		switch (key) {
 			case 'movementWheel':
@@ -176,7 +175,11 @@ var MobileControlsComponent = TaroEntity.extend({
 		let ability = null;
 		if (abilityId) {
 			ability = abilities[abilityId];
-		} else {
+		}
+
+		// check if ability is desktop only
+		if (ability && ability.visibility == 'desktop') {
+			return;
 		}
 
 		if (ability && ability.iconUrl) {
@@ -189,16 +192,57 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		htmlButton.addEventListener('touchstart', function () {
 			if (taro.isClient) {
-				taro.network.send('playerKeyDown', {
-					device: 'key',
-					key: type.toLowerCase(),
-				});
+				let timerElement = document.getElementById(type + '_button_timer');
+				let button = document.getElementById(type + '_button');
+
+				if (ability && ability.cooldown && !timerElement) {
+					let cooldown = ability.cooldown;
+
+					taro.client.emit('key-down', {
+						device: 'key',
+						key: type.toLowerCase(),
+					});
+
+					// cooldown logic
+					let cooldownCount = 0;
+
+					if (!timerElement) {
+						timerElement = document.createElement('h5');
+						timerElement.id = type + '_button_timer';
+						Object.assign(timerElement.style, {
+							right: 0,
+							position: 'absolute',
+							fontSize: '0.8rem',
+						});
+						timerElement.innerHTML = cooldown - cooldownCount;
+						button.append(timerElement);
+					}
+
+					cooldownInterval = setInterval(() => {
+						if (cooldownCount >= cooldown) {
+							button.disabled = false;
+							timerElement.parentNode.removeChild(timerElement);
+							clearInterval(cooldownInterval);
+						} else {
+							console.log(cooldown, cooldownCount);
+							button.disabled = true;
+							cooldownCount++;
+							timerElement.innerHTML = cooldown - cooldownCount;
+						}
+					}, 1000);
+				} else {
+					taro.client.emit('key-down', {
+						device: 'key',
+						key: type.toLowerCase(),
+					});
+				}
 			}
 		});
 
 		htmlButton.addEventListener('touchend', function () {
 			if (taro.isClient) {
-				taro.network.send('playerKeyUp', {
+				console.log('reached emit key up');
+				taro.client.emit('key-up', {
 					device: 'key',
 					key: type.toLowerCase(),
 				});
