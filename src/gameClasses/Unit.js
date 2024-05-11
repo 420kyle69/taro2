@@ -672,7 +672,7 @@ var Unit = TaroEntityPhysics.extend({
 				itemData.itemTypeId = itemTypeId;
 				taro.network.send('ui', { command: 'shopResponse', type: 'purchase' }, self._stats.clientId);
 				// item purchased and pickup
-				self.pickUpItem(itemData, shopData.replaceItemInTargetSlot);
+				self.pickUpItem(itemData);
 			} else {
 				taro.network.send('ui', { command: 'shopResponse', type: 'inventory_full' }, self._stats.clientId);
 			}
@@ -1288,7 +1288,7 @@ var Unit = TaroEntityPhysics.extend({
 					}
 				}
 
-				if (slotIndex !== null || availableSlot != undefined) {
+				if (!isNaN(parseFloat(slotIndex)) || availableSlot != undefined) {
 					if (!isItemInstance) {
 						// itemData.stateId = (availableSlot-1 == this._stats.currentItemIndex) ? 'selected' : 'unselected';
 						item = new Item(itemData);
@@ -1296,7 +1296,7 @@ var Unit = TaroEntityPhysics.extend({
 						item.script.trigger('entityCreated');
 					}
 
-					slotIndex = slotIndex !== null ? slotIndex : availableSlot - 1;
+					slotIndex = !isNaN(parseFloat(slotIndex)) ? slotIndex : availableSlot - 1;
 
 					// Item
 					item.streamUpdateData([{ ownerUnitId: self.id() }]);
