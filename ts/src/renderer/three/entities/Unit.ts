@@ -250,8 +250,8 @@ namespace Renderer {
 				const halfHeight = this.getBodyHeightInPixels() * 0.5;
 				let topOfTopBars = halfHeight + this.attributes.topBarsHeight;
 				if (this.attributes.topBarsHeight > 0) topOfTopBars += 16;
-				const labelOffset = (topOfTopBars + 16) / (this.label.height - 1.5);
-				this.label.setCenter(0.5, 1 + labelOffset);
+				this.label.setCenterY(1);
+				this.label.setOffsetY(16 + topOfTopBars);
 			}
 		}
 	}
