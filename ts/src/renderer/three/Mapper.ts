@@ -7,7 +7,7 @@ namespace Renderer {
 					config.height = attr.dimensions.height;
 				}
 
-				if (attr.cornerRounding) {
+				if (!isNaN(attr.cornerRounding)) {
 					config.radius = attr.cornerRounding;
 				}
 
@@ -23,7 +23,7 @@ namespace Renderer {
 					config.strokeColor = attr.strokeColor;
 				}
 
-				if (attr.strokeThickness) {
+				if (!isNaN(attr.strokeThickness)) {
 					config.strokeThickness = attr.strokeThickness;
 				}
 
@@ -31,7 +31,7 @@ namespace Renderer {
 					config.value = attr.value;
 				}
 
-				if (attr.max) {
+				if (!isNaN(attr.max)) {
 					config.max = attr.max;
 				}
 
@@ -39,7 +39,7 @@ namespace Renderer {
 					config.displayValue = attr.displayValue;
 				}
 
-				if (attr.decimalPlaces) {
+				if (!isNaN(attr.decimalPlaces)) {
 					config.decimalPlaces = attr.decimalPlaces;
 				}
 
@@ -47,12 +47,19 @@ namespace Renderer {
 					config.trailingZeros = attr.trailingZeros;
 				}
 
-				if (attr.fontSize) {
+				if (!isNaN(attr.fontSize)) {
 					config.fontSize = attr.fontSize;
 				}
 
-				if (attr.letterSpacing) {
+				if (!isNaN(attr.letterSpacing)) {
 					config.letterSpacing = attr.letterSpacing;
+				}
+
+				if (attr.anchorPosition) {
+					const isAbove = attr.anchorPosition === 'above-unit';
+					config.anchorPosition = isAbove ? 'above' : 'below';
+				} else {
+					config.anchorPosition = 'below';
 				}
 
 				return config;

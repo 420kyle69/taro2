@@ -46,6 +46,8 @@ namespace Renderer {
 				lineWidth: number,
 				alpha = 1
 			) {
+				if (lineWidth === 0) return;
+
 				const fillColor = new THREE.Color(color).getHex();
 				const red = (fillColor & 0xff0000) >>> 16;
 				const green = (fillColor & 0xff00) >>> 8;
@@ -126,6 +128,8 @@ namespace Renderer {
 				strokeThickness: number,
 				alpha = 1
 			) {
+				if (strokeThickness === 0) return;
+
 				var tl = radius;
 				var tr = radius;
 				var bl = radius;
