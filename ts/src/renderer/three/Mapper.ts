@@ -7,7 +7,7 @@ namespace Renderer {
 					config.height = attr.dimensions.height;
 				}
 
-				if (attr.cornerRounding) {
+				if (!isNaN(attr.cornerRounding)) {
 					config.radius = attr.cornerRounding;
 				}
 
