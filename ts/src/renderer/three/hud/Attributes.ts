@@ -7,8 +7,6 @@ namespace Renderer {
 			topBarsHeight = 0;
 			bottomBarsHeight = 0;
 
-			private numAttributesBelow = 0;
-			private numAttributesAbove = 0;
 			private margin = 0;
 
 			constructor() {
@@ -27,9 +25,6 @@ namespace Renderer {
 				this.topBarsHeight = 0;
 				this.bottomBarsHeight = 0;
 
-				this.numAttributesBelow = 0;
-				this.numAttributesAbove = 0;
-
 				return this;
 			}
 
@@ -43,19 +38,22 @@ namespace Renderer {
 				const config = Mapper.ProgressBar(data);
 				const bar = new ProgressBar(config);
 
+				// TODO: Find the cause of the magic number 1.5, and make it so
+				// it's not needed.
+
 				bar.name = data.type || data.key;
 				const marginInBarHeights = this.margin / Utils.pixelToWorld(bar.height - 1.5); // Unsure why I have to subtract 1.5 pixels, but otherwise it looks incorrect
 
-				if (config.anchorPosition === 'below') {
-					bar.setCenter(0.5, -(marginInBarHeights + this.numAttributesBelow));
+				if (config.anchorPosition != 'below') {
+					const topBarsHeightInCurrentBarHeights = this.topBarsHeight / bar.height;
+					bar.setCenter(0.5, marginInBarHeights + 1 + topBarsHeightInCurrentBarHeights);
 					this.add(bar);
-					this.numAttributesBelow++;
-					this.bottomBarsHeight += bar.height;
-				} else {
-					bar.setCenter(0.5, marginInBarHeights + 1 + this.numAttributesAbove);
-					this.add(bar);
-					this.numAttributesAbove++;
 					this.topBarsHeight += bar.height;
+				} else {
+					const bottomBarsHeightInCurrentBarHeights = this.bottomBarsHeight / bar.height;
+					bar.setCenter(0.5, -(marginInBarHeights + bottomBarsHeightInCurrentBarHeights));
+					this.add(bar);
+					this.bottomBarsHeight += bar.height;
 				}
 			}
 
