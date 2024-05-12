@@ -109,15 +109,7 @@ namespace Renderer {
 				taroEntity.on('update-label', (data) => {
 					entity.label.visible = true;
 					entity.label.update({ text: data.text, color: data.color, bold: data.bold });
-
-					let unitHeightPx = 0;
-					if (entity.body instanceof AnimatedSprite) {
-						unitHeightPx = entity.body.getSizeInPixels().height;
-					} else {
-						unitHeightPx = Utils.worldToPixel(entity.body.getSize().y);
-					}
-					const unitHeightInLabelHeightUnits = unitHeightPx / entity.label.height;
-					entity.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
+					entity.updateLabelOffset();
 				});
 
 				taroEntity.on('play-animation', (id) => {
@@ -208,31 +200,12 @@ namespace Renderer {
 			setScale(sx: number, sy: number, sz: number) {
 				if (this.body instanceof AnimatedSprite) {
 					this.body.setScale(sx, sy);
-					// this.body.setScale(5, 5);
 				} else {
 					this.body.setSize(sx, sy, sz);
 				}
 
-				// Update attributes
-				let unitHeightPx = 0;
-				if (this.body instanceof AnimatedSprite) {
-					unitHeightPx = this.body.getSizeInPixels().height;
-				} else {
-					unitHeightPx = Utils.worldToPixel(this.body.getSize().y);
-				}
-
-				const halfHeight = unitHeightPx * 0.5;
-				this.attributes.setMargin(Utils.pixelToWorld(halfHeight));
-
-				// Update label
-				unitHeightPx = 0;
-				if (this.body instanceof AnimatedSprite) {
-					unitHeightPx = this.body.getSizeInPixels().height;
-				} else {
-					unitHeightPx = Utils.worldToPixel(this.body.getSize().y);
-				}
-				const unitHeightInLabelHeightUnits = unitHeightPx / this.label.height;
-				this.label.setCenter(0.5, 2 + unitHeightInLabelHeightUnits);
+				this.updateAttributesOffset();
+				this.updateLabelOffset();
 			}
 
 			showHud(visible: boolean) {
@@ -255,6 +228,30 @@ namespace Renderer {
 						fadeAnimation(1, 0, () => (this.hud.visible = false));
 					}
 				}
+			}
+
+			private getBodyHeightInPixels() {
+				let unitHeightPx = 0;
+				if (this.body instanceof AnimatedSprite) {
+					unitHeightPx = this.body.getSizeInPixels().height;
+				} else {
+					unitHeightPx = Utils.worldToPixel(this.body.getSize().y);
+				}
+				return unitHeightPx;
+			}
+
+			private updateAttributesOffset() {
+				const halfHeight = this.getBodyHeightInPixels() * 0.5;
+				const spacing = halfHeight + 16;
+				this.attributes.setMargin(Utils.pixelToWorld(spacing));
+			}
+
+			private updateLabelOffset() {
+				const halfHeight = this.getBodyHeightInPixels() * 0.5;
+				let topOfTopBars = halfHeight + this.attributes.topBarsHeight;
+				if (this.attributes.topBarsHeight > 0) topOfTopBars += 16;
+				const labelOffset = (topOfTopBars + 16) / (this.label.height - 1.5);
+				this.label.setCenter(0.5, 1 + labelOffset);
 			}
 		}
 	}
