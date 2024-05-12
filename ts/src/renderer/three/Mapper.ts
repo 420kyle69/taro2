@@ -23,7 +23,7 @@ namespace Renderer {
 					config.strokeColor = attr.strokeColor;
 				}
 
-				if (attr.strokeThickness) {
+				if (!isNaN(attr.strokeThickness)) {
 					config.strokeThickness = attr.strokeThickness;
 				}
 
@@ -31,7 +31,7 @@ namespace Renderer {
 					config.value = attr.value;
 				}
 
-				if (attr.max) {
+				if (!isNaN(attr.max)) {
 					config.max = attr.max;
 				}
 
@@ -39,7 +39,7 @@ namespace Renderer {
 					config.displayValue = attr.displayValue;
 				}
 
-				if (attr.decimalPlaces) {
+				if (!isNaN(attr.decimalPlaces)) {
 					config.decimalPlaces = attr.decimalPlaces;
 				}
 
@@ -47,11 +47,11 @@ namespace Renderer {
 					config.trailingZeros = attr.trailingZeros;
 				}
 
-				if (attr.fontSize) {
+				if (!isNaN(attr.fontSize)) {
 					config.fontSize = attr.fontSize;
 				}
 
-				if (attr.letterSpacing) {
+				if (!isNaN(attr.letterSpacing)) {
 					config.letterSpacing = attr.letterSpacing;
 				}
 
