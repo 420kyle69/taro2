@@ -243,7 +243,7 @@ namespace Renderer {
 			private updateAttributesOffset() {
 				const halfHeight = this.getBodyHeightInPixels() * 0.5;
 				const spacing = halfHeight + 16;
-				this.attributes.setMargin(Utils.pixelToWorld(spacing));
+				this.attributes.setMargin(spacing);
 			}
 
 			private updateLabelOffset() {

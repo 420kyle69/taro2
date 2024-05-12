@@ -40,15 +40,14 @@ namespace Renderer {
 
 				bar.name = data.type || data.key;
 
-				console.log(this.margin);
 				if (config.anchorPosition != 'below') {
 					bar.setCenterY(1);
-					bar.setOffsetY(Utils.worldToPixel(this.margin) + this.topBarsHeight);
+					bar.setOffsetY(this.margin + this.topBarsHeight);
 					this.add(bar);
 					this.topBarsHeight += bar.height - bar.strokeThickness;
 				} else {
 					bar.setCenterY(0);
-					bar.setOffsetY(-(Utils.worldToPixel(this.margin) + this.bottomBarsHeight));
+					bar.setOffsetY(-(this.margin + this.bottomBarsHeight));
 					this.add(bar);
 					this.bottomBarsHeight += bar.height - bar.strokeThickness;
 				}
