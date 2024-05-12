@@ -115,15 +115,15 @@ namespace Renderer {
 			}
 
 			setOffset(x: number, y: number) {
-				this.setCenter(this.center.x + x / this.width, this.center.y + y / this.height);
+				this.sprite.center.set(this.center.x + x / this.width, 1 - (this.center.y + y / this.height));
 			}
 
 			setOffsetX(x: number) {
-				this.setCenterX(this.center.x + x / this.width);
+				this.sprite.center.x = this.center.x + x / this.width;
 			}
 
 			setOffsetY(y: number) {
-				this.setCenterY(this.center.y + y / this.height);
+				this.sprite.center.y = 1 - (this.center.y + y / this.height);
 			}
 
 			getOffset() {
@@ -131,6 +131,14 @@ namespace Renderer {
 					x: this.sprite.center.x * this.width - this.center.x,
 					y: (1 - this.sprite.center.y) * this.height - this.center.y,
 				};
+			}
+
+			getOffsetX() {
+				return this.sprite.center.x * this.width - this.center.x * this.width;
+			}
+
+			getOffsetY() {
+				return (1 - this.sprite.center.y) * this.height - this.center.y * this.height;
 			}
 
 			setScale(scale: number) {
