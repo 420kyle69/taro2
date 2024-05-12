@@ -38,22 +38,19 @@ namespace Renderer {
 				const config = Mapper.ProgressBar(data);
 				const bar = new ProgressBar(config);
 
-				// TODO: Find the cause of the magic number 1.5, and make it so
-				// it's not needed.
-
 				bar.name = data.type || data.key;
-				const marginInBarHeights = this.margin / Utils.pixelToWorld(bar.height - 1.5); // Unsure why I have to subtract 1.5 pixels, but otherwise it looks incorrect
 
+				console.log(this.margin);
 				if (config.anchorPosition != 'below') {
-					const topBarsHeightInCurrentBarHeights = this.topBarsHeight / bar.height;
-					bar.setCenter(0.5, marginInBarHeights + 1 + topBarsHeightInCurrentBarHeights);
+					bar.setCenterY(1);
+					bar.setOffsetY(Utils.worldToPixel(this.margin) + this.topBarsHeight);
 					this.add(bar);
-					this.topBarsHeight += bar.height;
+					this.topBarsHeight += bar.height - bar.strokeThickness;
 				} else {
-					const bottomBarsHeightInCurrentBarHeights = this.bottomBarsHeight / bar.height;
-					bar.setCenter(0.5, -(marginInBarHeights + bottomBarsHeightInCurrentBarHeights));
+					bar.setCenterY(0);
+					bar.setOffsetY(-(Utils.worldToPixel(this.margin) + this.bottomBarsHeight));
 					this.add(bar);
-					this.bottomBarsHeight += bar.height;
+					this.bottomBarsHeight += bar.height - bar.strokeThickness;
 				}
 			}
 
