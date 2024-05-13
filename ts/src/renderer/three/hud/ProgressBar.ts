@@ -47,6 +47,10 @@ namespace Renderer {
 
 			constructor(params: ProgressBarParams) {
 				const config = { ...defaultConfig, ...params };
+
+				config.width += config.padding * 2;
+				config.height += config.padding * 2;
+
 				super(config.x, config.y, config.z, config.width, config.height);
 
 				this.update(config);
