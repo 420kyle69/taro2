@@ -41,7 +41,7 @@ namespace Renderer {
 				bar.name = data.type || data.key;
 
 				if (config.anchorPosition != 'below') {
-					const newBarHeight = bar.height - bar.strokeThickness;
+					const newBarHeight = bar.height - bar.strokeThickness + bar.margin * 2;
 					for (const bar of this.children as ProgressBar[]) {
 						const isTopBar = bar.anchorPosition === 'above';
 						if (isTopBar) {
@@ -52,12 +52,12 @@ namespace Renderer {
 					bar.setCenterY(1);
 					bar.setOffsetY(this.margin);
 					this.add(bar);
-					this.topBarsHeight += bar.height - bar.strokeThickness;
+					this.topBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
 				} else {
 					bar.setCenterY(0);
-					bar.setOffsetY(-(this.margin + this.bottomBarsHeight));
+					bar.setOffsetY(-(this.margin + this.bottomBarsHeight + bar.margin * 2));
 					this.add(bar);
-					this.bottomBarsHeight += bar.height - bar.strokeThickness;
+					this.bottomBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
 				}
 			}
 

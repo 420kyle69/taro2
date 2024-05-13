@@ -46,7 +46,6 @@ namespace Renderer {
 			renderOnTop: boolean;
 			anchorPosition: 'below' | 'above';
 			padding: number;
-			margin: number;
 
 			constructor(params: ProgressBarParams) {
 				const config = { ...defaultConfig, ...params };
