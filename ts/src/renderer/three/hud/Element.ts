@@ -97,22 +97,18 @@ namespace Renderer {
 			}
 
 			setCenter(x: number, y: number) {
-				const mw = this.margin / this.width;
-				const mh = this.margin / this.height;
-				this.center.set(x + mw, y + mh);
-				this.sprite.center.set(x + mw, 1 - (y + mh));
+				this.center.set(x, y);
+				this.sprite.center.set(x, 1 - y);
 			}
 
 			setCenterX(x: number) {
-				const mw = this.margin / this.width;
-				this.center.x = x + mw;
-				this.sprite.center.x = x + mw;
+				this.center.x = x;
+				this.sprite.center.x = x;
 			}
 
 			setCenterY(y: number) {
-				const mh = this.margin / this.height;
-				this.center.y = y + mh;
-				this.sprite.center.y = 1 - (y + mh);
+				this.center.y = y;
+				this.sprite.center.y = 1 - y;
 			}
 
 			getCenter() {

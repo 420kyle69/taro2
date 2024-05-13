@@ -16,6 +16,10 @@ namespace Renderer {
 					}
 				}
 
+				if (attr.origin) {
+					config.origin = { x: attr.origin.x, y: attr.origin.y };
+				}
+
 				if (!isNaN(attr.cornerRounding)) {
 					config.radius = attr.cornerRounding;
 				}
