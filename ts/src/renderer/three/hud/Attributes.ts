@@ -41,7 +41,7 @@ namespace Renderer {
 				bar.name = data.type || data.key;
 
 				if (config.anchorPosition != 'below') {
-					const newBarHeight = bar.height - bar.strokeThickness;
+					const newBarHeight = bar.height - bar.strokeThickness + bar.margin * 2;
 					for (const bar of this.children as ProgressBar[]) {
 						const isTopBar = bar.anchorPosition === 'above';
 						if (isTopBar) {
@@ -50,14 +50,18 @@ namespace Renderer {
 					}
 
 					bar.setCenterY(1);
-					bar.setOffsetY(this.margin);
+					bar.setOffsetY(this.margin + bar.margin - (bar.height / 2 - bar.height * bar.origin.y));
+					bar.setOffsetX(bar.width / 2 - bar.width * bar.origin.x);
 					this.add(bar);
-					this.topBarsHeight += bar.height - bar.strokeThickness;
+					this.topBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
 				} else {
 					bar.setCenterY(0);
-					bar.setOffsetY(-(this.margin + this.bottomBarsHeight));
+					bar.setOffsetY(
+						-(this.margin + this.bottomBarsHeight + bar.margin + (bar.height / 2 - bar.height * bar.origin.y))
+					);
+					bar.setOffsetX(bar.width / 2 - bar.width * bar.origin.x);
 					this.add(bar);
-					this.bottomBarsHeight += bar.height - bar.strokeThickness;
+					this.bottomBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
 				}
 			}
 
@@ -102,6 +106,14 @@ namespace Renderer {
 			}
 
 			setMargin(margin: number) {
+				for (const bar of this.children as ProgressBar[]) {
+					const isTopBar = bar.anchorPosition === 'above';
+					if (isTopBar) {
+						bar.setOffsetY(bar.getOffsetY() - this.margin + margin);
+					} else {
+						bar.setOffsetY(bar.getOffsetY() + this.margin - margin);
+					}
+				}
 				this.margin = margin;
 			}
 		}

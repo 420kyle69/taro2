@@ -5,6 +5,7 @@ namespace Renderer {
 		export abstract class Element extends THREE.Object3D {
 			unscaledWidth: number;
 			unscaledHeight: number;
+			margin = 0;
 
 			protected sprite: THREE.Sprite;
 			protected canvas = document.createElement('canvas');
@@ -119,7 +120,7 @@ namespace Renderer {
 			}
 
 			setOffsetX(x: number) {
-				this.sprite.center.x = this.center.x + x / this.width;
+				this.sprite.center.x = this.center.x - x / this.width;
 			}
 
 			setOffsetY(y: number) {
