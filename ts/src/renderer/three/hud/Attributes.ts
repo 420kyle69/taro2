@@ -102,6 +102,14 @@ namespace Renderer {
 			}
 
 			setMargin(margin: number) {
+				for (const bar of this.children as ProgressBar[]) {
+					const isTopBar = bar.anchorPosition === 'above';
+					if (isTopBar) {
+						bar.setOffsetY(bar.getOffsetY() - this.margin + margin);
+					} else {
+						bar.setOffsetY(bar.getOffsetY() + this.margin - margin);
+					}
+				}
 				this.margin = margin;
 			}
 		}
