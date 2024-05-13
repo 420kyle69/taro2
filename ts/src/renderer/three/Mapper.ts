@@ -66,6 +66,10 @@ namespace Renderer {
 					config.padding = attr.padding;
 				}
 
+				if (!isNaN(attr.margin)) {
+					config.margin = attr.margin;
+				}
+
 				return config;
 			}
 		}

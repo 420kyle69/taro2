@@ -23,6 +23,7 @@ namespace Renderer {
 			renderOnTop: true,
 			anchorPosition: 'below' as 'below' | 'above',
 			padding: 0,
+			margin: 0,
 		};
 
 		export type ProgressBarParams = Partial<typeof defaultConfig>;
