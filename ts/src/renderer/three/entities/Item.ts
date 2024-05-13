@@ -101,6 +101,13 @@ namespace Renderer {
 					if (entity.body instanceof AnimatedSprite) {
 						const key = `${taroEntity._stats.cellSheet.url}/${id}/${taroEntity._stats.id}`;
 						entity.body.play(key);
+					} else {
+						const anim = entity.taroEntity._stats.animations[id];
+						if (anim) {
+							const name = anim.threeAnimationKey || '';
+							const loopCount = anim.loopCount || 0;
+							entity.body.play(name, loopCount);
+						}
 					}
 				});
 
@@ -152,7 +159,7 @@ namespace Renderer {
 				if (this.body instanceof AnimatedSprite) {
 					this.body.setScale(sx, sy);
 				} else {
-					this.body.setSize(sx, sy, sz);
+					this.body.setSize(sx, sz, sy);
 				}
 			}
 		}

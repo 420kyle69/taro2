@@ -5,11 +5,13 @@ namespace Renderer {
 		export abstract class Element extends THREE.Object3D {
 			unscaledWidth: number;
 			unscaledHeight: number;
+			margin = 0;
 
 			protected sprite: THREE.Sprite;
 			protected canvas = document.createElement('canvas');
 			protected ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
+			private center = new THREE.Vector2(0.5, 0.5);
 			private timeoutHandle: NodeJS.Timeout | null = null;
 
 			constructor(x: number, y: number, z: number, width = 0, height = 0) {
@@ -95,19 +97,49 @@ namespace Renderer {
 			}
 
 			setCenter(x: number, y: number) {
+				this.center.set(x, y);
 				this.sprite.center.set(x, 1 - y);
 			}
 
 			setCenterX(x: number) {
+				this.center.x = x;
 				this.sprite.center.x = x;
 			}
 
 			setCenterY(y: number) {
+				this.center.y = y;
 				this.sprite.center.y = 1 - y;
 			}
 
 			getCenter() {
 				return { x: this.sprite.center.x, y: 1 - this.sprite.center.y };
+			}
+
+			setOffset(x: number, y: number) {
+				this.sprite.center.set(this.center.x + x / this.width, 1 - (this.center.y + y / this.height));
+			}
+
+			setOffsetX(x: number) {
+				this.sprite.center.x = this.center.x - x / this.width;
+			}
+
+			setOffsetY(y: number) {
+				this.sprite.center.y = 1 - (this.center.y + y / this.height);
+			}
+
+			getOffset() {
+				return {
+					x: this.sprite.center.x * this.width - this.center.x,
+					y: (1 - this.sprite.center.y) * this.height - this.center.y,
+				};
+			}
+
+			getOffsetX() {
+				return this.sprite.center.x * this.width - this.center.x * this.width;
+			}
+
+			getOffsetY() {
+				return (1 - this.sprite.center.y) * this.height - this.center.y * this.height;
 			}
 
 			setScale(scale: number) {

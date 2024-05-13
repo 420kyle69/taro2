@@ -40,6 +40,19 @@ namespace Renderer {
 				this.scene.scale.z = this.originalScale.z * (z / this.originalSize.z);
 			}
 
+			setOpacity(opacity: number) {
+				this.traverse((child) => {
+					if (child instanceof THREE.Mesh) {
+						// Convert to basic material to avoid lighting
+						const material = new THREE.MeshBasicMaterial();
+						THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
+						child.material = material;
+						child.material.transparent = true;
+						child.material.opacity = opacity;
+					}
+				});
+			}
+
 			getCenter() {
 				this.aabb.setFromObject(this.scene);
 				return this.aabb.getCenter(this.center);

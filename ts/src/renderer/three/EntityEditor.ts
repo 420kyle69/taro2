@@ -2,72 +2,72 @@ namespace Renderer {
 	export namespace Three {
 		export class EntityEditor {
 			activeEntityPlacement: boolean;
-			preview: Renderer.Three.AnimatedSprite | undefined;
+			preview: Renderer.Three.AnimatedSprite | Renderer.Three.Model;
 			gizmo: EntityGizmo;
 
 			activeEntity: { id: string; player: string; entityType: string };
-			selectedEntityPreview: EntityPreview;
+			selectedInitEntity: InitEntity;
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
-				renderer.entityPreviewLayer.add(this.preview);
+				renderer.initEntityLayer.add(this.preview);
 				this.activatePlacement(false);
 
 				this.gizmo = new EntityGizmo();
 				taro.client.on('add-entities', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(true);
 				});
 				taro.client.on('cursor', () => {
 					this.activatePlacement(false);
 				});
 				taro.client.on('draw-region', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('brush', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('empty-tile', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('fill', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('clear', () => {
-					this.selectEntityPreview(null);
+					this.selectInitEntity(null);
 				});
 				taro.client.on('updateActiveEntity', () => {
 					this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
 					this.updatePreview();
 				});
-				const enitityPreviews = renderer.entityManager.entityPreviews;
+				const initEntities = renderer.entityManager.initEntities;
 				taro.client.on('editInitEntity', (data: ActionData) => {
 					let found = false;
-					enitityPreviews.forEach((preview) => {
-						if (preview.action.actionId === data.actionId) {
+					initEntities.forEach((initEntity) => {
+						if (initEntity.action.actionId === data.actionId) {
 							found = true;
-							preview.update(data);
+							initEntity.update(data);
 						}
 					});
 					if (!found) {
-						renderer.createEntityPreview(data);
+						renderer.createInitEntity(data);
 					}
 				});
 				taro.client.on('updateInitEntities', () => {
 					taro.developerMode.initEntities.forEach((action) => {
 						let found = false;
-						enitityPreviews.forEach((preview) => {
-							if (preview.action.actionId === action.actionId) {
+						initEntities.forEach((initEntity) => {
+							if (initEntity.action.actionId === action.actionId) {
 								found = true;
-								preview.update(action);
+								initEntity.update(action);
 							}
 						});
 						if (!found) {
-							renderer.createEntityPreview(action);
+							renderer.createInitEntity(action);
 						}
 					});
 				});
@@ -140,17 +140,19 @@ namespace Renderer {
 				const cols = entity.cellSheet.columnCount || 1;
 				const rows = entity.cellSheet.rowCount || 1;
 				if (entity.is3DObject) {
-					//TODO: add 3d preview
+					this.preview = new Renderer.Three.Model(key);
+					this.preview.setOpacity(0.5);
+					renderer.initEntityLayer.add(this.preview);
 				} else {
 					const tex = gAssetManager.getTexture(key).clone();
 					const frameWidth = tex.image.width / cols;
 					const frameHeight = tex.image.height / rows;
 					const texture = new TextureSheet(key, tex, frameWidth, frameHeight);
 
-					this.preview = new Renderer.Three.AnimatedSprite(texture);
+					this.preview = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite;
 					this.preview.setBillboard(entity.isBillboard, renderer.camera);
 					this.preview.setOpacity(0.5);
-					renderer.entityPreviewLayer.add(this.preview);
+					renderer.initEntityLayer.add(this.preview);
 				}
 			}
 
@@ -163,19 +165,21 @@ namespace Renderer {
 						this.preview.position.setY(Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1);
 						this.preview.position.setZ(worldPoint.z);
 					}
-					this.preview.setBillboard(this.preview.billboard, renderer.camera);
+					if (this.preview instanceof Renderer.Three.AnimatedSprite) {
+						this.preview.setBillboard(this.preview.billboard, renderer.camera);
+					}
 				}
 			}
 
-			selectEntityPreview(entityPreview: EntityPreview): void {
-				if (entityPreview === null) {
-					this.selectedEntityPreview = null;
+			selectInitEntity(initEntity: InitEntity): void {
+				if (initEntity === null) {
+					this.selectedInitEntity = null;
 					this.gizmo.control.detach();
 					taro.client.emit('show-transform-modes', false);
 					return;
 				}
-				this.selectedEntityPreview = entityPreview;
-				this.gizmo.attach(entityPreview);
+				this.selectedInitEntity = initEntity;
+				this.gizmo.attach(initEntity);
 				taro.client.emit('show-transform-modes', true);
 			}
 
@@ -205,9 +209,9 @@ namespace Renderer {
 			}
 
 			deleteInitEntity(): void {
-				if (this.selectedEntityPreview) {
-					this.selectedEntityPreview.delete();
-					this.selectEntityPreview(null);
+				if (this.selectedInitEntity) {
+					this.selectedInitEntity.delete();
+					this.selectInitEntity(null);
 				}
 			}
 		}
