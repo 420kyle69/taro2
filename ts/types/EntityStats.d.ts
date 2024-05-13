@@ -34,6 +34,7 @@ declare interface EntityStats {
 			framesPerSecond: number;
 			loopCount: number;
 			name: string;
+			threeAnimationKey: string;
 		}
 	>;
 	default?: {

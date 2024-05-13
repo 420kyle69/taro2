@@ -119,9 +119,9 @@ namespace Renderer {
 					} else {
 						const anim = entity.taroEntity._stats.animations[id];
 						if (anim) {
-							const name = anim.name || '';
+							const name = anim.threeAnimationKey || '';
 							const loopCount = anim.loopCount || 0;
-							entity.body.play(anim.name, loopCount);
+							entity.body.play(name, loopCount);
 						}
 					}
 				});
