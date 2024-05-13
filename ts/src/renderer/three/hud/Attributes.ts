@@ -50,12 +50,16 @@ namespace Renderer {
 					}
 
 					bar.setCenterY(1);
-					bar.setOffsetY(this.margin + bar.margin);
+					bar.setOffsetY(this.margin + bar.margin - (bar.height / 2 - bar.height * bar.origin.y));
+					bar.setOffsetX(bar.width / 2 - bar.width * bar.origin.x);
 					this.add(bar);
 					this.topBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
 				} else {
 					bar.setCenterY(0);
-					bar.setOffsetY(-(this.margin + this.bottomBarsHeight + bar.margin));
+					bar.setOffsetY(
+						-(this.margin + this.bottomBarsHeight + bar.margin + (bar.height / 2 - bar.height * bar.origin.y))
+					);
+					bar.setOffsetX(bar.width / 2 - bar.width * bar.origin.x);
 					this.add(bar);
 					this.bottomBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
 				}

@@ -120,7 +120,7 @@ namespace Renderer {
 			}
 
 			setOffsetX(x: number) {
-				this.sprite.center.x = this.center.x + x / this.width;
+				this.sprite.center.x = this.center.x - x / this.width;
 			}
 
 			setOffsetY(y: number) {
