@@ -22,6 +22,7 @@ namespace Renderer {
 			letterSpacing: -0.8,
 			renderOnTop: true,
 			anchorPosition: 'below' as 'below' | 'above',
+			padding: 0,
 		};
 
 		export type ProgressBarParams = Partial<typeof defaultConfig>;

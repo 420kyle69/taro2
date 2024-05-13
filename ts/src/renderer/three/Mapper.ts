@@ -62,6 +62,10 @@ namespace Renderer {
 					config.anchorPosition = 'below';
 				}
 
+				if (!isNaN(attr.padding)) {
+					config.padding = attr.padding;
+				}
+
 				return config;
 			}
 		}
