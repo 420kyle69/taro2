@@ -471,6 +471,28 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getQuestProgress':
+						var player = self.getValue(text.player, vars);
+						var questId = self.getValue(text.questId, vars);
+						var quests = player.variable.getValue('quests');
+						var gameId = taro.game.data.defaultData._id;
+						if (quests && quests.ongoing[gameId][questId]) {
+							returnValue = quests.ongoing[gameId][questId].progress;
+						}
+
+						break;
+
+					case 'isQuestProgressCompleted':
+						var player = self.getValue(text.player, vars);
+						var questId = self.getValue(text.questId, vars);
+						var quests = player.variable.getValue('quests');
+						var gameId = taro.game.data.defaultData._id;
+						if (quests && quests.ongoing[gameId][questId]) {
+							returnValue = quests.ongoing[gameId][questId].progress === quests.ongoing[gameId][questId].goal;
+						}
+
+						break;
+
 					case 'getPlayerName':
 						if (entity && entity._category == 'player') {
 							returnValue = entity._stats.name;
@@ -512,6 +534,22 @@ var ParameterComponent = TaroEntity.extend({
 					case 'entityExists':
 						returnValue = !!(entity && entity._id && taro.$(entity._id));
 
+						break;
+
+					case 'isQuestOngoing':
+						var player = self.getValue(text.player, vars);
+						var questId = self.getValue(text.questId, vars);
+						var gameId = taro.game.data.defaultData._id;
+						var quests = player.variable.getValue('quests');
+						returnValue = !!(quests?.ongoing[gameId]?.[questId] === undefined);
+						break;
+
+					case 'isQuestCompleted':
+						var player = self.getValue(text.player, vars);
+						var questId = self.getValue(text.questId, vars);
+						var gameId = taro.game.data.defaultData._id;
+						var quests = player.variable.getValue('quests');
+						returnValue = !!quests?.completed[gameId]?.includes(questId);
 						break;
 
 					case 'objectContainsElement':

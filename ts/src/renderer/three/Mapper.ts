@@ -2,9 +2,22 @@ namespace Renderer {
 	export namespace Three {
 		export class Mapper {
 			static ProgressBar(attr: AttributeData, config: ProgressBarParams = {}) {
+				if (!isNaN(attr.padding)) {
+					config.padding = attr.padding;
+				}
+
 				if (attr.dimensions) {
 					config.width = attr.dimensions.width;
 					config.height = attr.dimensions.height;
+
+					if (!isNaN(attr.padding)) {
+						config.width += attr.padding * 2;
+						config.height += attr.padding * 2;
+					}
+				}
+
+				if (attr.origin) {
+					config.origin = { x: attr.origin.x, y: attr.origin.y };
 				}
 
 				if (!isNaN(attr.cornerRounding)) {
@@ -60,6 +73,10 @@ namespace Renderer {
 					config.anchorPosition = isAbove ? 'above' : 'below';
 				} else {
 					config.anchorPosition = 'below';
+				}
+
+				if (!isNaN(attr.margin)) {
+					config.margin = attr.margin;
 				}
 
 				return config;
