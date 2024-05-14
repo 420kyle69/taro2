@@ -113,6 +113,8 @@ var VariableComponent = TaroEntity.extend({
 					variableObj.dataType
 				);
 			}
+		} else {
+			taro.script.errorLog(`variable ${variableId} is not defined`);
 		}
 	},
 
