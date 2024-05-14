@@ -1212,27 +1212,34 @@ var Unit = TaroEntityPhysics.extend({
 		// if item is suppose to be consumed immediately
 		// this ensures that item is picked up only once, and is only picked up by units that can pick up this item
 		var itemData = item._stats || item;
-		var isItemInstance = item._category === 'item';
+		var isItemAnEntity = item._category === 'item';
 		var itemTypeId = itemData.itemTypeId;
+		var totalQuantityTakenFromItem = 0;
+		var removeQueued = false;
+		var returnQueued = false;
 
 		if (self.canCarryItem(itemData)) {
 			// immediately consumable item doesn't require inventory space
 			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
-				if (!isItemInstance) {
+				// if item is not an entity, create a new item instance
+				if (!isItemAnEntity) {
 					item = new Item(itemData);
-					if (!persistedItem) item.script.trigger('entityCreated');
+					// don't trigger entityCreated if item is loaded from persisted data
+					if (!persistedItem) {
+						item.script.trigger('entityCreated');
+					}
 				}
 				taro.devLog('using item immediately');
 				item.setOwnerUnit(self);
 				item.use();
 				taro.game.lastCreatedItemId = item.id(); // this is necessary in case item isn't a new instance, but an existing item getting quantity updated
-				return true;
+				returnQueued = true;
 			} else {
 				// if designated item slot is already occupied, unit cannot get this item
 				var availableSlot = self.inventory.getFirstAvailableSlotForItem(itemData);
 
 				// Check if the item can merge
-				if (itemData.controls?.canMerge != false) {
+				if (!!itemData.controls?.canMerge) {
 					// insert/merge itemData's quantity into matching items in the inventory
 					var totalInventorySize = this.inventory.getTotalInventorySize();
 					for (var i = 0; i < totalInventorySize; i++) {
@@ -1250,11 +1257,12 @@ var Unit = TaroEntityPhysics.extend({
 
 								// matching item has infinite quantity. merge item unless new item is also infinite
 								if (matchingItem._stats.quantity == undefined && itemData.quantity != undefined) {
-									if (isItemInstance) {
+									if (isItemAnEntity) {
 										// remove if it's an instance
-										item.remove();
+										removeQueued = true;										
 									}
-									return true;
+									returnQueued = true;
+									break;
 								}
 
 								// the new item can fit in, because the matching item isn't full or has infinite quantity. Increase matching item's quantity only.
@@ -1274,22 +1282,48 @@ var Unit = TaroEntityPhysics.extend({
 										{ quantity: matchingItem._stats.quantity + quantityToBeTakenFromItem },
 									]);
 									itemData.quantity -= quantityToBeTakenFromItem;
+									totalQuantityTakenFromItem += quantityToBeTakenFromItem;
 								}
 							}
 
 							// if the new item no longer has any quantity left, destroy it (if it's an instance).
 							if (itemData.quantity == 0) {
-								if (isItemInstance) {
-									item.remove();
+								if (isItemAnEntity) {
+									removeQueued = true;
 								}
-								return true;
+								returnQueued = true;
+								break;
 							}
 						}
 					}
 				}
 
+				const triggerParams = {}
+				triggerParams.unitId = self.id();
+				if (item && isItemAnEntity) {
+					triggerParams.itemId = item.id();
+					item._stats.quantity += totalQuantityTakenFromItem; // temporarily increase quantity of item for event triggers. then subtract again.
+				};
+				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
+				
+				self.script.trigger('thisUnitPicksUpItem', triggerParams); // this entity (unit)
+				taro.script.trigger('unitPicksUpItem', triggerParams); // unit picked item 
+				if (item && isItemAnEntity) {
+					item.script.trigger('thisItemIsPickedUp', triggerParams); // this entity (item)
+					item._stats.quantity -= totalQuantityTakenFromItem; // restore the correct quantity
+					if (removeQueued) {
+						item.remove();
+					}
+				}
+				
+
+				if (returnQueued) {
+					return true;
+				}
+
+				// if there is an available slot, insert the item into the inventory
 				if (!isNaN(parseFloat(slotIndex)) || availableSlot != undefined) {
-					if (!isItemInstance) {
+					if (!isItemAnEntity) {
 						// itemData.stateId = (availableSlot-1 == this._stats.currentItemIndex) ? 'selected' : 'unselected';
 						item = new Item(itemData);
 						taro.game.lastCreatedItemId = item._id;
