@@ -220,6 +220,7 @@ var InventoryComponent = TaroEntity.extend({
 			itemData.controls && Array.isArray(itemData.controls.permittedInventorySlots)
 				? itemData.controls.permittedInventorySlots
 				: undefined;
+
 		var mappedSlot = undefined;
 		var isAvailable = false;
 		if (mappedSlots != undefined && mappedSlots.length > 0) {
@@ -272,24 +273,6 @@ var InventoryComponent = TaroEntity.extend({
 							}
 						}
 					}
-				}
-			}
-		}
-
-		// get first available empty slot including from backpack
-		for (var i = 0; i < totalInventorySize; i++) {
-			// if item was mapped to a specific slot, then check if there's available slot in the backpack
-			// if item didn't have mapping, then return the first available slot including both inventory + backpack
-			if (
-				mappedSlot == undefined ||
-				(i >= this._entity._stats.inventorySize &&
-					(itemData.controls == undefined ||
-						itemData.controls.backpackAllowed == true ||
-						itemData.controls.backpackAllowed == undefined))
-			) {
-				var itemId = self._entity._stats.itemIds[i];
-				if (!(itemId && taro.$(itemId))) {
-					return i + 1; // empty slot found
 				}
 			}
 		}
