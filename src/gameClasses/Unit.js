@@ -1299,7 +1299,8 @@ var Unit = TaroEntityPhysics.extend({
 					slotIndex =
 						!isNaN(parseFloat(slotIndex)) &&
 						Array.isArray(itemData.controls?.permittedInventorySlots) &&
-						itemData.controls.permittedInventorySlots.indexOf(slotIndex + 1) !== -1
+						(itemData.controls.permittedInventorySlots.length() === 0 ||
+							itemData.controls.permittedInventorySlots.indexOf(slotIndex + 1) !== -1)
 							? slotIndex
 							: availableSlot - 1;
 
