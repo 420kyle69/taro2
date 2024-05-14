@@ -1086,6 +1086,12 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getLastProgressCompletedQuestId':
+						var id = taro.game.lastProgressCompletedQuestId;
+						returnValue = id;
+
+						break;
+
 					case 'getLastCastingUnit':
 						var id = taro.game.lastCastingUnitId;
 						var unit = taro.$(id);

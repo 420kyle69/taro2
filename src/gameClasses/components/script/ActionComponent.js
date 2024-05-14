@@ -1231,6 +1231,7 @@ var ActionComponent = TaroEntity.extend({
 							) {
 								var selectedUnit = player.getSelectedUnit();
 								var triggeredBy = {};
+								taro.game.lastProgressCompletedQuestId = questId;
 								if (selectedUnit && selectedUnit.script) {
 									triggeredBy.unitId = selectedUnit.id();
 									selectedUnit.script.trigger('questProgressCompleted', triggeredBy);
