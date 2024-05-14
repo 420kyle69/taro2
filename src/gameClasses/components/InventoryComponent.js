@@ -224,17 +224,21 @@ var InventoryComponent = TaroEntity.extend({
 		var isAvailable = false;
 		if (mappedSlots != undefined && mappedSlots.length > 0) {
 			for (var i = 0; i < mappedSlots.length; i++) {
-				if (mappedSlots[i] === "backpack-slots") {
-					for (let j = this._entity._stats.inventorySize + 1; j <= this._entity._stats.inventorySize + this._entity._stats.backpackSize; j++) {
+				if (mappedSlots[i] === 'backpack-slots') {
+					for (
+						let j = this._entity._stats.inventorySize + 1;
+						j <= this._entity._stats.inventorySize + this._entity._stats.backpackSize;
+						j++
+					) {
 						mappedSlot = j;
-						isAvailable = this.isMappedSlotAvailable(j, itemTypeId);
+						isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId);
 						if (isAvailable) {
 							return mappedSlot;
 						}
 					}
 				} else {
 					mappedSlot = mappedSlots[i];
-					isAvailable = this.isMappedSlotAvailable(mappedSlots[i], itemTypeId);
+					isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId);
 					if (isAvailable) {
 						return mappedSlot;
 					}
@@ -323,11 +327,6 @@ var InventoryComponent = TaroEntity.extend({
 					}
 				}
 			}
-			const triggerParams = { unitId: unit.id(), itemId: item.id() };
-			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
-			item.script.trigger('thisItemIsPickedUp', triggerParams); // this entity (item)
-			unit.script.trigger('thisUnitPickedUpAnItem', triggerParams); // this entity (unit)
-			taro.script.trigger('unitPickedAnItem', triggerParams); // unit picked item (need to rename rename 'unitPickedAnItem' -> 'unitPickedUpAnItem')
 		}
 
 		return slotIndex;

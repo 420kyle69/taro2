@@ -4,7 +4,10 @@ namespace Renderer {
 		// inheritance. The Attributes class should have a private instance of Node.
 		// This happens all over the place because I didn't know about this.
 		export class Attributes extends Node {
-			private numAttributes = 0;
+			topBarsHeight = 0;
+			bottomBarsHeight = 0;
+
+			private margin = 0;
 
 			constructor() {
 				super();
@@ -19,7 +22,8 @@ namespace Renderer {
 
 				super.clear();
 
-				this.numAttributes = 0;
+				this.topBarsHeight = 0;
+				this.bottomBarsHeight = 0;
 
 				return this;
 			}
@@ -33,11 +37,32 @@ namespace Renderer {
 			addAttribute(data: AttributeData) {
 				const config = Mapper.ProgressBar(data);
 				const bar = new ProgressBar(config);
+
 				bar.name = data.type || data.key;
-				const emptyRows = 2; // For spacing
-				bar.setCenter(0.5, (this.numAttributes + 1 + emptyRows) * -1);
-				this.add(bar);
-				this.numAttributes++;
+
+				if (config.anchorPosition != 'below') {
+					const newBarHeight = bar.height - bar.strokeThickness + bar.margin * 2;
+					for (const bar of this.children as ProgressBar[]) {
+						const isTopBar = bar.anchorPosition === 'above';
+						if (isTopBar) {
+							bar.setOffsetY(bar.getOffsetY() + newBarHeight);
+						}
+					}
+
+					bar.setCenterY(1);
+					bar.setOffsetY(this.margin + bar.margin - (bar.height / 2 - bar.height * bar.origin.y));
+					bar.setOffsetX(bar.width / 2 - bar.width * bar.origin.x);
+					this.add(bar);
+					this.topBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
+				} else {
+					bar.setCenterY(0);
+					bar.setOffsetY(
+						-(this.margin + this.bottomBarsHeight + bar.margin + (bar.height / 2 - bar.height * bar.origin.y))
+					);
+					bar.setOffsetX(bar.width / 2 - bar.width * bar.origin.x);
+					this.add(bar);
+					this.bottomBarsHeight += bar.height - bar.strokeThickness + bar.margin * 2;
+				}
 			}
 
 			update(data: { attr: AttributeData; shouldRender: boolean }) {
@@ -78,6 +103,18 @@ namespace Renderer {
 				for (const bar of this.children as ProgressBar[]) {
 					bar.setOpacity(opacity);
 				}
+			}
+
+			setMargin(margin: number) {
+				for (const bar of this.children as ProgressBar[]) {
+					const isTopBar = bar.anchorPosition === 'above';
+					if (isTopBar) {
+						bar.setOffsetY(bar.getOffsetY() - this.margin + margin);
+					} else {
+						bar.setOffsetY(bar.getOffsetY() + this.margin - margin);
+					}
+				}
+				this.margin = margin;
 			}
 		}
 	}
