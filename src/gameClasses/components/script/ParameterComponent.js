@@ -487,8 +487,10 @@ var ParameterComponent = TaroEntity.extend({
 						var questId = self.getValue(text.questId, vars);
 						var quests = player.variable.getValue('quests');
 						var gameId = taro.game.data.defaultData._id;
-						if (quests && quests.ongoing[gameId][questId]) {
+						if (quests && quests.ongoing && quests.ongoing[gameId][questId]) {
 							returnValue = quests.ongoing[gameId][questId].progress === quests.ongoing[gameId][questId].goal;
+						} else {
+							returnValue = false;
 						}
 
 						break;
@@ -541,7 +543,12 @@ var ParameterComponent = TaroEntity.extend({
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
 						var quests = player.variable.getValue('quests');
-						returnValue = !!(quests?.ongoing[gameId]?.[questId] === undefined);
+						if (quests.ongoing === undefined) {
+							returnValue = false;
+						} else {
+							returnValue = quests?.ongoing[gameId]?.[questId] !== undefined;
+						}
+
 						break;
 
 					case 'isQuestCompleted':
@@ -549,7 +556,12 @@ var ParameterComponent = TaroEntity.extend({
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
 						var quests = player.variable.getValue('quests');
-						returnValue = !!quests?.completed[gameId]?.includes(questId);
+						if (quests.completed === undefined) {
+							returnValue = false;
+						} else {
+							returnValue = quests?.completed[gameId]?.includes(questId);
+						}
+
 						break;
 
 					case 'objectContainsElement':
@@ -1065,6 +1077,18 @@ var ParameterComponent = TaroEntity.extend({
 					case 'getLastPlayerSelectingDialogueOption':
 						var id = taro.game.lastPlayerSelectingDialogueOption;
 						returnValue = taro.$(id);
+
+						break;
+
+					case 'getLastCompletedQuestId':
+						var id = taro.game.lastCompletedQuestId;
+						returnValue = id;
+
+						break;
+
+					case 'getLastProgressCompletedQuestId':
+						var id = taro.game.lastProgressCompletedQuestId;
+						returnValue = id;
 
 						break;
 
