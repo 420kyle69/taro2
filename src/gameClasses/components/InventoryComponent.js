@@ -224,8 +224,12 @@ var InventoryComponent = TaroEntity.extend({
 		var isAvailable = false;
 		if (mappedSlots != undefined && mappedSlots.length > 0) {
 			for (var i = 0; i < mappedSlots.length; i++) {
-				if (mappedSlots[i] === "backpack-slots") {
-					for (let j = this._entity._stats.inventorySize + 1; j <= this._entity._stats.inventorySize + this._entity._stats.backpackSize; j++) {
+				if (mappedSlots[i] === 'backpack-slots') {
+					for (
+						let j = this._entity._stats.inventorySize + 1;
+						j <= this._entity._stats.inventorySize + this._entity._stats.backpackSize;
+						j++
+					) {
 						mappedSlot = j;
 						isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId);
 						if (isAvailable) {
