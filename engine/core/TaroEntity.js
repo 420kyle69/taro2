@@ -4437,8 +4437,11 @@ var TaroEntity = TaroObject.extend({
 								} else {
 
 									if (newValue.complete) {
-										var questsId = newValue.complete.questsId;
+										var questsId = newValue.complete;
 										this.quests.completed[gameId].push(questsId);
+										if (this.quests.active[gameId][questsId] !== undefined) {
+											delete this.quests.active[gameId][questsId];
+										}
 									} else {
 										var keys = Object.keys(newValue)
 										if (keys.length === 1) {

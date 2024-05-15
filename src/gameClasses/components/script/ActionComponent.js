@@ -1191,8 +1191,8 @@ var ActionComponent = TaroEntity.extend({
 								selectedUnit.script.trigger('questCompleted', triggeredBy);
 							}
 							triggeredBy.playerId = player.id();
-							taro.script.trigger('questCompleted', triggeredBy);
 							player.quest.completeQuest(questId);
+							taro.script.trigger('questCompleted', triggeredBy);
 						}
 						// console.log('completeQuest', JSON.stringify(player.quests));
 						break;
@@ -1205,8 +1205,10 @@ var ActionComponent = TaroEntity.extend({
 						var gameId = taro.game.data.defaultData._id;
 						const quests = player.quests;
 						if (quests.active[gameId] !== undefined && quests.active[gameId][questId] !== undefined) {
+							var oldProgress = quests.active[gameId][questId].progress
+							player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
 							if (
-								quests.active[gameId][questId].progress !== quests.active[gameId][questId].goal &&
+								oldProgress !== quests.active[gameId][questId].goal &&
 								progress === quests.active[gameId][questId].goal
 							) {
 								var selectedUnit = player.getSelectedUnit();
@@ -1219,7 +1221,7 @@ var ActionComponent = TaroEntity.extend({
 								triggeredBy.playerId = player.id();
 								taro.script.trigger('questProgressCompleted', triggeredBy);
 							}
-							player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
+
 						}
 						// console.log('setQuestProgress', JSON.stringify(player.quests));
 						break;
