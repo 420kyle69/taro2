@@ -471,6 +471,17 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getQuestObject':
+						var player = self.getValue(text.player, vars);
+						var questId = self.getValue(text.questId, vars);
+						var quests = player.quests;
+						var gameId = taro.game.data.defaultData._id;
+						if (quests && quests.active[gameId][questId]) {
+							returnValue = quests.active[gameId][questId];
+						}
+
+						break;
+
 					case 'getQuestProgress':
 						var player = self.getValue(text.player, vars);
 						var questId = self.getValue(text.questId, vars);
