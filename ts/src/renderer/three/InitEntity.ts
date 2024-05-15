@@ -53,8 +53,13 @@ namespace Renderer {
 					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 				}
 
-				if (!isNaN(action.width) && !isNaN(action.height))
-					this.scale.set(action.width / this.defaultWidth, 1, action.height / this.defaultHeight);
+				if (!isNaN(action.width) && !isNaN(action.height)) {
+					if (this.body instanceof Renderer.Three.AnimatedSprite) {
+						this.body.setScale(Utils.pixelToWorld(action.width), Utils.pixelToWorld(action.height));
+					} else {
+						this.body.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+					}
+				}
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 					body.visible = true;
 				} else {
@@ -102,11 +107,19 @@ namespace Renderer {
 				}
 				if (!isNaN(this.action.width) && !isNaN(action.width)) {
 					this.action.width = action.width;
-					this.scale.setX(action.width / this.defaultWidth);
+					if (this.body instanceof Renderer.Three.AnimatedSprite) {
+						this.body.setScale(Utils.pixelToWorld(action.width), this.body.scale.y);
+					} else {
+						this.body.setSize(Utils.pixelToWorld(action.width), 1, this.body.size.z);
+					}
 				}
 				if (!isNaN(this.action.height) && !isNaN(action.height)) {
 					this.action.height = action.height;
-					this.scale.setZ(action.height / this.defaultHeight);
+					if (this.body instanceof Renderer.Three.AnimatedSprite) {
+						this.body.setScale(this.body.scale.x, Utils.pixelToWorld(action.height));
+					} else {
+						this.body.setSize(this.body.size.x, 1, Utils.pixelToWorld(action.height));
+					}
 				}
 				if (action.wasDeleted) {
 					const renderer = Renderer.Three.instance();
