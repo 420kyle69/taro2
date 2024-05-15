@@ -48,6 +48,26 @@ var QuestComponent = TaroEntity.extend({
 		}
 	},
 
+	removeQuest: function (questId) {
+		var self = this;
+		var gameId = taro.game.data.defaultData._id;
+		var questObj = self._entity.quests;
+		if (questObj.active[gameId][questId] !== undefined) {
+			delete questObj.active[gameId][questId];
+		}
+		var questObj = self._entity.quests;
+		if (questObj.completed[gameId].includes(questId)) {
+			questObj.completed[gameId] = questObj.completed[gameId].filter(v => v !== questId);
+			if (taro.isServer) {
+				self._entity.streamUpdateData([
+					{
+						quests: questId,
+					},
+				]);
+			}
+		}
+	},
+
 	addQuest: function (questId, object) {
 		var self = this;
 		var gameId = taro.game.data.defaultData._id;

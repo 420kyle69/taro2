@@ -1160,13 +1160,20 @@ var ActionComponent = TaroEntity.extend({
 						taro.chat.sendToRoom('1', message, undefined, undefined);
 						break;
 
+					case 'removeQuestForPlayer':
+						var player = self._script.param.getValue(action.player, vars);
+						var questId = self._script.param.getValue(action.questId, vars);
+						player.quest.removeQuest(questId);
+						// console.log('addQuest', JSON.stringify(player.quests));
+						break;
+
 					case 'addQuestToPlayer':
 						var player = self._script.param.getValue(action.player, vars);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var name = self._script.param.getValue(action.name, vars);
 						var goal = self._script.param.getValue(action.goal, vars);
 						var description = self._script.param.getValue(action.description, vars);
-						var newObj = player.quest.addQuest(questId, { name, description, goal, progress: 0 });
+						player.quest.addQuest(questId, { name, description, goal, progress: 0 });
 						// console.log('addQuest', JSON.stringify(player.quests));
 						break;
 

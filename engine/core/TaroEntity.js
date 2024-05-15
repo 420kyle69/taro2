@@ -4428,24 +4428,33 @@ var TaroEntity = TaroObject.extend({
 						switch (attrName) {
 							case 'quests':
 								var gameId = taro.game.data.defaultData._id;
-								if (newValue.complete) {
-									var questsId = newValue.complete.questsId;
-									this.quests.completed[gameId].push(questsId);
-								} else {
-									var keys = Object.keys(newValue)
-									if (keys.length === 1) {
-										var questId = keys[0];
-										if (this.quests.active[gameId][questId] === undefined) {
-											this.quests.active[gameId][questId] = newValue[questId];
-										} else {
-											Object.entries(newValue[questId]).map(([k, v]) => {
-												this.quests.active[gameId][questId][k] = v;
-											});
-										}
+								if (typeof newValue === 'string') {
+									if (this.quests.active[gameId][newValue] !== undefined) {
+										delete this.quests.active[gameId][newValue];
 									} else {
-										this.quests = newValue;
+										this.quests.completed[gameId] = this.quests.completed[gameId].filter(v => v !== newValue);
 									}
+								} else {
 
+									if (newValue.complete) {
+										var questsId = newValue.complete.questsId;
+										this.quests.completed[gameId].push(questsId);
+									} else {
+										var keys = Object.keys(newValue)
+										if (keys.length === 1) {
+											var questId = keys[0];
+											if (this.quests.active[gameId][questId] === undefined) {
+												this.quests.active[gameId][questId] = newValue[questId];
+											} else {
+												Object.entries(newValue[questId]).map(([k, v]) => {
+													this.quests.active[gameId][questId][k] = v;
+												});
+											}
+										} else {
+											this.quests = newValue;
+										}
+
+									}
 								}
 								break;
 							case 'anim':
