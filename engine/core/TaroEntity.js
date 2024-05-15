@@ -4335,7 +4335,8 @@ var TaroEntity = TaroObject.extend({
 								}
 							}
 							break;
-
+						case 'quests':
+							break;
 						case 'depth':
 							this._stats[attrName] = newValue;
 							if (taro.isClient) {
@@ -4416,6 +4417,23 @@ var TaroEntity = TaroObject.extend({
 						}
 					} else if (taro.isClient) {
 						switch (attrName) {
+							case 'quests':
+								var gameId = taro.game.data.defaultData._id;
+								console.log(attrName, newValue, this);
+								if (newValue.complete) {
+									var questsId = newValue.complete.questsId;
+									this.quests.completed[gameId].push(questsId);
+								} else {
+									var questId = Object.keys(newValue)[0];
+									if (this.quests.active[gameId][questId] === undefined) {
+										this.quests.active[gameId][questId] = newValue[questId];
+									} else {
+										Object.entries(newValue[questId]).map(([k, v]) => {
+											this.quests.active[gameId][questId][k] = v;
+										});
+									}
+								}
+								break;
 							case 'anim':
 								var animationId = newValue;
 								this.applyAnimationById(animationId);

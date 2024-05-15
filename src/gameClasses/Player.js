@@ -13,6 +13,7 @@ var Player = TaroEntity.extend({
 		// dont save variables in _stats as _stats is stringified and synced
 		// and some variables of type unit, item, projectile may contain circular json objects
 		self.variables = {};
+		self.quests = { active: {}, completed: {} };
 		if (self._stats.variables) {
 			self.variables = self._stats.variables;
 			delete self._stats.variables;
@@ -30,6 +31,7 @@ var Player = TaroEntity.extend({
 
 		self.addComponent(AttributeComponent);
 		self.addComponent(VariableComponent);
+		self.addComponent(QuestComponent);
 
 		if (taro.isServer) {
 			this.streamMode(2);
