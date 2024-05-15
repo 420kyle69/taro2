@@ -1259,7 +1259,7 @@ var Unit = TaroEntityPhysics.extend({
 								if (matchingItem._stats.quantity == undefined && itemData.quantity != undefined) {
 									if (isItemAnEntity) {
 										// remove if it's an instance
-										removeQueued = true;										
+										removeQueued = true;
 									}
 									returnQueued = true;
 									break;
@@ -1298,16 +1298,16 @@ var Unit = TaroEntityPhysics.extend({
 					}
 				}
 
-				const triggerParams = {}
+				const triggerParams = {};
 				triggerParams.unitId = self.id();
 				if (item && isItemAnEntity) {
 					triggerParams.itemId = item.id();
 					item._stats.quantity += totalQuantityTakenFromItem; // temporarily increase quantity of item for event triggers. then subtract again.
-				};
+				}
 				//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
-				
+
 				self.script.trigger('thisUnitPicksUpItem', triggerParams); // this entity (unit)
-				taro.script.trigger('unitPicksUpItem', triggerParams); // unit picked item 
+				taro.script.trigger('unitPicksUpItem', triggerParams); // unit picked item
 				if (item && isItemAnEntity) {
 					item.script.trigger('thisItemIsPickedUp', triggerParams); // this entity (item)
 					item._stats.quantity -= totalQuantityTakenFromItem; // restore the correct quantity
@@ -1315,7 +1315,6 @@ var Unit = TaroEntityPhysics.extend({
 						item.remove();
 					}
 				}
-				
 
 				if (returnQueued) {
 					return true;
@@ -1330,13 +1329,7 @@ var Unit = TaroEntityPhysics.extend({
 						item.script.trigger('entityCreated');
 					}
 
-					slotIndex =
-						!isNaN(parseFloat(slotIndex)) &&
-						Array.isArray(itemData.controls?.permittedInventorySlots) &&
-						(itemData.controls.permittedInventorySlots.length() === 0 ||
-							itemData.controls.permittedInventorySlots.indexOf(slotIndex + 1) !== -1)
-							? slotIndex
-							: availableSlot - 1;
+					slotIndex = !isNaN(parseFloat(slotIndex)) ? slotIndex : availableSlot - 1;
 
 					// Item
 					item.streamUpdateData([{ ownerUnitId: self.id() }]);
