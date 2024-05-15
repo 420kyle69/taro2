@@ -3968,6 +3968,7 @@ var TaroEntity = TaroObject.extend({
 		dataToBeSaved[type] = {
 			attributes: rfdc()(self._stats.attributes),
 			variables: variables,
+			quests: type === 'player' ? self.quests : undefined,
 		};
 
 		if (isUnitExists) {
@@ -4134,6 +4135,11 @@ var TaroEntity = TaroObject.extend({
 			self.streamUpdateData([{ attributesRegenerateRate: regSpeed }]);
 
 			var variables = persistData.variables;
+			var quests = persistData.quests;
+
+			if (self && self.quests) {
+				self.quests = quests;
+			}
 
 			for (var variableKey in variables) {
 				var persistVariable = variables[variableKey];
