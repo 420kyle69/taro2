@@ -31,8 +31,8 @@ var QuestComponent = TaroEntity.extend({
 		var questObj = self._entity.quests;
 		if (questObj !== undefined) {
 			if (questObj.active[gameId][questId] !== undefined) {
-				questObj.active[gameId][questId] = undefined;
-				questObj.completed[gameId][questId].push(questId);
+				delete questObj.active[gameId][questId];
+				questObj.completed[gameId].push(questId);
 				if (taro.isServer) {
 					self._entity.streamUpdateData([
 						{

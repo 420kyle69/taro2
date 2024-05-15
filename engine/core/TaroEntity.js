@@ -1336,11 +1336,11 @@ var TaroEntity = TaroObject.extend({
 		return new TaroPoint3d(
 			Math.floor(
 				(this._worldMatrix.matrix[2] - taro._currentCamera._translate.x) * taro._currentCamera._scale.x +
-					taro._bounds2d.x2
+				taro._bounds2d.x2
 			),
 			Math.floor(
 				(this._worldMatrix.matrix[5] - taro._currentCamera._translate.y) * taro._currentCamera._scale.y +
-					taro._bounds2d.y2
+				taro._bounds2d.y2
 			),
 			0
 		);
@@ -1349,7 +1349,7 @@ var TaroEntity = TaroObject.extend({
 	/**
 	 * @deprecated Use bounds3dPolygon instead
 	 */
-	localIsoBoundsPoly: function () {},
+	localIsoBoundsPoly: function () { },
 
 	localBounds3dPolygon: function (recalculate) {
 		if (this._bounds3dPolygonDirty || !this._localBounds3dPolygon || recalculate) {
@@ -1383,7 +1383,7 @@ var TaroEntity = TaroObject.extend({
 	/**
 	 * @deprecated Use bounds3dPolygon instead
 	 */
-	isoBoundsPoly: function () {},
+	isoBoundsPoly: function () { },
 
 	bounds3dPolygon: function (recalculate) {
 		if (this._bounds3dPolygonDirty || !this._bounds3dPolygon || recalculate) {
@@ -1401,7 +1401,7 @@ var TaroEntity = TaroObject.extend({
 	/**
 	 * @deprecated Use mouseInBounds3d instead
 	 */
-	mouseInIsoBounds: function () {},
+	mouseInIsoBounds: function () { },
 
 	mouseInBounds3d: function (recalculate) {
 		var poly = this.localBounds3dPolygon(recalculate);
@@ -4139,6 +4139,9 @@ var TaroEntity = TaroObject.extend({
 
 			if (self && self.quests) {
 				self.quests = quests;
+				self.streamUpdateData([{
+					quests
+				}]);
 			}
 
 			for (var variableKey in variables) {
@@ -4425,19 +4428,24 @@ var TaroEntity = TaroObject.extend({
 						switch (attrName) {
 							case 'quests':
 								var gameId = taro.game.data.defaultData._id;
-								console.log(attrName, newValue, this);
 								if (newValue.complete) {
 									var questsId = newValue.complete.questsId;
 									this.quests.completed[gameId].push(questsId);
 								} else {
-									var questId = Object.keys(newValue)[0];
-									if (this.quests.active[gameId][questId] === undefined) {
-										this.quests.active[gameId][questId] = newValue[questId];
+									var keys = Object.keys(newValue)
+									if (keys.length === 1) {
+										var questId = keys[0];
+										if (this.quests.active[gameId][questId] === undefined) {
+											this.quests.active[gameId][questId] = newValue[questId];
+										} else {
+											Object.entries(newValue[questId]).map(([k, v]) => {
+												this.quests.active[gameId][questId][k] = v;
+											});
+										}
 									} else {
-										Object.entries(newValue[questId]).map(([k, v]) => {
-											this.quests.active[gameId][questId][k] = v;
-										});
+										this.quests = newValue;
 									}
+
 								}
 								break;
 							case 'anim':

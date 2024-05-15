@@ -1167,7 +1167,7 @@ var ActionComponent = TaroEntity.extend({
 						var goal = self._script.param.getValue(action.goal, vars);
 						var description = self._script.param.getValue(action.description, vars);
 						var newObj = player.quest.addQuest(questId, { name, description, goal, progress: 0 });
-						console.log('addQuest', JSON.stringify(player.quests));
+						// console.log('addQuest', JSON.stringify(player.quests));
 						break;
 
 					case 'completeQuest':
@@ -1187,7 +1187,7 @@ var ActionComponent = TaroEntity.extend({
 							taro.script.trigger('questCompleted', triggeredBy);
 							player.quest.completeQuest(questId);
 						}
-						console.log('completeQuest', JSON.stringify(player.quests));
+						// console.log('completeQuest', JSON.stringify(player.quests));
 						break;
 
 					case 'setQuestProgress':
@@ -1214,7 +1214,7 @@ var ActionComponent = TaroEntity.extend({
 							}
 							player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
 						}
-						console.log('setQuestProgress', JSON.stringify(player.quests));
+						// console.log('setQuestProgress', JSON.stringify(player.quests));
 						break;
 
 					case 'sendChatMessageToPlayer':
