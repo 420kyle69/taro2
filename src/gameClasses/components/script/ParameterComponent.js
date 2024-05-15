@@ -471,13 +471,24 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getQuestObject':
+						var player = self.getValue(text.player, vars);
+						var questId = self.getValue(text.questId, vars);
+						var quests = player.quests;
+						var gameId = taro.game.data.defaultData._id;
+						if (quests && quests.active[gameId][questId]) {
+							returnValue = quests.active[gameId][questId];
+						}
+
+						break;
+
 					case 'getQuestProgress':
 						var player = self.getValue(text.player, vars);
 						var questId = self.getValue(text.questId, vars);
-						var quests = player.variable.getValue('quests');
+						var quests = player.quests;
 						var gameId = taro.game.data.defaultData._id;
-						if (quests && quests.ongoing[gameId][questId]) {
-							returnValue = quests.ongoing[gameId][questId].progress;
+						if (quests && quests.active[gameId][questId]) {
+							returnValue = quests.active[gameId][questId].progress;
 						}
 
 						break;
@@ -485,10 +496,10 @@ var ParameterComponent = TaroEntity.extend({
 					case 'isQuestProgressCompleted':
 						var player = self.getValue(text.player, vars);
 						var questId = self.getValue(text.questId, vars);
-						var quests = player.variable.getValue('quests');
+						var quests = player.quests;
 						var gameId = taro.game.data.defaultData._id;
-						if (quests && quests.ongoing && quests.ongoing[gameId][questId]) {
-							returnValue = quests.ongoing[gameId][questId].progress === quests.ongoing[gameId][questId].goal;
+						if (quests && quests.active && quests.active[gameId][questId]) {
+							returnValue = quests.active[gameId][questId].progress === quests.active[gameId][questId].goal;
 						} else {
 							returnValue = false;
 						}
@@ -538,16 +549,12 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-					case 'isQuestOngoing':
+					case 'isQuestActive':
 						var player = self.getValue(text.player, vars);
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
-						var quests = player.variable.getValue('quests');
-						if (quests.ongoing === undefined) {
-							returnValue = false;
-						} else {
-							returnValue = quests?.ongoing[gameId]?.[questId] !== undefined;
-						}
+						var quests = player.quests;
+						returnValue = quests?.active[gameId][questId] !== undefined;
 
 						break;
 
@@ -555,12 +562,8 @@ var ParameterComponent = TaroEntity.extend({
 						var player = self.getValue(text.player, vars);
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
-						var quests = player.variable.getValue('quests');
-						if (quests.completed === undefined) {
-							returnValue = false;
-						} else {
-							returnValue = quests?.completed[gameId]?.includes(questId);
-						}
+						var quests = player.quests;
+						returnValue = quests.completed[gameId].includes(questId);
 
 						break;
 

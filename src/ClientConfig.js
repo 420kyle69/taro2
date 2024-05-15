@@ -63,7 +63,7 @@ var taroClientConfig = {
 
 		'/gameClasses/components/entity/AttributeComponent.js',
 		'/gameClasses/components/entity/VariableComponent.js',
-
+		'/gameClasses/components/quest/QuestComponent.js',
 		/* Standard game scripts */
 		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',

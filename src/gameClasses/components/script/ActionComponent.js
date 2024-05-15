@@ -1160,50 +1160,29 @@ var ActionComponent = TaroEntity.extend({
 						taro.chat.sendToRoom('1', message, undefined, undefined);
 						break;
 
+					case 'removeQuestForPlayer':
+						var player = self._script.param.getValue(action.player, vars);
+						var questId = self._script.param.getValue(action.questId, vars);
+						player.quest.removeQuest(questId);
+						// console.log('addQuest', JSON.stringify(player.quests));
+						break;
+
 					case 'addQuestToPlayer':
 						var player = self._script.param.getValue(action.player, vars);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var name = self._script.param.getValue(action.name, vars);
 						var goal = self._script.param.getValue(action.goal, vars);
 						var description = self._script.param.getValue(action.description, vars);
-						var gameId = taro.game.data.defaultData._id;
-						var newObj = player.variable.getValue('quests');
-						if (newObj.ongoing === undefined) {
-							newObj.ongoing = {};
-						}
-						if (newObj.completed === undefined) {
-							newObj.completed = {};
-						}
-						if (newObj['ongoing'][gameId] === undefined) {
-							newObj['ongoing'][gameId] = {};
-						}
-						if (newObj.completed[gameId] === undefined) {
-							newObj.completed[gameId] = [];
-						}
-						if (
-							newObj['ongoing'][gameId][questId] === undefined &&
-							newObj['completed'][gameId].includes(questId) === false
-						) {
-							newObj['ongoing'][gameId][questId] = { name, description, goal, progress: 0 };
-							player.variable.update('quests', newObj);
-						}
-
+						player.quest.addQuest(questId, { name, description, goal, progress: 0 });
+						// console.log('addQuest', JSON.stringify(player.quests));
 						break;
 
 					case 'completeQuest':
 						var player = self._script.param.getValue(action.player, vars);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
-						var newObj = player.variable.getValue('quests');
-						if (newObj.completed === undefined) {
-							newObj.completed = {};
-						}
-						if (newObj.completed[gameId] === undefined) {
-							newObj.completed[gameId] = [];
-						}
-						if (newObj.ongoing[gameId] && newObj['ongoing'][gameId][questId]) {
-							newObj.ongoing[gameId][questId] = undefined;
-							newObj.completed[gameId].push(questId);
+						var newObj = player.quests;
+						if (newObj.active[gameId] && newObj['active'][gameId][questId]) {
 							var selectedUnit = player.getSelectedUnit();
 							var triggeredBy = {};
 							taro.game.lastCompletedQuestId = questId;
@@ -1213,8 +1192,9 @@ var ActionComponent = TaroEntity.extend({
 							}
 							triggeredBy.playerId = player.id();
 							taro.script.trigger('questCompleted', triggeredBy);
+							player.quest.completeQuest(questId);
 						}
-
+						// console.log('completeQuest', JSON.stringify(player.quests));
 						break;
 
 					case 'setQuestProgress':
@@ -1223,11 +1203,11 @@ var ActionComponent = TaroEntity.extend({
 						var progress = self._script.param.getValue(action.progress, vars);
 
 						var gameId = taro.game.data.defaultData._id;
-						const quests = player.variable.getValue('quests');
-						if (quests.ongoing[gameId] !== undefined && quests.ongoing[gameId][questId] !== undefined) {
+						const quests = player.quests;
+						if (quests.active[gameId] !== undefined && quests.active[gameId][questId] !== undefined) {
 							if (
-								quests.ongoing[gameId][questId].progress !== quests.ongoing[gameId][questId].goal &&
-								progress === quests.ongoing[gameId][questId].goal
+								quests.active[gameId][questId].progress !== quests.active[gameId][questId].goal &&
+								progress === quests.active[gameId][questId].goal
 							) {
 								var selectedUnit = player.getSelectedUnit();
 								var triggeredBy = {};
@@ -1239,13 +1219,9 @@ var ActionComponent = TaroEntity.extend({
 								triggeredBy.playerId = player.id();
 								taro.script.trigger('questProgressCompleted', triggeredBy);
 							}
-							quests.ongoing[gameId][questId].progress = progress;
-							if (quests.ongoing[gameId][questId].progress >= quests.ongoing[gameId][questId].goal) {
-								quests.ongoing[gameId][questId].progress = quests.ongoing[gameId][questId].goal;
-							}
+							player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
 						}
-						player.variable.update('quests', quests);
-
+						// console.log('setQuestProgress', JSON.stringify(player.quests));
 						break;
 
 					case 'sendChatMessageToPlayer':
