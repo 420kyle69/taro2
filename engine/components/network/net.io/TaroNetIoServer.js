@@ -724,6 +724,7 @@ var TaroNetIoServer = {
 						gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
 						gameId: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData._id,
 						playTime: end - self._socketById[socket.id].start,
+						worldId: taro.game?.data?.defaultData?.worldId,
 						code: code,
 						reason: reason,
 						reasonCode: reasonCode,
