@@ -42,6 +42,7 @@ namespace Renderer {
 							case 'scale':
 								editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
 								editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
+								editedAction['depth'] = Utils.worldToPixel(control.object.scale.y);
 								break;
 						}
 						if (editedAction) {
@@ -78,7 +79,7 @@ namespace Renderer {
 					this.updateForDimension();
 				} else {
 					// TODO: make it 3d when taro action will support 3d
-					this.dimension = '2d';
+					this.dimension = '3d';
 					this.updateForDimension();
 				}
 				this.control.attach(entity);

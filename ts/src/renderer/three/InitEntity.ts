@@ -7,6 +7,7 @@ namespace Renderer {
 			body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
 			defaultWidth: number;
 			defaultHeight: number;
+			defaultDepth: number;
 			isBillboard = false;
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				super();
@@ -29,6 +30,7 @@ namespace Renderer {
 				}
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
+				this.defaultDepth = entityTypeData.bodies?.default?.depth;
 				this.isBillboard = entityTypeData?.isBillboard ?? false;
 				const renderer = Renderer.Three.instance();
 				let body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
@@ -54,8 +56,17 @@ namespace Renderer {
 				}
 
 				if (!isNaN(action.width) && !isNaN(action.height)) {
-					this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+					if (!isNaN(action.depth)) {
+						this.scale.set(
+							Utils.pixelToWorld(action.width),
+							Utils.pixelToWorld(action.depth),
+							Utils.pixelToWorld(action.height)
+						);
+					} else {
+						this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+					}
 				}
+
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 					body.visible = true;
 				} else {
@@ -64,7 +75,9 @@ namespace Renderer {
 				this.add(this.body);
 				this.position.set(
 					Utils.pixelToWorld(action.position?.x),
-					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
+					action.position?.z
+						? Utils.pixelToWorld(action.position?.z)
+						: Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
 					Utils.pixelToWorld(action.position?.y)
 				);
 				renderer.initEntityLayer.add(this);
@@ -96,6 +109,9 @@ namespace Renderer {
 					this.action.position = action.position;
 					this.position.x = Utils.pixelToWorld(action.position.x);
 					this.position.z = Utils.pixelToWorld(action.position.y);
+					if (!isNaN(action.position.z)) {
+						this.position.y = Utils.pixelToWorld(action.position.z);
+					}
 				}
 				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
@@ -108,6 +124,10 @@ namespace Renderer {
 				if (!isNaN(this.action.height) && !isNaN(action.height)) {
 					this.action.height = action.height;
 					this.scale.setZ(Utils.pixelToWorld(action.height));
+				}
+				if (!isNaN(this.action.depth) && !isNaN(action.depth)) {
+					this.action.depth = action.depth;
+					this.scale.setY(Utils.pixelToWorld(action.depth));
 				}
 				if (action.wasDeleted) {
 					const renderer = Renderer.Three.instance();
