@@ -715,6 +715,7 @@ var ActionComponent = TaroEntity.extend({
 														gameSlug: taro?.game?.data?.defaultData?.gameSlug,
 														gameId: taro?.game?.data?.defaultData?._id,
 														parentGameId: parentGameId,
+														worldId: taro?.game?.data?.defaultData?.worldId,
 														progress: value,
 														tutorialVersion: 'v2',
 													},
