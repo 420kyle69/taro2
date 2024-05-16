@@ -29,6 +29,7 @@ namespace Renderer {
 								editedAction['position'] = {
 									x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
 									y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+									z: Renderer.Three.Utils.worldToPixel(control.object.position.y),
 									function: 'xyCoordinate',
 								};
 								break;
