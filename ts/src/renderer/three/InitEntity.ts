@@ -126,12 +126,11 @@ namespace Renderer {
 				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 				if (
 					is3D &&
-					!isNaN(this.action.rotation?.x) &&
 					!isNaN(action.rotation?.x) &&
-					!isNaN(this.action.rotation?.y) &&
 					!isNaN(action.rotation?.y) &&
-					!isNaN(this.action.rotation?.z) &&
-					!isNaN(action.rotation?.z)
+					!isNaN(action.rotation?.z) &&
+					((!isNaN(this.action.rotation?.x) && !isNaN(this.action.rotation?.y) && !isNaN(this.action.rotation?.z)) ||
+						!isNaN(this.action.angle))
 				) {
 					this.action.rotation = action.rotation;
 					this.rotation.set(

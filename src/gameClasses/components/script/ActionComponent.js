@@ -3120,7 +3120,7 @@ var ActionComponent = TaroEntity.extend({
 
 							var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 
-							if (is3D) {
+							/*if (is3D) {
 								position.z = parseFloat(position.z);
 
 								rotation.x = parseFloat(rotation.x);
@@ -3130,7 +3130,8 @@ var ActionComponent = TaroEntity.extend({
 								depth = parseFloat(depth);
 							} else {
 								angle = parseFloat(angle);
-							}
+							}*/
+							angle = parseFloat(angle);
 
 							var angleInRadians = Math.radians(angle);
 							height = parseFloat(height);

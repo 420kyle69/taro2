@@ -809,10 +809,8 @@ class DeveloperMode {
 						!isNaN(data.rotation.x) &&
 						!isNaN(data.rotation.y) &&
 						!isNaN(data.rotation.z) &&
-						action.rotation &&
-						!isNaN(action.rotation.x) &&
-						!isNaN(action.rotation.y) &&
-						!isNaN(action.rotation.z)
+						((action.rotation && !isNaN(action.rotation.x) && !isNaN(action.rotation.y) && !isNaN(action.rotation.z)) ||
+							action.angle)
 					) {
 						action.rotation = data.rotation;
 					}
