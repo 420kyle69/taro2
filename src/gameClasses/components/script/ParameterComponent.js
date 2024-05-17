@@ -1763,7 +1763,7 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-					case 'xyzEuler':
+					/*case 'xyzEuler':
 						var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 
 						if (is3D) {
@@ -1775,7 +1775,7 @@ var ParameterComponent = TaroEntity.extend({
 							}
 						}
 
-						break;
+						break;*/
 
 					case 'getPositionInFrontOfPosition':
 						var position = self.getValue(text.position, vars);

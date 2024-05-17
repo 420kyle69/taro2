@@ -50,7 +50,7 @@ namespace Renderer {
 										x: degreesX,
 										y: degreesY,
 										z: degreesZ,
-										function: 'xyzEuler',
+										function: 'vector3',
 									};
 								} else {
 									const heading = control.object.rotation.y;
