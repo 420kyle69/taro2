@@ -59,6 +59,11 @@ namespace Renderer {
 										// Convert to basic material to avoid lighting
 										const material = new THREE.MeshBasicMaterial();
 										THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
+
+										if (material.map) {
+											material.map.magFilter = this.filter;
+										}
+
 										child.material = material;
 									}
 								});
