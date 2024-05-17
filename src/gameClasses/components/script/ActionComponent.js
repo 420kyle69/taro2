@@ -3117,14 +3117,17 @@ var ActionComponent = TaroEntity.extend({
 
 							position.x = parseFloat(position.x);
 							position.y = parseFloat(position.y);
-							position.z = parseFloat(position.z) || 0;
 
 							var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 
 							if (is3D) {
+								position.z = parseFloat(position.z);
+
 								rotation.x = parseFloat(rotation.x);
 								rotation.y = parseFloat(rotation.y);
 								rotation.z = parseFloat(rotation.z);
+
+								depth = parseFloat(depth);
 							} else {
 								angle = parseFloat(angle);
 							}
