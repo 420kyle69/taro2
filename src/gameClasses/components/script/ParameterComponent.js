@@ -1763,9 +1763,8 @@ var ParameterComponent = TaroEntity.extend({
 							if (x != undefined && y != undefined && z != undefined) {
 								returnValue = { x: x, y: y, z: z };
 							}
-						} else {
-							returnValue = parseFloat(self.getValue(text));
 						}
+
 						break;
 
 					case 'getPositionInFrontOfPosition':
