@@ -801,6 +801,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const searchParams = reqUrl.searchParams;
 		const token = searchParams.get('token');
 
+		console.log('request', request.headers, request.cookies, request.cookie);
+
 		try {
 			let decodedToken;
 			if (process.env.ENV !== 'standalone' && taro.workerComponent) {
