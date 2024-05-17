@@ -1206,23 +1206,29 @@ var ActionComponent = TaroEntity.extend({
 						var gameId = taro.game.data.defaultData._id;
 						const quests = player.quests;
 						if (quests.active[gameId] !== undefined && quests.active[gameId][questId] !== undefined) {
-							var oldProgress = quests.active[gameId][questId].progress
-							player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
-							if (
-								oldProgress !== quests.active[gameId][questId].goal &&
-								progress === quests.active[gameId][questId].goal
-							) {
+							if (quests.active[gameId][questId].progress !== progress) {
+								var oldProgress = quests.active[gameId][questId].progress;
+								player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
 								var selectedUnit = player.getSelectedUnit();
 								var triggeredBy = {};
-								taro.game.lastProgressCompletedQuestId = questId;
-								if (selectedUnit && selectedUnit.script) {
-									triggeredBy.unitId = selectedUnit.id();
-									selectedUnit.script.trigger('questProgressCompleted', triggeredBy);
-								}
+								taro.game.lastProgressUpdatedQuestId = questId;
 								triggeredBy.playerId = player.id();
-								taro.script.trigger('questProgressCompleted', triggeredBy);
+								taro.script.trigger('questProgressUpdated', triggeredBy);
+								if (
+									oldProgress !== quests.active[gameId][questId].goal &&
+									progress === quests.active[gameId][questId].goal
+								) {
+									var selectedUnit = player.getSelectedUnit();
+									var triggeredBy = {};
+									taro.game.lastProgressCompletedQuestId = questId;
+									if (selectedUnit && selectedUnit.script) {
+										triggeredBy.unitId = selectedUnit.id();
+										selectedUnit.script.trigger('questProgressCompleted', triggeredBy);
+									}
+									triggeredBy.playerId = player.id();
+									taro.script.trigger('questProgressCompleted', triggeredBy);
+								}
 							}
-
 						}
 						// console.log('setQuestProgress', JSON.stringify(player.quests));
 						break;
