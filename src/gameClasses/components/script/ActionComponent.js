@@ -2635,7 +2635,6 @@ var ActionComponent = TaroEntity.extend({
 							}
 
 							if (itemGivesBonuses) {
-								console.log('itemData', itemData);
 								self._script.errorLog(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`);
 								console.log(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`, path, itemTypeId);
 								break;
@@ -2686,7 +2685,6 @@ var ActionComponent = TaroEntity.extend({
 							}
 
 							if (itemGivesBonuses) {
-								console.log('itemData', itemData);
 								self._script.errorLog(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`);
 								console.log(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`, path, itemTypeId);
 								break;
@@ -3162,7 +3160,6 @@ var ActionComponent = TaroEntity.extend({
 									}
 
 									if (itemGivesBonuses) {
-										console.log('itemData', itemData);
 										self._script.errorLog(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`);
 										console.log(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`, path);
 										break;
