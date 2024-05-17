@@ -73,6 +73,12 @@ interface ActionData {
 		y: number;
 		z?: number;
 	};
+	rotation?: {
+		function?: string;
+		x: number;
+		y: number;
+		z: number;
+	};
 	angle?: number;
 	width?: number;
 	height?: number;

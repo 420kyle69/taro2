@@ -36,6 +36,11 @@ var VariableComponent = TaroEntity.extend({
 					isDataTypeMatching = typeof value === 'object' && value.x != undefined && value.y != undefined;
 					break;
 				}
+				case 'rotation': {
+					isDataTypeMatching =
+						typeof value === 'object' && value.x != undefined && value.y != undefined && value.z != undefined;
+					break;
+				}
 				case 'projectile':
 				case 'item':
 				case 'player':

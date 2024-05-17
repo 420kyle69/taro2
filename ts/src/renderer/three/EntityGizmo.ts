@@ -35,10 +35,29 @@ namespace Renderer {
 								break;
 							case 'rotate':
 								control.object.rotation.order = 'YXZ';
-								const heading = control.object.rotation.y;
-								const radians = heading > 0 ? heading : 2 * Math.PI + heading;
-								const degrees = THREE.MathUtils.radToDeg(radians);
-								editedAction['angle'] = degrees;
+								const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+								if (is3D) {
+									const headingX = control.object.rotation.x;
+									const headingY = control.object.rotation.y;
+									const headingZ = control.object.rotation.z;
+									const radiansX = headingX > 0 ? headingX : 2 * Math.PI + headingX;
+									const radiansY = headingY > 0 ? headingY : 2 * Math.PI + headingY;
+									const radiansZ = headingZ > 0 ? headingZ : 2 * Math.PI + headingZ;
+									const degreesX = THREE.MathUtils.radToDeg(radiansX);
+									const degreesY = THREE.MathUtils.radToDeg(radiansY);
+									const degreesZ = THREE.MathUtils.radToDeg(radiansZ);
+									editedAction['rotation'] = {
+										x: degreesX,
+										y: degreesY,
+										z: degreesZ,
+										function: 'xyzEuler',
+									};
+								} else {
+									const heading = control.object.rotation.y;
+									const radians = heading > 0 ? heading : 2 * Math.PI + heading;
+									const degrees = THREE.MathUtils.radToDeg(radians);
+									editedAction['angle'] = degrees;
+								}
 								break;
 							case 'scale':
 								editedAction['width'] = Utils.worldToPixel(control.object.scale.x);

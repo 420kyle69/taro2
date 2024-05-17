@@ -9,6 +9,8 @@ namespace Renderer {
 			defaultHeight: number;
 			defaultDepth: number;
 			isBillboard = false;
+			is3D: boolean;
+
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				super();
 				this.action = action;
@@ -50,7 +52,15 @@ namespace Renderer {
 					body.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				}
 				body.entity = this;
-				if (!isNaN(action.angle)) {
+				const is3D = (this.is3D = taro.game.data.defaultData.defaultRenderer === '3d');
+				if (is3D && !isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)) {
+					this.rotation.order = 'YXZ';
+					this.rotation.set(
+						THREE.MathUtils.degToRad(action.rotation.x),
+						THREE.MathUtils.degToRad(action.rotation.y),
+						THREE.MathUtils.degToRad(action.rotation.z)
+					);
+				} else if (!isNaN(action.angle)) {
 					this.rotation.order = 'YXZ';
 					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 				}
@@ -113,7 +123,23 @@ namespace Renderer {
 						this.position.y = Utils.pixelToWorld(action.position.z);
 					}
 				}
-				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
+				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+				if (
+					is3D &&
+					!isNaN(this.action.rotation?.x) &&
+					!isNaN(action.rotation?.x) &&
+					!isNaN(this.action.rotation?.y) &&
+					!isNaN(action.rotation?.y) &&
+					!isNaN(this.action.rotation?.z) &&
+					!isNaN(action.rotation?.z)
+				) {
+					this.action.rotation = action.rotation;
+					this.rotation.set(
+						THREE.MathUtils.degToRad(action.rotation.x),
+						THREE.MathUtils.degToRad(action.rotation.y),
+						THREE.MathUtils.degToRad(action.rotation.z)
+					);
+				} else if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
 					this.action.angle = action.angle;
 					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 				}

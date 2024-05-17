@@ -1205,7 +1205,7 @@ var ActionComponent = TaroEntity.extend({
 						var gameId = taro.game.data.defaultData._id;
 						const quests = player.quests;
 						if (quests.active[gameId] !== undefined && quests.active[gameId][questId] !== undefined) {
-							var oldProgress = quests.active[gameId][questId].progress
+							var oldProgress = quests.active[gameId][questId].progress;
 							player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
 							if (
 								oldProgress !== quests.active[gameId][questId].goal &&
@@ -1221,7 +1221,6 @@ var ActionComponent = TaroEntity.extend({
 								triggeredBy.playerId = player.id();
 								taro.script.trigger('questProgressCompleted', triggeredBy);
 							}
-
 						}
 						// console.log('setQuestProgress', JSON.stringify(player.quests));
 						break;
@@ -3105,8 +3104,10 @@ var ActionComponent = TaroEntity.extend({
 						let entityType = self._script.param.getValue(action.entityType, vars);
 						let entityToCreate = self._script.param.getValue(action.entity, vars);
 						var position = self._script.param.getValue(action.position, vars);
+						var rotation = self._script.param.getValue(action.rotation, vars);
 						var height = self._script.param.getValue(action.height, vars) || 100;
 						var width = self._script.param.getValue(action.width, vars) || 100;
+						var depth = self._script.param.getValue(action.depth, vars) || 0;
 						var angle = self._script.param.getValue(action.angle, vars) || 0;
 
 						const entityTypeData = taro.game.data[entityType] && taro.game.data[entityType][entityToCreate];
@@ -3116,7 +3117,18 @@ var ActionComponent = TaroEntity.extend({
 
 							position.x = parseFloat(position.x);
 							position.y = parseFloat(position.y);
-							angle = parseFloat(angle);
+							position.z = parseFloat(position.z) || 0;
+
+							var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+
+							if (is3D) {
+								angle = parseFloat(angle);
+							} else {
+								rotation.x = parseFloat(rotation.x);
+								rotation.y = parseFloat(rotation.y);
+								rotation.z = parseFloat(rotation.z);
+							}
+
 							var angleInRadians = Math.radians(angle);
 							height = parseFloat(height);
 							width = parseFloat(width);
