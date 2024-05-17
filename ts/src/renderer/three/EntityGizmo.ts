@@ -98,7 +98,6 @@ namespace Renderer {
 					this.dimension = '2d';
 					this.updateForDimension();
 				} else {
-					// TODO: make it 3d when taro action will support 3d
 					this.dimension = '3d';
 					this.updateForDimension();
 				}
