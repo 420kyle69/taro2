@@ -3122,11 +3122,11 @@ var ActionComponent = TaroEntity.extend({
 							var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 
 							if (is3D) {
-								angle = parseFloat(angle);
-							} else {
 								rotation.x = parseFloat(rotation.x);
 								rotation.y = parseFloat(rotation.y);
 								rotation.z = parseFloat(rotation.z);
+							} else {
+								angle = parseFloat(angle);
 							}
 
 							var angleInRadians = Math.radians(angle);
