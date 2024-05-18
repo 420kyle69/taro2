@@ -393,14 +393,28 @@ var ActionComponent = TaroEntity.extend({
 					}
 
 					case 'runScript':
-						let previousScriptId = self._script.currentScriptId;
-						let previousAcionBlockIdx = self._script.currentActionLineNumber;
+						var previousScriptId = self._script.currentScriptId;
+						var previousAcionBlockIdx = self._script.currentActionLineNumber;
 
 						const scriptParams = { ...vars, triggeredFrom: vars.isWorldScript ? 'world' : 'map' };
 						self._script.runScript(action.scriptName, scriptParams);
 
 						self._script.currentScriptId = previousScriptId;
 						self._script.currentActionLineNumber = previousAcionBlockIdx;
+						break;
+
+					case 'runEntityScript':
+						var previousScriptId = self._script.currentScriptId;
+						var previousAcionBlockIdx = self._script.currentActionLineNumber;
+						
+						var entity = self._script.param.getValue(action.entity, vars);
+						if (entity) {
+							const scriptParams = { ...vars, triggeredFrom: vars.isWorldScript ? 'world' : 'map' };
+							entity.script.runScript(action.scriptName, scriptParams);
+
+							self._script.currentScriptId = previousScriptId;
+							self._script.currentActionLineNumber = previousAcionBlockIdx;
+						}
 						break;
 
 					case 'condition':
