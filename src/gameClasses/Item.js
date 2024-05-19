@@ -903,6 +903,7 @@ var Item = TaroEntityPhysics.extend({
 		return offset;
 	},
 
+	// update inventory slot number of this item
 	changeSlotIndex: function (index) {
 		var self = this;
 		var owner = self.getOwnerUnit();
