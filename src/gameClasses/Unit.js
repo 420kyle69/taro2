@@ -1301,8 +1301,7 @@ var Unit = TaroEntityPhysics.extend({
 				if (item && isItemAnEntity) {
 
 					// if this item is picked up (or even just a portion), trigger thisItemIsPickedUp
-					if (totalQuantityTakenFromItem > 0 || removeQueued) { // using removeQueued instead of returnQueued as removeQueued ensures that the item is an entity
-
+					if (!persistedItem && (totalQuantityTakenFromItem > 0 || removeQueued)) { // using removeQueued instead of returnQueued as removeQueued ensures that the item is an entity
 						 // temporarily increase quantity of item to pass the qty at the moment of picking up
 						item._stats.quantity += totalQuantityTakenFromItem;
 						const triggerParams = {
@@ -1361,16 +1360,19 @@ var Unit = TaroEntityPhysics.extend({
 
 					this.setCurrentItem(); // this MUST come after item.streamUpdateData
 
-					taro.game.lastCreatedItemId = item.id(); // this is necessary in case item isn't a new instance, but an existing item getting quantity updated
-
-					const triggerParams = {
-						unitId: self.id(),
-						itemId: item.id()
-					};
 					
-					self.script.trigger('thisUnitPicksUpItem', triggerParams); // this entity (unit)
-					taro.script.trigger('unitPicksUpItem', triggerParams); // unit picked item				
-
+					if (!persistedItem) {
+						taro.game.lastCreatedItemId = item.id(); // this is necessary in case item isn't a new instance, but an existing item getting quantity updated
+						
+						const triggerParams = {
+							unitId: self.id(),
+							itemId: item.id()
+						};
+						
+						self.script.trigger('thisUnitPicksUpItem', triggerParams); // this entity (unit)
+						taro.script.trigger('unitPicksUpItem', triggerParams); // unit picked item	
+					}
+					
 					return true;
 				} else {
 					return false;
