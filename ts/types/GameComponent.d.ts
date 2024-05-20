@@ -79,6 +79,12 @@ interface ActionData {
 		y: number;
 		z: number;
 	};
+	scale?: {
+		function?: string;
+		x: number;
+		y: number;
+		z: number;
+	};
 	angle?: number;
 	width?: number;
 	height?: number;

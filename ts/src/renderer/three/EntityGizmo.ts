@@ -24,18 +24,26 @@ namespace Renderer {
 						// drag ended
 						const initEntity: InitEntity = control.object;
 						const editedAction = { actionId: initEntity.action.actionId };
+						const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 						switch (control.mode) {
 							case 'translate':
-								editedAction['position'] = {
-									x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
-									y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
-									z: Renderer.Three.Utils.worldToPixel(control.object.position.y),
-									function: 'xyCoordinate',
-								};
+								if (is3D) {
+									editedAction['position'] = {
+										x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+										y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+										z: Renderer.Three.Utils.worldToPixel(control.object.position.y),
+										function: 'vector3',
+									};
+								} else {
+									editedAction['position'] = {
+										x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+										y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+										function: 'xyCoordinate',
+									};
+								}
 								break;
 							case 'rotate':
 								control.object.rotation.order = 'YXZ';
-								const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 								if (is3D) {
 									const headingX = control.object.rotation.x;
 									const headingY = control.object.rotation.y;
@@ -60,9 +68,17 @@ namespace Renderer {
 								}
 								break;
 							case 'scale':
-								editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
-								editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
-								editedAction['depth'] = Utils.worldToPixel(control.object.scale.y);
+								if (is3D) {
+									editedAction['scale'] = {
+										x: Utils.worldToPixel(control.object.scale.x),
+										y: Utils.worldToPixel(control.object.scale.z),
+										z: Utils.worldToPixel(control.object.scale.y),
+										function: 'vector3',
+									};
+								} else {
+									editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
+									editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
+								}
 								break;
 						}
 						if (editedAction) {
