@@ -483,16 +483,18 @@ namespace Renderer {
 			createInitEntity(action: ActionData): void {
 				if (
 					!action.disabled &&
-					action.position?.function === 'xyCoordinate' &&
-					!isNaN(action.position?.x) &&
-					!isNaN(action.position?.y)
+					((action.position?.function === 'xyCoordinate' && !isNaN(action.position?.x) && !isNaN(action.position?.y)) ||
+						(action.position?.function === 'vector3' &&
+							!isNaN(action.position?.x) &&
+							!isNaN(action.position?.y) &&
+							!isNaN(action.position?.z)))
 				) {
 					if (
 						action.type === 'createEntityForPlayerAtPositionWithDimensions' ||
-						(action.type === 'createEntityAtPositionWithDimensions' &&
+						action.type === 'createEntityAtPositionWithDimensions' /*&&
 							!isNaN(action.width) &&
 							!isNaN(action.height) &&
-							!isNaN(action.angle))
+							!isNaN(action.angle)*/
 					) {
 						if (action.actionId && !action.wasDeleted) new InitEntity(action);
 						else {
@@ -504,10 +506,10 @@ namespace Renderer {
 							this.showRepublishWarning = true;
 						}
 					} else if (
-						action.type === 'createUnitForPlayerAtPosition' &&
+						action.type === 'createUnitForPlayerAtPosition' /* &&
 						!isNaN(action.angle) &&
 						!isNaN(action.width) &&
-						!isNaN(action.height)
+						!isNaN(action.height)*/
 					) {
 						if (action.actionId && !action.wasDeleted) new InitEntity(action, 'unit');
 						else {
