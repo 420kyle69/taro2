@@ -22,14 +22,6 @@ namespace Renderer {
 				});
 				this.sprite = new THREE.Mesh(geometry, material);
 				this.add(this.sprite);
-
-				const renderer = Renderer.Three.instance();
-				renderer.camera.onChange(() => {
-					if (this.billboard) {
-						this.faceCamera(renderer.camera);
-						this.correctZOffsetBasedOnCameraAngle();
-					}
-				});
 			}
 
 			setBillboard(billboard: boolean, camera: Camera) {
