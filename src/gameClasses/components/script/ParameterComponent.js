@@ -553,7 +553,7 @@ var ParameterComponent = TaroEntity.extend({
 						var player = self.getValue(text.player, vars);
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
-						var quests = player.quests;
+						var quests = player?.quests;
 						returnValue = quests?.active[gameId][questId] !== undefined;
 
 						break;
@@ -1085,6 +1085,12 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'getLastCompletedQuestId':
 						var id = taro.game.lastCompletedQuestId;
+						returnValue = id;
+
+						break;
+
+					case 'getLastProgressUpdatedQuestId':
+						var id = taro.game.lastProgressUpdatedQuestId;
 						returnValue = id;
 
 						break;

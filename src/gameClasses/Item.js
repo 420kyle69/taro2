@@ -903,15 +903,21 @@ var Item = TaroEntityPhysics.extend({
 		return offset;
 	},
 
+	// update inventory slot number of this item
 	changeSlotIndex: function (index) {
 		var self = this;
 		var owner = self.getOwnerUnit();
+		
 		if (taro.isServer) {
 			this._stats.slotIndex = index;
 			this.streamUpdateData([{ slotIndex: index }]);
 		}
 		// if item is in its owner's backpack, hide it
 		if (owner) {
+			let triggerParams = { unitId: owner.id(), itemId: self.id() };
+			self.script.trigger('thisItemChangesInventorySlot', triggerParams); // this entity (item) (need to rename rename 'itemIsUsed' -> 'thisItemIsUsed')		
+			owner.script.trigger('thisUnitMovesItemInInventory', triggerParams); // this entity (unit)
+		
 			if (this._stats.slotIndex >= owner._stats.inventorySize) {
 				this.hide();
 			} else if (this._stats.slotIndex < owner._stats.inventorySize) {

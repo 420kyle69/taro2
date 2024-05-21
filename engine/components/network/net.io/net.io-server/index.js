@@ -640,7 +640,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
-			maxPayload: 200 * 1024, // 100 KB - The maximum allowed message size
+			maxPayload: 350 * 1024, // 100 KB - The maximum allowed message size
 			verifyClient: async function (info, done) {
 				// Custom logic to determine whether to accept or reject the connection
 				const acceptConnection =
@@ -800,6 +800,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const reqUrl = new URL(`https://www.modd.io${request.url}`);
 		const searchParams = reqUrl.searchParams;
 		const token = searchParams.get('token');
+
 
 		try {
 			let decodedToken;

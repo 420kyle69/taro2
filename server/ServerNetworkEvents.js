@@ -342,7 +342,7 @@ var ServerNetworkEvents = {
 		taro.developerMode.editEntity(data, clientId);
 	},
 
-	_onBuyItem: function (data, clientId) {
+	_onBuyItem: async function (data, clientId) {
 		const { id, token } = data;
 		taro.devLog(`player ${clientId} wants to purchase item${id}`);
 
@@ -350,9 +350,9 @@ var ServerNetworkEvents = {
 		if (player) {
 			var unit = player.getSelectedUnit();
 			if (unit) {
-				unit.buyItem(id, token);
+				await unit.buyItem(id, token);
 				taro.script.trigger('playerPurchasesItem', {
-					itemId: id,
+					itemId: taro.game.lastCreatedItemId,
 					playerId: player.id(),
 				});
 			}
@@ -650,15 +650,17 @@ var ServerNetworkEvents = {
 	_onSendDataFromClient: function (data, clientId) {
 		var player = taro.game.getPlayerByClientId(clientId);
 		if (player && data) {
-			player.lastClientReceivedData = data.data ? Object.keys(data.data).reduce((result, key) => {
-				if (['boolean', 'number'].includes(typeof data.data[key])) {
-					result[key] = data.data[key];
-				} else if (typeof data.data[key] === 'string') {
-					result[key] = taro.sanitizer(data.data[key]);
-				}
+			player.lastClientReceivedData = data.data
+				? Object.keys(data.data).reduce((result, key) => {
+						if (['boolean', 'number'].includes(typeof data.data[key])) {
+							result[key] = data.data[key];
+						} else if (typeof data.data[key] === 'string') {
+							result[key] = taro.sanitizer(data.data[key]);
+						}
 
-				return result;
-			}, {}) : {};
+						return result;
+					}, {})
+				: {};
 			taro.script.trigger('whenDataReceivedFromClient', { playerId: player.id() });
 		}
 	},
