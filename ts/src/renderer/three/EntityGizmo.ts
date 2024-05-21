@@ -24,24 +24,61 @@ namespace Renderer {
 						// drag ended
 						const initEntity: InitEntity = control.object;
 						const editedAction = { actionId: initEntity.action.actionId };
+						const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 						switch (control.mode) {
 							case 'translate':
-								editedAction['position'] = {
-									x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
-									y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
-									function: 'xyCoordinate',
-								};
+								if (is3D) {
+									editedAction['position'] = {
+										x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+										y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+										z: Renderer.Three.Utils.worldToPixel(control.object.position.y),
+										function: 'vector3',
+									};
+								} else {
+									editedAction['position'] = {
+										x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+										y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+										function: 'xyCoordinate',
+									};
+								}
 								break;
 							case 'rotate':
 								control.object.rotation.order = 'YXZ';
-								const heading = control.object.rotation.y;
-								const radians = heading > 0 ? heading : 2 * Math.PI + heading;
-								const degrees = THREE.MathUtils.radToDeg(radians);
-								editedAction['angle'] = degrees;
+								if (is3D) {
+									const headingX = control.object.rotation.x;
+									const headingY = control.object.rotation.y;
+									const headingZ = control.object.rotation.z;
+									const radiansX = headingX > 0 ? headingX : 2 * Math.PI + headingX;
+									const radiansY = headingY > 0 ? headingY : 2 * Math.PI + headingY;
+									const radiansZ = headingZ > 0 ? headingZ : 2 * Math.PI + headingZ;
+									const degreesX = THREE.MathUtils.radToDeg(radiansX);
+									const degreesY = THREE.MathUtils.radToDeg(radiansY);
+									const degreesZ = THREE.MathUtils.radToDeg(radiansZ);
+									editedAction['rotation'] = {
+										x: degreesX,
+										y: degreesY,
+										z: degreesZ,
+										function: 'vector3',
+									};
+								} else {
+									const heading = control.object.rotation.y;
+									const radians = heading > 0 ? heading : 2 * Math.PI + heading;
+									const degrees = THREE.MathUtils.radToDeg(radians);
+									editedAction['angle'] = degrees;
+								}
 								break;
 							case 'scale':
-								editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
-								editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
+								if (is3D) {
+									editedAction['scale'] = {
+										x: Utils.worldToPixel(control.object.scale.x),
+										y: Utils.worldToPixel(control.object.scale.z),
+										z: Utils.worldToPixel(control.object.scale.y),
+										function: 'vector3',
+									};
+								} else {
+									editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
+									editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
+								}
 								break;
 						}
 						if (editedAction && renderer.entityEditor.selectedInitEntity instanceof InitEntity) {
@@ -77,8 +114,7 @@ namespace Renderer {
 					this.dimension = '2d';
 					this.updateForDimension();
 				} else {
-					// TODO: make it 3d when taro action will support 3d
-					this.dimension = '2d';
+					this.dimension = '3d';
 					this.updateForDimension();
 				}
 				this.control.attach(entity);

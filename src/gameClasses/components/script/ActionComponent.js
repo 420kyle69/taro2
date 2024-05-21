@@ -406,7 +406,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'runEntityScript':
 						var previousScriptId = self._script.currentScriptId;
 						var previousAcionBlockIdx = self._script.currentActionLineNumber;
-						
+
 						var entity = self._script.param.getValue(action.entity, vars);
 						if (entity) {
 							const scriptParams = { ...vars, triggeredFrom: vars.isWorldScript ? 'world' : 'map' };
@@ -703,8 +703,14 @@ var ActionComponent = TaroEntity.extend({
 
 								const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
 								if (taro.game.isWorldMap && !vars.isWorldScript && isWorldPlayerAttribute && !canBeUpdatedByMap) {
-									self._script.errorLog(`can not update world player attribute from map (attribute: ${attribute.name})`);
-									console.log(`can not update world player attribute from map (attribute: ${attribute.name})`, path, attrId);
+									self._script.errorLog(
+										`can not update world player attribute from map (attribute: ${attribute.name})`
+									);
+									console.log(
+										`can not update world player attribute from map (attribute: ${attribute.name})`,
+										path,
+										attrId
+									);
 									break;
 								}
 
@@ -832,7 +838,11 @@ var ActionComponent = TaroEntity.extend({
 
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldPlayerVariable && !canBeUpdatedByMap) {
 								self._script.errorLog(`can not update world player variable from map (variable: ${variableId})`);
-								console.log(`can not update world player variable from map (variable: ${variableId})`, path, variableId);
+								console.log(
+									`can not update world player variable from map (variable: ${variableId})`,
+									path,
+									variableId
+								);
 								break;
 							}
 
@@ -870,7 +880,6 @@ var ActionComponent = TaroEntity.extend({
 						var userId = ownerPlayer._stats.userId;
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
-							
 							if (taro.game.isWorldMap && !vars.isWorldScript) {
 								self._script.errorLog('can not save unit data from map');
 								console.log('can not save unit data from map', path);
@@ -890,9 +899,8 @@ var ActionComponent = TaroEntity.extend({
 					case 'savePlayerData':
 						var player = self._script.param.getValue(action.player, vars);
 						var userId = player && player._stats && player._stats.userId;
-						
+
 						if (player && userId && player.persistentDataLoaded) {
-							
 							if (taro.game.isWorldMap && !vars.isWorldScript) {
 								self._script.errorLog('can not save player data from map');
 								console.log('can not save player data from map', path);
@@ -2601,8 +2609,14 @@ var ActionComponent = TaroEntity.extend({
 							}
 
 							if (itemGivesBonuses) {
-								self._script.errorLog(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`);
-								console.log(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`, path, itemTypeId);
+								self._script.errorLog(
+									`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`
+								);
+								console.log(
+									`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`,
+									path,
+									itemTypeId
+								);
 								break;
 							}
 						}
@@ -2655,8 +2669,14 @@ var ActionComponent = TaroEntity.extend({
 							}
 
 							if (itemGivesBonuses) {
-								self._script.errorLog(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`);
-								console.log(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`, path, itemTypeId);
+								self._script.errorLog(
+									`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`
+								);
+								console.log(
+									`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`,
+									path,
+									itemTypeId
+								);
 								break;
 							}
 						}
@@ -2705,8 +2725,14 @@ var ActionComponent = TaroEntity.extend({
 							}
 
 							if (itemGivesBonuses) {
-								self._script.errorLog(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`);
-								console.log(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`, path, itemTypeId);
+								self._script.errorLog(
+									`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`
+								);
+								console.log(
+									`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`,
+									path,
+									itemTypeId
+								);
 								break;
 							}
 						}
@@ -3140,8 +3166,10 @@ var ActionComponent = TaroEntity.extend({
 						let entityType = self._script.param.getValue(action.entityType, vars);
 						let entityToCreate = self._script.param.getValue(action.entity, vars);
 						var position = self._script.param.getValue(action.position, vars);
+						var rotation = self._script.param.getValue(action.rotation, vars);
 						var height = self._script.param.getValue(action.height, vars) || 100;
 						var width = self._script.param.getValue(action.width, vars) || 100;
+						var depth = self._script.param.getValue(action.depth, vars) || 0;
 						var angle = self._script.param.getValue(action.angle, vars) || 0;
 
 						const entityTypeData = taro.game.data[entityType] && taro.game.data[entityType][entityToCreate];
@@ -3151,7 +3179,22 @@ var ActionComponent = TaroEntity.extend({
 
 							position.x = parseFloat(position.x);
 							position.y = parseFloat(position.y);
+
+							var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+
+							/*if (is3D) {
+								position.z = parseFloat(position.z);
+
+								rotation.x = parseFloat(rotation.x);
+								rotation.y = parseFloat(rotation.y);
+								rotation.z = parseFloat(rotation.z);
+
+								depth = parseFloat(depth);
+							} else {
+								angle = parseFloat(angle);
+							}*/
 							angle = parseFloat(angle);
+
 							var angleInRadians = Math.radians(angle);
 							height = parseFloat(height);
 							width = parseFloat(width);
@@ -3180,8 +3223,13 @@ var ActionComponent = TaroEntity.extend({
 									}
 
 									if (itemGivesBonuses) {
-										self._script.errorLog(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`);
-										console.log(`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`, path);
+										self._script.errorLog(
+											`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`
+										);
+										console.log(
+											`can not create item that gives world attribute bonuses from map (item: ${itemData?.name})`,
+											path
+										);
 										break;
 									}
 								}
@@ -3259,7 +3307,6 @@ var ActionComponent = TaroEntity.extend({
 						var depth = self._script.param.getValue(action.depth, vars);
 
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && typeof depth === 'number') {
-
 							const isWorldEntity = entity._stats.isWorld;
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntity) {
 								self._script.errorLog(`can not update world entity from map (entity: ${entity._stats.name})`);
@@ -3277,7 +3324,6 @@ var ActionComponent = TaroEntity.extend({
 						var lifespan = self._script.param.getValue(action.lifeSpan, vars);
 
 						if (entity && lifespan != undefined && !isNaN(parseFloat(lifespan))) {
-
 							const isWorldEntity = entity._stats.isWorld;
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntity) {
 								self._script.errorLog(`can not update world entity from map (entity: ${entity._stats.name})`);
@@ -3307,8 +3353,14 @@ var ActionComponent = TaroEntity.extend({
 							const isWorldEntity = entity._stats.isWorld;
 							const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntity && !canBeUpdatedByMap) {
-								self._script.errorLog(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`);
-								console.log(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`, path, attrId);
+								self._script.errorLog(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`
+								);
+								console.log(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`,
+									path,
+									attrId
+								);
 								break;
 							}
 
@@ -3337,8 +3389,14 @@ var ActionComponent = TaroEntity.extend({
 							const isWorldEntity = entity._stats.isWorld;
 							const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntity && !canBeUpdatedByMap) {
-								self._script.errorLog(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`);
-								console.log(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`, path, attrId);
+								self._script.errorLog(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`
+								);
+								console.log(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`,
+									path,
+									attrId
+								);
 								break;
 							}
 
@@ -3361,8 +3419,14 @@ var ActionComponent = TaroEntity.extend({
 							const isWorldEntity = entity._stats.isWorld;
 							const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntity && !canBeUpdatedByMap) {
-								self._script.errorLog(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`);
-								console.log(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`, path, attrId);
+								self._script.errorLog(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`
+								);
+								console.log(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`,
+									path,
+									attrId
+								);
 								break;
 							}
 
@@ -3387,8 +3451,14 @@ var ActionComponent = TaroEntity.extend({
 							const isWorldEntity = entity._stats.isWorld;
 							const canBeUpdatedByMap = attribute.canBeUpdatedByMap;
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntity && !canBeUpdatedByMap) {
-								self._script.errorLog(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`);
-								console.log(`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`, path, attrId);
+								self._script.errorLog(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`
+								);
+								console.log(
+									`can not update world entity's attribute from map (entity: ${entity._stats.name}, attribute: ${attribute.name})`,
+									path,
+									attrId
+								);
 								break;
 							}
 
@@ -3520,8 +3590,14 @@ var ActionComponent = TaroEntity.extend({
 							const canBeUpdatedByMap = entity?.variables?.[variableId]?.canBeUpdatedByMap;
 
 							if (taro.game.isWorldMap && !vars.isWorldScript && isWorldEntityVariable && !canBeUpdatedByMap) {
-								self._script.errorLog(`can not update world entity variable from map (entity: ${entity._stats.name}, variable: ${variable.key})`);
-								console.log(`can not update world entity variable from map (entity: ${entity._stats.name}, variable: ${variable.key})`, path, variableId);
+								self._script.errorLog(
+									`can not update world entity variable from map (entity: ${entity._stats.name}, variable: ${variable.key})`
+								);
+								console.log(
+									`can not update world entity variable from map (entity: ${entity._stats.name}, variable: ${variable.key})`,
+									path,
+									variableId
+								);
 								break;
 							}
 
@@ -3529,7 +3605,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
- 
+
 					case 'rotateEntityToRadians':
 					case 'rotateEntityToRadiansLT': // No more LT.
 						var entity = self._script.param.getValue(action.entity, vars);

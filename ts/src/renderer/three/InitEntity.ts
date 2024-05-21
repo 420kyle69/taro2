@@ -7,7 +7,10 @@ namespace Renderer {
 			body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
 			defaultWidth: number;
 			defaultHeight: number;
+			defaultDepth: number;
 			isBillboard = false;
+			is3D: boolean;
+
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				super();
 				this.action = action;
@@ -29,6 +32,7 @@ namespace Renderer {
 				}
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
+				this.defaultDepth = entityTypeData.bodies?.default?.depth;
 				this.isBillboard = entityTypeData?.isBillboard ?? false;
 				const renderer = Renderer.Three.instance();
 				let body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
@@ -48,14 +52,32 @@ namespace Renderer {
 					body.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				}
 				body.entity = this;
-				if (!isNaN(action.angle)) {
-					this.rotation.order = 'YXZ';
-					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+				const is3D = (this.is3D = taro.game.data.defaultData.defaultRenderer === '3d');
+				this.rotation.order = 'YXZ';
+				if (is3D) {
+					if (!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)) {
+						this.rotation.set(
+							THREE.MathUtils.degToRad(action.rotation.x),
+							THREE.MathUtils.degToRad(action.rotation.y),
+							THREE.MathUtils.degToRad(action.rotation.z)
+						);
+					}
+					if (!isNaN(action.scale?.x) && !isNaN(action.scale?.y) && !isNaN(action.scale?.z)) {
+						this.scale.set(
+							Utils.pixelToWorld(action.scale.x),
+							Utils.pixelToWorld(action.scale.z),
+							Utils.pixelToWorld(action.scale.y)
+						);
+					}
+				} else {
+					if (!isNaN(action.angle)) {
+						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+					}
+					if (!isNaN(action.width) && !isNaN(action.height)) {
+						this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+					}
 				}
 
-				if (!isNaN(action.width) && !isNaN(action.height)) {
-					this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
-				}
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 					body.visible = true;
 				} else {
@@ -64,7 +86,9 @@ namespace Renderer {
 				this.add(this.body);
 				this.position.set(
 					Utils.pixelToWorld(action.position?.x),
-					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
+					action.position?.z
+						? Utils.pixelToWorld(action.position?.z)
+						: Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
 					Utils.pixelToWorld(action.position?.y)
 				);
 				renderer.initEntityLayer.add(this);
@@ -96,18 +120,53 @@ namespace Renderer {
 					this.action.position = action.position;
 					this.position.x = Utils.pixelToWorld(action.position.x);
 					this.position.z = Utils.pixelToWorld(action.position.y);
+					if (!isNaN(action.position.z)) {
+						this.position.y = Utils.pixelToWorld(action.position.z);
+					}
 				}
-				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
-					this.action.angle = action.angle;
-					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
-				}
-				if (!isNaN(this.action.width) && !isNaN(action.width)) {
-					this.action.width = action.width;
-					this.scale.setX(Utils.pixelToWorld(action.width));
-				}
-				if (!isNaN(this.action.height) && !isNaN(action.height)) {
-					this.action.height = action.height;
-					this.scale.setZ(Utils.pixelToWorld(action.height));
+				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+				if (is3D) {
+					if (
+						!isNaN(action.rotation?.x) &&
+						!isNaN(action.rotation?.y) &&
+						!isNaN(action.rotation?.z) &&
+						((!isNaN(this.action.rotation?.x) && !isNaN(this.action.rotation?.y) && !isNaN(this.action.rotation?.z)) ||
+							!isNaN(this.action.angle))
+					) {
+						this.action.rotation = action.rotation;
+						this.rotation.set(
+							THREE.MathUtils.degToRad(action.rotation.x),
+							THREE.MathUtils.degToRad(action.rotation.y),
+							THREE.MathUtils.degToRad(action.rotation.z)
+						);
+					}
+					if (!isNaN(this.action.width) && !isNaN(action.width)) {
+						this.action.width = action.width;
+						this.scale.setX(Utils.pixelToWorld(action.width));
+					}
+					if (!isNaN(this.action.height) && !isNaN(action.height)) {
+						this.action.height = action.height;
+						this.scale.setZ(Utils.pixelToWorld(action.height));
+					}
+				} else {
+					if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
+						this.action.angle = action.angle;
+						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+					}
+					if (
+						!isNaN(action.scale?.x) &&
+						!isNaN(action.scale?.y) &&
+						!isNaN(action.scale?.z) &&
+						((!isNaN(this.action.scale?.x) && !isNaN(this.action.scale?.y) && !isNaN(this.action.scale?.z)) ||
+							!isNaN(this.action.angle))
+					) {
+						this.action.scale = action.scale;
+						this.scale.set(
+							THREE.MathUtils.degToRad(action.scale.x),
+							THREE.MathUtils.degToRad(action.scale.z),
+							THREE.MathUtils.degToRad(action.scale.y)
+						);
+					}
 				}
 				if (action.wasDeleted) {
 					const renderer = Renderer.Three.instance();

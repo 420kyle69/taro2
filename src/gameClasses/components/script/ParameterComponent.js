@@ -1740,14 +1740,48 @@ var ParameterComponent = TaroEntity.extend({
 						break;
 
 					case 'xyCoordinate':
+						var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+
 						var x = self.getValue(text.x, vars);
 						var y = self.getValue(text.y, vars);
 
-						if (x != undefined && y != undefined) {
-							returnValue = { x: x, y: y };
+						if (is3D) {
+							var z = self.getValue(text.z, vars);
+
+							if (x != undefined && y != undefined && z != undefined) {
+								returnValue = { x: x, y: y, z: z };
+							}
+						} else {
+							if (x != undefined && y != undefined) {
+								returnValue = { x: x, y: y };
+							}
 						}
 
 						break;
+
+					case 'vector3':
+						var x = self.getValue(text.x, vars);
+						var y = self.getValue(text.y, vars);
+						var z = self.getValue(text.z, vars);
+						if (x != undefined && y != undefined && z != undefined) {
+							returnValue = { x: x, y: y, z: z };
+						}
+
+						break;
+
+					/*case 'xyzEuler':
+						var is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+
+						if (is3D) {
+							var x = self.getValue(text.x, vars);
+							var y = self.getValue(text.y, vars);
+							var z = self.getValue(text.z, vars);
+							if (x != undefined && y != undefined && z != undefined) {
+								returnValue = { x: x, y: y, z: z };
+							}
+						}
+
+						break;*/
 
 					case 'getPositionInFrontOfPosition':
 						var position = self.getValue(text.position, vars);

@@ -308,7 +308,8 @@ class DeveloperMode {
 						!isNaN(action.position?.y) &&
 						!isNaN(action.width) &&
 						!isNaN(action.height) &&
-						!isNaN(action.angle)
+						(!isNaN(action.angle) ||
+							(!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)))
 					) {
 						if (
 							(action.type === 'createEntityForPlayerAtPositionWithDimensions' ||
@@ -316,12 +317,14 @@ class DeveloperMode {
 								action.type === 'createUnitForPlayerAtPosition') &&
 							!isNaN(action.width) &&
 							!isNaN(action.height) &&
-							!isNaN(action.angle)
+							(!isNaN(action.angle) ||
+								(!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)))
 						) {
 							if (action.actionId) this.initEntities.push(action);
 						} else if (
 							(action.type === 'createUnitAtPosition' || action.type === 'createProjectileAtPosition') &&
-							!isNaN(action.angle)
+							(!isNaN(action.angle) ||
+								(!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)))
 						) {
 							if (action.actionId) this.initEntities.push(action);
 						} else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
@@ -800,6 +803,16 @@ class DeveloperMode {
 					}
 					if (!isNaN(data.angle) && !isNaN(action.angle)) {
 						action.angle = data.angle;
+					}
+					if (
+						data.rotation &&
+						!isNaN(data.rotation.x) &&
+						!isNaN(data.rotation.y) &&
+						!isNaN(data.rotation.z) &&
+						((action.rotation && !isNaN(action.rotation.x) && !isNaN(action.rotation.y) && !isNaN(action.rotation.z)) ||
+							action.angle)
+					) {
+						action.rotation = data.rotation;
 					}
 					if (!isNaN(data.width) && !isNaN(action.width)) {
 						action.width = data.width;
