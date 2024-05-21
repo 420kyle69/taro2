@@ -96,7 +96,7 @@ namespace Renderer {
 
 			scaleGui(scale: number) {
 				for (const unit of this.units) {
-					unit.hud.scale.setScalar(scale);
+					unit.setHudScale(scale);
 				}
 			}
 
