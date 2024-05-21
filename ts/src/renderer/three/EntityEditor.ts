@@ -6,7 +6,7 @@ namespace Renderer {
 			gizmo: EntityGizmo;
 
 			activeEntity: { id: string; player: string; entityType: string };
-			selectedInitEntity: InitEntity;
+			selectedInitEntity: InitEntity | Region;
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
@@ -172,7 +172,7 @@ namespace Renderer {
 				}
 			}
 
-			selectInitEntity(initEntity: InitEntity): void {
+			selectInitEntity(initEntity: InitEntity | Region): void {
 				if (initEntity === null) {
 					this.selectedInitEntity = null;
 					this.gizmo.control.detach();
@@ -210,7 +210,7 @@ namespace Renderer {
 			}
 
 			deleteInitEntity(): void {
-				if (this.selectedInitEntity) {
+				if (this.selectedInitEntity && this.selectedInitEntity instanceof InitEntity) {
 					this.selectedInitEntity.delete();
 					this.selectInitEntity(null);
 				}

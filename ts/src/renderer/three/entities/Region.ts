@@ -6,7 +6,7 @@ namespace Renderer {
 		}
 		export class Region extends Node {
 			gameObject: THREE.Object3D;
-			mesh: THREE.Mesh;
+			mesh: THREE.Mesh & { region?: Region };
 			stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number };
 			devModeOnly: boolean;
 			hud = new THREE.Group();
@@ -49,7 +49,8 @@ namespace Renderer {
 					transparent: true,
 				});
 
-				const mesh = (this.mesh = new THREE.Mesh(geometry, material));
+				const mesh = (this.mesh = new THREE.Mesh(geometry, material)) as THREE.Mesh & { region?: Region };
+				mesh.region = this;
 				mesh.position.set(x + width / 2, z + depth / 2, y + height / 2);
 				mesh.scale.set(width, depth, height);
 				this.add(mesh);

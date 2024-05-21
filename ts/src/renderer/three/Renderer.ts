@@ -212,6 +212,8 @@ namespace Renderer {
 													});
 													if (regionList.length === 1) {
 														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+														const clickedRegionMesh = clickedList[0] as THREE.Mesh & { region: Region };
+														this.entityEditor.selectInitEntity(clickedRegionMesh.region);
 													} else if (regionList.length > 1) {
 														inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
 													}

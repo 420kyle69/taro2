@@ -44,7 +44,7 @@ namespace Renderer {
 								editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
 								break;
 						}
-						if (editedAction) {
+						if (editedAction && renderer.entityEditor.selectedInitEntity instanceof InitEntity) {
 							renderer.entityEditor.selectedInitEntity.edit(editedAction);
 						}
 					}
