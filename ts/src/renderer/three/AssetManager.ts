@@ -32,6 +32,21 @@ namespace Renderer {
 
 				this.loaders.set('gltf', gltfLoader);
 				this.loaders.set('texture', new THREE.TextureLoader());
+
+				this.load([{ name: 'placeholderTexture', type: 'texture', src: '/assets/images/placeholder-texture.jpg' }]);
+
+				const geometry = new THREE.BoxGeometry(1, 1, 1);
+				const material = new THREE.MeshBasicMaterial({ color: 0xff00ff });
+				const scene = new THREE.Group();
+				scene.add(new THREE.Mesh(geometry, material));
+				const placeholderModel = {
+					animations: [],
+					scene: scene,
+					scenes: [scene],
+					cameras: [],
+					asset: {},
+				} as GLTF;
+				this.assets.set('placeholderModel', placeholderModel);
 			}
 
 			setFilter(filter: typeof THREE.LinearFilter | typeof THREE.NearestFilter) {
@@ -77,21 +92,14 @@ namespace Renderer {
 				}
 			}
 
-			get(name: string) {
-				return this.assets.get(name);
-			}
-
 			getTexture(name: string) {
-				return this.assets.get(name) as THREE.Texture;
-			}
-
-			getModel(name: string) {
-				return this.assets.get(name) as GLTF;
+				const placeholderTex = this.textures.get('placeholderTexture');
+				return (this.textures.get(name) as THREE.Texture) || placeholderTex;
 			}
 
 			getTexturesContaining(name: string) {
 				const textures: THREE.Texture[] = [];
-				for (const [key, value] of this.assets) {
+				for (const [key, value] of this.textures) {
 					if (key.includes(name) && value instanceof THREE.Texture) {
 						textures.push(value);
 					}
@@ -99,8 +107,9 @@ namespace Renderer {
 				return textures;
 			}
 
-			set(name: string, asset: Asset) {
-				this.assets.set(name, asset);
+			getModel(name: string) {
+				const placeholderModel = this.assets.get('placeholderModel') as GLTF;
+				return (this.assets.get(name) as GLTF) || placeholderModel;
 			}
 		}
 
