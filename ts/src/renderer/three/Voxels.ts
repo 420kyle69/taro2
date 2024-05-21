@@ -137,10 +137,12 @@ namespace Renderer {
 				const mat1 = new THREE.MeshBasicMaterial({
 					map: this.sidesTileset.texture,
 					side: THREE.DoubleSide,
+					alphaTest: 0.5,
 				});
 				const mat2 = new THREE.MeshBasicMaterial({
 					map: this.topTileset.texture,
 					side: THREE.DoubleSide,
+					alphaTest: 0.5,
 				});
 				const [mat1Preview, mat2Preview] = [mat1.clone(), mat2.clone()];
 				[mat1Preview, mat2Preview].forEach((mat) => {
