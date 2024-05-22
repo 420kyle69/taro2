@@ -22,8 +22,13 @@ namespace Renderer {
 					orbit.enabled = !event.value;
 					if (!event.value) {
 						// drag ended
-						const initEntity: InitEntity = control.object;
-						const editedAction = { actionId: initEntity.action.actionId };
+						const editedEntity = control.object;
+						let editedAction = {};
+						if (editedEntity instanceof Region) {
+							editedAction = { name: editedEntity.taroEntity._stats.id };
+						} else if (editedEntity instanceof InitEntity) {
+							editedAction = { actionId: editedEntity.action.actionId };
+						}
 						const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 						switch (control.mode) {
 							case 'translate':
