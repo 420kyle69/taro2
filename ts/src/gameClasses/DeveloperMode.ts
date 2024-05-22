@@ -716,17 +716,28 @@ class DeveloperMode {
 			if (region) region._stats.id = data.newKey;
 			taro.client.emit('update-region-name', { name: data.name, newName: data.newKey });
 		} else if (data.showModal) {
-			inGameEditor.addNewRegion &&
-				inGameEditor.addNewRegion({
+			const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+			if (is3D) {
+				taro.client.emit('add-region', {
 					name: data.name,
-					x: data.x,
-					y: data.y,
-					width: data.width,
-					height: data.height,
-					userId: data.userId,
+					position: { x: data.x, y: data.y },
+					scale: { x: data.width, z: data.height },
 					alpha: data.alpha,
 					inside: data.inside,
 				});
+			} else {
+				inGameEditor.addNewRegion &&
+					inGameEditor.addNewRegion({
+						name: data.name,
+						x: data.x,
+						y: data.y,
+						width: data.width,
+						height: data.height,
+						userId: data.userId,
+						alpha: data.alpha,
+						inside: data.inside,
+					});
+			}
 		}
 
 		inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
