@@ -88,6 +88,8 @@ namespace Renderer {
 						}
 						if (editedAction && renderer.entityEditor.selectedInitEntity instanceof InitEntity) {
 							renderer.entityEditor.selectedInitEntity.edit(editedAction);
+						} else if (editedAction && renderer.entityEditor.selectedInitEntity instanceof Region) {
+							inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(editedAction as RegionData);
 						}
 					}
 				});
