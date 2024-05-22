@@ -89,7 +89,13 @@ namespace Renderer {
 						if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
 							renderer.entityEditor.selectedEntity.edit(editedAction);
 						} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
-							inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
+							if (editedAction['position']) {
+								editedAction['position'].x -= Utils.worldToPixel(control.object.scale.x) / 2;
+								editedAction['position'].y -= Utils.worldToPixel(control.object.scale.z) / 2;
+								editedAction['position'].z -= Utils.worldToPixel(control.object.scale.y) / 2;
+							}
+							inGameEditor.updateRegionInReact &&
+								inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
 						}
 					}
 				});
