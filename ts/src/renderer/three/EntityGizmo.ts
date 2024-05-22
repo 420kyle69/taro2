@@ -86,9 +86,9 @@ namespace Renderer {
 								}
 								break;
 						}
-						if (editedAction && renderer.entityEditor.selectedInitEntity instanceof InitEntity) {
-							renderer.entityEditor.selectedInitEntity.edit(editedAction);
-						} else if (editedAction && renderer.entityEditor.selectedInitEntity instanceof Region) {
+						if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
+							renderer.entityEditor.selectedEntity.edit(editedAction);
+						} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
 							inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(editedAction as RegionData);
 						}
 					}

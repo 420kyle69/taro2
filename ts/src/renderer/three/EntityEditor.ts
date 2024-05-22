@@ -6,7 +6,7 @@ namespace Renderer {
 			gizmo: EntityGizmo;
 
 			activeEntity: { id: string; player: string; entityType: string };
-			selectedInitEntity: InitEntity | Region;
+			selectedEntity: InitEntity | Region;
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
@@ -15,30 +15,30 @@ namespace Renderer {
 
 				this.gizmo = new EntityGizmo();
 				taro.client.on('add-entities', () => {
-					this.selectInitEntity(null);
+					this.selectEntity(null);
 					this.activatePlacement(true);
 				});
 				taro.client.on('cursor', () => {
 					this.activatePlacement(false);
 				});
 				taro.client.on('draw-region', () => {
-					this.selectInitEntity(null);
+					this.selectEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('brush', () => {
-					this.selectInitEntity(null);
+					this.selectEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('empty-tile', () => {
-					this.selectInitEntity(null);
+					this.selectEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('fill', () => {
-					this.selectInitEntity(null);
+					this.selectEntity(null);
 					this.activatePlacement(false);
 				});
 				taro.client.on('clear', () => {
-					this.selectInitEntity(null);
+					this.selectEntity(null);
 				});
 				taro.client.on('updateActiveEntity', () => {
 					this.activeEntity = inGameEditor.getActiveEntity && inGameEditor.getActiveEntity();
@@ -74,7 +74,7 @@ namespace Renderer {
 
 				window.addEventListener('keydown', (event) => {
 					if (event.key === 'Delete' || event.key === 'Backspace') {
-						this.deleteInitEntity();
+						this.deleteEntity();
 					}
 				});
 			}
@@ -172,47 +172,22 @@ namespace Renderer {
 				}
 			}
 
-			selectInitEntity(initEntity: InitEntity | Region): void {
-				if (initEntity === null) {
-					this.selectedInitEntity = null;
+			selectEntity(entity: InitEntity | Region): void {
+				if (entity === null) {
+					this.selectedEntity = null;
 					this.gizmo.control.detach();
 					taro.client.emit('show-transform-modes', false);
 					return;
 				}
-				this.selectedInitEntity = initEntity;
-				this.gizmo.attach(initEntity);
+				this.selectedEntity = entity;
+				this.gizmo.attach(entity);
 				taro.client.emit('show-transform-modes', true);
 			}
 
-			rescaleInitEntity(
-				width: boolean,
-				height: boolean,
-				worldPoint: Phaser.Math.Vector2,
-				imagePoint: Phaser.Types.Math.Vector2Like,
-				selectedEntityImage: EntityImage,
-				editedAction: ActionData
-			): void {
-				const distanceToStart = Phaser.Math.Distance.Between(
-					imagePoint.x,
-					imagePoint.y,
-					selectedEntityImage.startDragX,
-					selectedEntityImage.startDragY
-				);
-				const distanceToCurrent = Phaser.Math.Distance.Between(imagePoint.x, imagePoint.y, worldPoint.x, worldPoint.y);
-				if (width) {
-					selectedEntityImage.image.scaleX = selectedEntityImage.scaleX * (distanceToCurrent / distanceToStart);
-					editedAction.width = Math.floor(selectedEntityImage.image.displayWidth);
-				}
-				if (height) {
-					selectedEntityImage.image.scaleY = selectedEntityImage.scaleY * (distanceToCurrent / distanceToStart);
-					editedAction.height = Math.floor(selectedEntityImage.image.displayHeight);
-				}
-			}
-
-			deleteInitEntity(): void {
-				if (this.selectedInitEntity && this.selectedInitEntity instanceof InitEntity) {
-					this.selectedInitEntity.delete();
-					this.selectInitEntity(null);
+			deleteEntity(): void {
+				if (this.selectedEntity && this.selectedEntity instanceof InitEntity) {
+					this.selectedEntity.delete();
+					this.selectEntity(null);
 				}
 			}
 		}
