@@ -167,11 +167,11 @@ namespace Renderer {
 											}
 											if (
 												initEntity &&
-												(this.entityEditor.selectedInitEntity === null ||
-													this.entityEditor.selectedInitEntity === undefined ||
-													this.entityEditor.selectedInitEntity.uuid !== initEntity.uuid)
+												(this.entityEditor.selectedEntity === null ||
+													this.entityEditor.selectedEntity === undefined ||
+													this.entityEditor.selectedEntity.uuid !== initEntity.uuid)
 											) {
-												this.entityEditor.selectInitEntity(initEntity);
+												this.entityEditor.selectEntity(initEntity);
 												taro.client.emit('block-rotation', !!initEntity.isBillboard);
 												//double click
 												let clickDelay = taro._currentTime - lastTime;
@@ -184,7 +184,7 @@ namespace Renderer {
 											}
 										} else {
 											if (!this.entityEditor.gizmo.control.dragging) {
-												this.entityEditor.selectInitEntity(null);
+												this.entityEditor.selectEntity(null);
 												intersects = raycaster.intersectObjects(this.entityManager.entities);
 												if (intersects?.length > 0) {
 													let closest: THREE.Mesh;
@@ -213,7 +213,7 @@ namespace Renderer {
 													if (regionList.length === 1) {
 														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
 														const clickedRegionMesh = clickedList[0] as THREE.Mesh & { region: Region };
-														this.entityEditor.selectInitEntity(clickedRegionMesh.region);
+														this.entityEditor.selectEntity(clickedRegionMesh.region);
 														taro.client.emit('block-rotation', true);
 													} else if (regionList.length > 1) {
 														inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
@@ -594,8 +594,8 @@ namespace Renderer {
 				this.voxelEditor.voxels.updateLayer(new Map(), this.voxelEditor.currentLayerIndex);
 				this.voxelEditor.showAllLayers();
 
-				if (this.entityEditor.selectedInitEntity) {
-					this.entityEditor.selectInitEntity(null);
+				if (this.entityEditor.selectedEntity) {
+					this.entityEditor.selectEntity(null);
 				}
 
 				this.entityManager.initEntities.forEach((initEntity) => {

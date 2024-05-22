@@ -86,6 +86,7 @@ namespace Renderer {
 
 						this.position.set(x + width / 2, z + depth / 2, y + height / 2);
 						this.scale.set(width, depth, height);
+						this.hud.scale.set(1 / width, 1 / depth, 1 / height);
 					},
 					this
 				);
