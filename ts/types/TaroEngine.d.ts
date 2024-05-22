@@ -96,4 +96,6 @@ declare class TaroEngine extends TaroClass {
 		type: 'top' | 'side';
 		onlyIndex?: boolean;
 	}) => any;
+
+	is3D: () => boolean;
 }

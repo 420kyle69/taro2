@@ -661,7 +661,7 @@ class DeveloperMode {
 						key: data.name,
 						alpha: data.alpha,
 						inside: data.inside,
-					},
+					} as any,
 					id: data.name,
 					value: {
 						x: data.x,
@@ -671,9 +671,17 @@ class DeveloperMode {
 						key: data.name,
 						alpha: data.alpha,
 						inside: data.inside,
-					},
+					} as any,
 				};
-				const region = new Region(regionData);
+				if (taro.is3D()) {
+					regionData.default.z = data.z;
+					regionData.default.depth = data.depth;
+
+					regionData.value.depth = data.depth;
+					regionData.value.z = data.z;
+				}
+				
+				new Region(regionData);
 
 				// create new region in game.data
 				taro.regionManager.updateRegionToDatabase(regionData);
@@ -716,28 +724,17 @@ class DeveloperMode {
 			if (region) region._stats.id = data.newKey;
 			taro.client.emit('update-region-name', { name: data.name, newName: data.newKey });
 		} else if (data.showModal) {
-			const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
-			if (is3D) {
-				taro.client.emit('add-region', {
+			inGameEditor.addNewRegion &&
+				inGameEditor.addNewRegion({
 					name: data.name,
-					position: { x: data.x, y: data.y },
-					scale: { x: data.width, z: data.height },
+					x: data.x,
+					y: data.y,
+					width: data.width,
+					height: data.height,
+					userId: data.userId,
 					alpha: data.alpha,
 					inside: data.inside,
 				});
-			} else {
-				inGameEditor.addNewRegion &&
-					inGameEditor.addNewRegion({
-						name: data.name,
-						x: data.x,
-						y: data.y,
-						width: data.width,
-						height: data.height,
-						userId: data.userId,
-						alpha: data.alpha,
-						inside: data.inside,
-					});
-			}
 		}
 
 		inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
@@ -753,8 +750,12 @@ class DeveloperMode {
 					if (variable.newKey) regionData.newKey = variable.newKey;
 					if (!isNaN(variable.value?.x)) regionData.x = variable.value.x;
 					if (!isNaN(variable.value?.y)) regionData.y = variable.value.y;
+					if (!isNaN(variable.value?.z)) regionData.z = variable.value.z;
+
 					if (!isNaN(variable.value?.width)) regionData.width = variable.value.width;
 					if (!isNaN(variable.value?.height)) regionData.height = variable.value.height;
+					if (!isNaN(variable.value?.depth)) regionData.depth = variable.value.depth;
+
 					if (variable.value?.inside || variable.value?.inside === '') regionData.inside = variable.value.inside;
 					if (variable.value?.alpha) regionData.alpha = variable.value.alpha;
 					if (variable.value?.create) regionData.create = variable.value.create;
@@ -996,7 +997,7 @@ class DeveloperMode {
 		});
 	}
 
-	createProjectile(data) {}
+	createProjectile(data) { }
 
 	updateProjectile(data) {
 		// 1. broadcast update to all players
@@ -1290,14 +1291,24 @@ type MapEditToolEnum = keyof MapEditTool;
 
 type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>;
 
+interface RegionVector3 {
+	x: number,
+	y?: number,
+	z?: number
+};
+
 interface RegionData {
 	userId?: string;
+	position?: RegionVector3;
+	scale?: RegionVector3;
 	name: string;
 	newKey?: string;
 	x?: number;
 	y?: number;
+	z?: number;
 	width?: number;
 	height?: number;
+	depth?: number;
 	inside?: string;
 	alpha?: number;
 	create?: boolean;

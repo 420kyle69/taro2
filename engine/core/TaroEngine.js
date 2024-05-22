@@ -2300,7 +2300,11 @@ var TaroEngine = TaroEntity.extend({
 					return '&#039;';
 			}
 		});
-	}
+	},
+
+	is3D () {
+		return taro.game.data.defaultData.defaultRenderer === '3d';
+	},
 });
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
