@@ -172,7 +172,7 @@ namespace Renderer {
 													this.entityEditor.selectedInitEntity.uuid !== initEntity.uuid)
 											) {
 												this.entityEditor.selectInitEntity(initEntity);
-												taro.client.emit('entity-billboard', !!initEntity.isBillboard);
+												taro.client.emit('block-rotation', !!initEntity.isBillboard);
 												//double click
 												let clickDelay = taro._currentTime - lastTime;
 												lastTime = taro._currentTime;
@@ -214,6 +214,7 @@ namespace Renderer {
 														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
 														const clickedRegionMesh = clickedList[0] as THREE.Mesh & { region: Region };
 														this.entityEditor.selectInitEntity(clickedRegionMesh.region);
+														taro.client.emit('block-rotation', true);
 													} else if (regionList.length > 1) {
 														inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
 													}
