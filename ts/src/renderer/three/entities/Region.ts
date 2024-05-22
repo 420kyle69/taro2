@@ -7,7 +7,7 @@ namespace Renderer {
 		export class Region extends Node {
 			gameObject: THREE.Object3D;
 			mesh: THREE.Mesh & { region?: Region };
-			stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number };
+			stats: { x: number; y: number; z?: number; width: number; height: number; depth?: number; inside?: string; alpha?: number; };
 			devModeOnly: boolean;
 			hud = new THREE.Group();
 			label = new Label({ renderOnTop: true });

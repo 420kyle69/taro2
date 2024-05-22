@@ -203,8 +203,10 @@ namespace Renderer {
 																name: region.taroEntity._stats.id,
 																x: region.stats.x,
 																y: region.stats.y,
+																z: region.stats.z,
 																width: region.stats.width,
 																height: region.stats.height,
+																depth: region.stats.depth,
 																alpha: region.stats.alpha,
 																inside: region.stats.inside,
 															});

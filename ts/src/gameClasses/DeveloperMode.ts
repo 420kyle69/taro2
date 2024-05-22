@@ -706,6 +706,8 @@ class DeveloperMode {
 							{ height: data.height !== region._stats.default.height ? data.height : null },
 							{ alpha: data.alpha !== region._stats.default.alpha ? data.alpha : null },
 							{ inside: data.inside !== region._stats.default.inside ? data.inside : null },
+							{ depth: data.depth !== region._stats.default.depth ? data.depth : null },
+							{ z: data.z !== region._stats.default.z ? data.z : null },
 						];
 						statsData = statsData.filter((obj) => obj[Object.keys(obj)[0]] !== null);
 						if (data.inside === '') statsData.push({ inside: '' });
@@ -734,6 +736,8 @@ class DeveloperMode {
 					userId: data.userId,
 					alpha: data.alpha,
 					inside: data.inside,
+					z: data.z,
+					depth: data.depth
 				});
 		}
 

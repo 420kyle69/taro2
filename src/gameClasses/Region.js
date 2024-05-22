@@ -82,14 +82,14 @@ var Region = TaroEntityPhysics.extend({
 		);
 		this.width(regionCordinates.width);
 		this.height(regionCordinates.height);
-		//this.depth(regionCordinates.depth || 0);
+		this.depth(regionCordinates.depth || 0);
 
 		if (taro.isServer) {
 			var shapeData = {};
 			var normalizer = 0.45;
 			shapeData.width = regionCordinates.width * normalizer;
 			shapeData.height = regionCordinates.height * normalizer;
-			//shapeData.depth = regionCordinates.depth * normalizer;
+			shapeData.depth = regionCordinates.depth * normalizer;
 			// shapeData.x = regionCordinates.x;
 			// shapeData.y = regionCordinates.y;
 			this._stats.currentBody.fixtures[0].shape.data = shapeData;
