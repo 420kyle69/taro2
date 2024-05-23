@@ -147,6 +147,9 @@ namespace Renderer {
 						} else if (developerMode.active && developerMode.activeTab === 'map') {
 							if (Utils.isLeftButton(event.buttons)) {
 								this.voxelEditor.leftButtonDown = true;
+								//double click
+								let clickDelay = taro._currentTime - lastTime;
+								lastTime = taro._currentTime;
 								switch (developerMode.activeButton) {
 									case 'cursor': {
 										const raycaster = new THREE.Raycaster();
@@ -173,9 +176,6 @@ namespace Renderer {
 											) {
 												this.entityEditor.selectEntity(initEntity);
 												taro.client.emit('block-rotation', !!initEntity.isBillboard);
-												//double click
-												let clickDelay = taro._currentTime - lastTime;
-												lastTime = taro._currentTime;
 												if (clickDelay < 350) {
 													if (inGameEditor && inGameEditor.showScriptForEntity) {
 														inGameEditor.showScriptForEntity(initEntity.action.actionId);
@@ -213,12 +213,16 @@ namespace Renderer {
 														}
 													});
 													if (regionList.length === 1) {
-														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+														if (clickDelay < 350) {
+															inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+														}
 														const clickedRegionMesh = clickedList[0] as THREE.Mesh & { region: Region };
 														this.entityEditor.selectEntity(clickedRegionMesh.region);
 														taro.client.emit('block-rotation', true);
 													} else if (regionList.length > 1) {
-														inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
+														if (clickDelay < 350) {
+															inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
+														}
 													}
 												}
 											}
