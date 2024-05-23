@@ -677,10 +677,10 @@ class DeveloperMode {
 					regionData.default.z = data.z;
 					regionData.default.depth = data.depth;
 
-					regionData.value.depth = data.depth;
 					regionData.value.z = data.z;
+					regionData.value.depth = data.depth;
 				}
-				
+
 				new Region(regionData);
 
 				// create new region in game.data
@@ -702,12 +702,12 @@ class DeveloperMode {
 						let statsData = [
 							{ x: data.x !== region._stats.default.x ? data.x : null },
 							{ y: data.y !== region._stats.default.y ? data.y : null },
+							{ z: data.z !== region._stats.default.z ? data.z : null },
 							{ width: data.width !== region._stats.default.width ? data.width : null },
 							{ height: data.height !== region._stats.default.height ? data.height : null },
+							{ depth: data.depth !== region._stats.default.depth ? data.depth : null },
 							{ alpha: data.alpha !== region._stats.default.alpha ? data.alpha : null },
 							{ inside: data.inside !== region._stats.default.inside ? data.inside : null },
-							{ depth: data.depth !== region._stats.default.depth ? data.depth : null },
-							{ z: data.z !== region._stats.default.z ? data.z : null },
 						];
 						statsData = statsData.filter((obj) => obj[Object.keys(obj)[0]] !== null);
 						if (data.inside === '') statsData.push({ inside: '' });
@@ -731,13 +731,13 @@ class DeveloperMode {
 					name: data.name,
 					x: data.x,
 					y: data.y,
+					z: data.z,
 					width: data.width,
 					height: data.height,
+					depth: data.depth,
 					userId: data.userId,
 					alpha: data.alpha,
 					inside: data.inside,
-					z: data.z,
-					depth: data.depth
 				});
 		}
 
@@ -1001,7 +1001,7 @@ class DeveloperMode {
 		});
 	}
 
-	createProjectile(data) { }
+	createProjectile(data) {}
 
 	updateProjectile(data) {
 		// 1. broadcast update to all players
@@ -1296,10 +1296,10 @@ type MapEditToolEnum = keyof MapEditTool;
 type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>;
 
 interface RegionVector3 {
-	x: number,
-	y?: number,
-	z?: number
-};
+	x: number;
+	y?: number;
+	z?: number;
+}
 
 interface RegionData {
 	userId?: string;

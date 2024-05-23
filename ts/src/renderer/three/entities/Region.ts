@@ -7,7 +7,16 @@ namespace Renderer {
 		export class Region extends Node {
 			gameObject: THREE.Object3D;
 			mesh: THREE.Mesh & { region?: Region };
-			stats: { x: number; y: number; z?: number; width: number; height: number; depth?: number; inside?: string; alpha?: number; };
+			stats: {
+				x: number;
+				y: number;
+				z?: number;
+				width: number;
+				height: number;
+				depth?: number;
+				inside?: string;
+				alpha?: number;
+			};
 			devModeOnly: boolean;
 			hud = new THREE.Group();
 			label = new Label({ renderOnTop: true });
@@ -77,12 +86,12 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					() => {
-						/*const x = Utils.pixelToWorld(stats.x);
+						const x = Utils.pixelToWorld(stats.x);
 						const y = Utils.pixelToWorld(stats.y);
 						const z = Utils.pixelToWorld(stats.z) || 0;
 						const width = Utils.pixelToWorld(stats.width);
 						const height = Utils.pixelToWorld(stats.height);
-						const depth = Utils.pixelToWorld(stats.depth) || 3;*/
+						const depth = Utils.pixelToWorld(stats.depth) || 3;
 
 						this.position.set(x + width / 2, z + depth / 2, y + height / 2);
 						this.scale.set(width, depth, height);
