@@ -192,7 +192,7 @@ namespace Renderer {
 						name: this.selectedEntity.taroEntity._stats.id,
 						delete: true,
 					};
-					inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
+					inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data, 'threejs');
 				}
 				this.selectEntity(null);
 			}
