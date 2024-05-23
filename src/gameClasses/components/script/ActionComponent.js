@@ -406,7 +406,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'runEntityScript':
 						var previousScriptId = self._script.currentScriptId;
 						var previousAcionBlockIdx = self._script.currentActionLineNumber;
-						
+
 						var entity = self._script.param.getValue(action.entity, vars);
 						if (entity) {
 							const scriptParams = { ...vars, triggeredFrom: vars.isWorldScript ? 'world' : 'map' };
@@ -870,7 +870,7 @@ var ActionComponent = TaroEntity.extend({
 						var userId = ownerPlayer._stats.userId;
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
-							
+
 							if (taro.game.isWorldMap && !vars.isWorldScript) {
 								self._script.errorLog('can not save unit data from map');
 								console.log('can not save unit data from map', path);
@@ -890,9 +890,9 @@ var ActionComponent = TaroEntity.extend({
 					case 'savePlayerData':
 						var player = self._script.param.getValue(action.player, vars);
 						var userId = player && player._stats && player._stats.userId;
-						
+
 						if (player && userId && player.persistentDataLoaded) {
-							
+
 							if (taro.game.isWorldMap && !vars.isWorldScript) {
 								self._script.errorLog('can not save player data from map');
 								console.log('can not save player data from map', path);
@@ -1193,6 +1193,14 @@ var ActionComponent = TaroEntity.extend({
 						var player = self._script.param.getValue(action.player, vars);
 						var questId = self._script.param.getValue(action.questId, vars);
 						player.quest.removeQuest(questId);
+
+						taro.game.lastTriggeringQuestId = questId;
+						if (selectedUnit && selectedUnit.script) {
+							triggeredBy.unitId = selectedUnit.id();
+							selectedUnit.script.trigger('questRemoved', triggeredBy);
+						}
+						triggeredBy.playerId = player.id();
+						taro.script.trigger('questRemoved', triggeredBy);
 						// console.log('addQuest', JSON.stringify(player.quests));
 						break;
 
@@ -1203,6 +1211,13 @@ var ActionComponent = TaroEntity.extend({
 						var goal = self._script.param.getValue(action.goal, vars);
 						var description = self._script.param.getValue(action.description, vars);
 						player.quest.addQuest(questId, { name, description, goal, progress: 0 });
+						taro.game.lastTriggeringQuestId = questId;
+						if (selectedUnit && selectedUnit.script) {
+							triggeredBy.unitId = selectedUnit.id();
+							selectedUnit.script.trigger('questAdded', triggeredBy);
+						}
+						triggeredBy.playerId = player.id();
+						taro.script.trigger('questAdded', triggeredBy);
 						// console.log('addQuest', JSON.stringify(player.quests));
 						break;
 
@@ -1214,13 +1229,13 @@ var ActionComponent = TaroEntity.extend({
 						if (newObj.active[gameId] && newObj['active'][gameId][questId]) {
 							var selectedUnit = player.getSelectedUnit();
 							var triggeredBy = {};
-							taro.game.lastCompletedQuestId = questId;
+							taro.game.lastTriggeringQuestId = questId;
+							player.quest.completeQuest(questId);
 							if (selectedUnit && selectedUnit.script) {
 								triggeredBy.unitId = selectedUnit.id();
 								selectedUnit.script.trigger('questCompleted', triggeredBy);
 							}
 							triggeredBy.playerId = player.id();
-							player.quest.completeQuest(questId);
 							taro.script.trigger('questCompleted', triggeredBy);
 						}
 						// console.log('completeQuest', JSON.stringify(player.quests));
@@ -1239,7 +1254,7 @@ var ActionComponent = TaroEntity.extend({
 								player.quest.setProgress(questId, Math.min(progress, quests.active[gameId][questId].goal));
 								var selectedUnit = player.getSelectedUnit();
 								var triggeredBy = {};
-								taro.game.lastProgressUpdatedQuestId = questId;
+								taro.game.lastTriggeringQuestId = questId;
 								triggeredBy.playerId = player.id();
 								taro.script.trigger('questProgressUpdated', triggeredBy);
 								if (
@@ -1248,7 +1263,7 @@ var ActionComponent = TaroEntity.extend({
 								) {
 									var selectedUnit = player.getSelectedUnit();
 									var triggeredBy = {};
-									taro.game.lastProgressCompletedQuestId = questId;
+									taro.game.lastTriggeringQuestId = questId;
 									if (selectedUnit && selectedUnit.script) {
 										triggeredBy.unitId = selectedUnit.id();
 										selectedUnit.script.trigger('questProgressCompleted', triggeredBy);
@@ -3529,7 +3544,7 @@ var ActionComponent = TaroEntity.extend({
 						}
 
 						break;
- 
+
 					case 'rotateEntityToRadians':
 					case 'rotateEntityToRadiansLT': // No more LT.
 						var entity = self._script.param.getValue(action.entity, vars);
