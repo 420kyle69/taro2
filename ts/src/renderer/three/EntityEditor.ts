@@ -187,8 +187,14 @@ namespace Renderer {
 			deleteEntity(): void {
 				if (this.selectedEntity && this.selectedEntity instanceof InitEntity) {
 					this.selectedEntity.delete();
-					this.selectEntity(null);
+				} else if (this.selectedEntity && this.selectedEntity instanceof Region) {
+					const data = {
+						name: this.selectedEntity.taroEntity._stats.id,
+						delete: true,
+					};
+					inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
 				}
+				this.selectEntity(null);
 			}
 		}
 	}
