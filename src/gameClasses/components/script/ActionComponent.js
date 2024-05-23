@@ -867,7 +867,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'saveUnitData':
 						var unit = self._script.param.getValue(action.unit, vars);
 						var ownerPlayer = unit.getOwner();
-						var userId = ownerPlayer._stats.userId;
+						var userId = ownerPlayer._stats.userId || ownerPlayer._stats.guestUserId;
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
 							
@@ -889,8 +889,8 @@ var ActionComponent = TaroEntity.extend({
 						break;
 					case 'savePlayerData':
 						var player = self._script.param.getValue(action.player, vars);
-						var userId = player && player._stats && player._stats.userId;
-						
+						var userId = player && player._stats && (player._stats.userId || player._stats.guestUserId);
+
 						if (player && userId && player.persistentDataLoaded) {
 							
 							if (taro.game.isWorldMap && !vars.isWorldScript) {
