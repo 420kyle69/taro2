@@ -146,9 +146,9 @@ var Player = TaroEntity.extend({
 					self.streamUpdateData(playerJoinStreamData);
 				}
 			}
-			
-			if (self._stats.userId || self._stats.guestUserId) {
-				taro.workerComponent && taro.workerComponent.playerJoined(clientId, self._stats.userId, self._stats.guestUserId);
+
+			if (self._stats.userId) {
+				taro.workerComponent && taro.workerComponent.playerJoined(self._stats.userId);
 			}
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
