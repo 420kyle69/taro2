@@ -2790,6 +2790,11 @@ var ParameterComponent = TaroEntity.extend({
 				}
 			},
 
+			computerPlayer: function (text, vars) {
+				var number = self.getValue(text.number, vars);
+				return taro.game.getComputerPlayerByNumber(number);
+			},
+
 			/* unit */
 
 			getTriggeringUnit: function (text, vars) {
@@ -3003,6 +3008,7 @@ var ParameterComponent = TaroEntity.extend({
 
 			getVariable: function (text, vars) {
 				var name = self.getValue(text.variableName, vars);
+				// console.log(name);
 				return self.getVariable(name);
 			},
 
