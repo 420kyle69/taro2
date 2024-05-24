@@ -107,6 +107,7 @@ namespace Renderer {
 				const entity = taro.game.data[entityData.entityType] && taro.game.data[entityData.entityType][entityData.id];
 				let height: number;
 				let width: number;
+				let depth: number;
 				let key: string;
 
 				if (entityData.entityType === 'unitTypes') {
@@ -114,6 +115,7 @@ namespace Renderer {
 					if (entity.bodies?.default) {
 						height = entity.bodies.default.height;
 						width = entity.bodies.default.width;
+						depth = entity.bodies.default.depth;
 					} else {
 						console.log('no default body for unit', entityData.id);
 						return;
@@ -123,6 +125,7 @@ namespace Renderer {
 					if (entity.bodies?.dropped) {
 						height = entity.bodies.dropped.height;
 						width = entity.bodies.dropped.width;
+						depth = entity.bodies.dropped.depth;
 					} else {
 						console.log('no dropped body for item', entityData.id);
 						return;
@@ -132,6 +135,7 @@ namespace Renderer {
 					if (entity.bodies?.default) {
 						height = entity.bodies.default.height;
 						width = entity.bodies.default.width;
+						depth = entity.bodies.default.depth;
 					} else {
 						console.log('no default body for projectile', entityData.id);
 						return;
@@ -141,6 +145,7 @@ namespace Renderer {
 				const rows = entity.cellSheet.rowCount || 1;
 				if (entity.is3DObject) {
 					this.preview = new Renderer.Three.Model(key);
+					this.preview.setSize(Utils.pixelToWorld(width), Utils.pixelToWorld(depth), Utils.pixelToWorld(height));
 					this.preview.setOpacity(0.5);
 					renderer.initEntityLayer.add(this.preview);
 				} else {
@@ -151,10 +156,10 @@ namespace Renderer {
 
 					this.preview = new Renderer.Three.AnimatedSprite(texture) as Renderer.Three.AnimatedSprite;
 					this.preview.setBillboard(entity.isBillboard, renderer.camera);
+					this.preview.scale.set(Utils.pixelToWorld(width), 1, Utils.pixelToWorld(height));
 					this.preview.setOpacity(0.5);
 					renderer.initEntityLayer.add(this.preview);
 				}
-				this.preview.scale.set(Utils.pixelToWorld(width), 1, Utils.pixelToWorld(height));
 			}
 
 			update(): void {

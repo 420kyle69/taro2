@@ -74,12 +74,21 @@ namespace Renderer {
 								break;
 							case 'scale':
 								if (is3D) {
-									editedAction['scale'] = {
-										x: Utils.worldToPixel(control.object.body.getSize().x),
-										y: Utils.worldToPixel(control.object.body.getSize().z),
-										z: Utils.worldToPixel(control.object.body.getSize().y),
-										function: 'vector3',
-									};
+									if (control.object.body instanceof AnimatedSprite) {
+										editedAction['scale'] = {
+											x: Utils.worldToPixel(control.object.body.width),
+											y: Utils.worldToPixel(control.object.body.height),
+											z: Utils.worldToPixel(0),
+											function: 'vector3',
+										};
+									} else if (control.object.body instanceof THREE.Mesh) {
+										editedAction['scale'] = {
+											x: Utils.worldToPixel(control.object.body.getSize().x),
+											y: Utils.worldToPixel(control.object.body.getSize().z),
+											z: Utils.worldToPixel(control.object.body.getSize().y),
+											function: 'vector3',
+										};
+									}
 								} else {
 									editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
 									editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
