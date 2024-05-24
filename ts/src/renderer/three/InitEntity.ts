@@ -65,13 +65,21 @@ namespace Renderer {
 						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 					}
 					if (!isNaN(action.scale?.x) && !isNaN(action.scale?.y) && !isNaN(action.scale?.z)) {
-						this.setSize(
-							Utils.pixelToWorld(action.scale.x),
-							Utils.pixelToWorld(action.scale.z),
-							Utils.pixelToWorld(action.scale.y)
-						);
+						if (body instanceof AnimatedSprite) {
+							this.scale.set(Utils.pixelToWorld(action.scale.x), 1, Utils.pixelToWorld(action.scale.y));
+						} else if (body instanceof Model) {
+							this.setSize(
+								Utils.pixelToWorld(action.scale.x),
+								Utils.pixelToWorld(action.scale.z),
+								Utils.pixelToWorld(action.scale.y)
+							);
+						}
 					} else if (!isNaN(action.width) && !isNaN(action.height)) {
-						this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+						if (body instanceof AnimatedSprite) {
+							this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+						} else if (body instanceof Model) {
+							this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+						}
 					}
 				} else {
 					if (!isNaN(action.angle)) {
