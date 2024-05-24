@@ -76,9 +76,9 @@ namespace Renderer {
 								if (is3D) {
 									if (control.object.body instanceof AnimatedSprite) {
 										editedAction['scale'] = {
-											x: Utils.worldToPixel(control.object.body.width),
-											y: Utils.worldToPixel(control.object.body.height),
-											z: Utils.worldToPixel(0),
+											x: Utils.worldToPixel(control.object.scale.x),
+											y: Utils.worldToPixel(0),
+											z: Utils.worldToPixel(control.object.scale.y),
 											function: 'vector3',
 										};
 									} else if (control.object.body instanceof THREE.Mesh) {
