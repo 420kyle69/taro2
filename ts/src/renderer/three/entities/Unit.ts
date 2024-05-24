@@ -47,7 +47,7 @@ namespace Renderer {
 			static create(taroEntity: TaroEntityPhysics) {
 				const renderer = Three.instance();
 				const entity = new Unit(taroEntity._id, taroEntity._stats.ownerId, taroEntity);
-				entity.hud.scale.setScalar(1 / renderer.camera.lastAuthoritativeZoom);
+				entity.setHudScale(1 / renderer.camera.lastAuthoritativeZoom);
 
 				if (taroEntity._stats.cameraPointerLock) {
 					entity.cameraConfig.pointerLock = taroEntity._stats.cameraPointerLock;
@@ -230,6 +230,12 @@ namespace Renderer {
 				}
 			}
 
+			setHudScale(scale: number) {
+				this.hud.scale.setScalar(scale);
+				this.updateAttributesOffset();
+				this.updateLabelOffset();
+			}
+
 			private getBodyHeightInPixels() {
 				let unitHeightPx = 0;
 				if (this.body instanceof AnimatedSprite) {
@@ -243,15 +249,17 @@ namespace Renderer {
 			private updateAttributesOffset() {
 				const halfHeight = this.getBodyHeightInPixels() * 0.5;
 				const spacing = halfHeight + 16;
-				this.attributes.setMargin(spacing);
+				const scaling = 1 / this.hud.scale.y;
+				this.attributes.setMargin(spacing * scaling);
 			}
 
 			private updateLabelOffset() {
 				const halfHeight = this.getBodyHeightInPixels() * 0.5;
 				let topOfTopBars = halfHeight + this.attributes.topBarsHeight;
-				if (this.attributes.topBarsHeight > 0) topOfTopBars += 16;
+				const scaling = 1 / this.hud.scale.y;
+				if (this.attributes.topBarsHeight > 0) topOfTopBars += 16 * scaling;
 				this.label.setCenterY(1);
-				this.label.setOffsetY(16 + topOfTopBars);
+				this.label.setOffsetY(16 * scaling + topOfTopBars);
 			}
 		}
 	}

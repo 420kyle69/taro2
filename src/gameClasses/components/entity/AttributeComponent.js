@@ -299,6 +299,7 @@ var AttributeComponent = TaroEntity.extend({
 							attributeTypeId == taro.game.data.settings.scoreAttributeId || // always stream attribute that's used for scoreboard
 							attributeTypeId === taro.game.data.settings.persistentScoreAttributeId
 						) {
+							// console.log('playerId', this._entity.id(), 'data', attrData);
 							self._entity.streamUpdateData([attrData]);
 						} else if (attribute.streamMode == 3) {
 							self._entity.streamUpdateData([attrData], clientId);

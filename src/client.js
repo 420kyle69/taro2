@@ -594,6 +594,7 @@ const Client = TaroEventingClass.extend({
 			// old comment => 'create a listener that will fire whenever an entity is created because of the incoming stream data'
 			taro.network.stream.on('entityCreated', (entity) => {
 				if (entity._category == 'player') {
+					console.log('player created', entity._stats.clientId);
 					// old comment => 'apply skin to all units owned by this player'
 					const player = entity;
 

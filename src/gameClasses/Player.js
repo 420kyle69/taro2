@@ -34,7 +34,7 @@ var Player = TaroEntity.extend({
 		self.addComponent(QuestComponent);
 
 		if (taro.isServer) {
-			this.streamMode(2);
+			this.streamMode(1);
 			// self._stats.unitId = self.getCurrentUnit().id()
 			self.addComponent(ControlComponent);
 			taro.server.totalPlayersCreated++;
@@ -137,6 +137,7 @@ var Player = TaroEntity.extend({
 						];
 					}
 
+					// Adding script data and default variables to the player join stream data for developer clients
 					if (taro.server.developerClientIds.includes(clientId)) {
 						playerJoinStreamData.push({ scriptData: taro.game.data.scripts });
 						playerJoinStreamData.push({ variableData: taro.defaultVariables });
