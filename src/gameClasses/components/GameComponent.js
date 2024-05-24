@@ -48,9 +48,9 @@ var GameComponent = TaroEntity.extend({
 
 		taro.script.trigger('gameStart');
 		self.hasStarted = true;
-		self.isWorld = !!(taro.game?.data?.defaultData?.isWorld);
-		self.isWorldMap = !!(taro.game?.data?.defaultData?.worldId);
-		
+		self.isWorld = !!taro.game?.data?.defaultData?.isWorld;
+		self.isWorldMap = !!taro.game?.data?.defaultData?.worldId;
+
 		taro.timer.startGameClock();
 
 		taro._physicsTickRate = Math.max(20, Math.min(60, taro.game?.data?.defaultData?.frameRate || 20));
@@ -202,6 +202,13 @@ var GameComponent = TaroEntity.extend({
 	getPlayerByUserId: function (userId) {
 		return taro.$$('player').find(function (player) {
 			return player._stats && player._stats.userId == userId;
+		});
+	},
+
+	// numbers are between 1 and 10
+	getComputerPlayerByNumber: function (number) {
+		return taro.$$('player').find(function (player) {
+			return player._stats.clientId == number;
 		});
 	},
 

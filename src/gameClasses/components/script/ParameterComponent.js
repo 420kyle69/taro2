@@ -482,6 +482,26 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'getAllActiveQuestObjectsInThisMap':
+						var player = self.getValue(text.player, vars);
+						var quests = player.quests;
+						var questId = self.getValue(text.questId, vars);
+						var gameId = taro.game.data.defaultData._id;
+						if (quests && quests.active) {
+							returnValue = quests.active[gameId];
+						}
+
+						break;
+
+					case 'getAllActiveQuestObjects':
+						var player = self.getValue(text.player, vars);
+						var quests = player.quests;
+						if (quests && quests.active) {
+							returnValue = quests.active;
+						}
+
+						break;
+
 					case 'getQuestProgress':
 						var player = self.getValue(text.player, vars);
 						var questId = self.getValue(text.questId, vars);
@@ -1083,20 +1103,8 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
-					case 'getLastCompletedQuestId':
-						var id = taro.game.lastCompletedQuestId;
-						returnValue = id;
-
-						break;
-
-					case 'getLastProgressUpdatedQuestId':
-						var id = taro.game.lastProgressUpdatedQuestId;
-						returnValue = id;
-
-						break;
-
-					case 'getLastProgressCompletedQuestId':
-						var id = taro.game.lastProgressCompletedQuestId;
+					case 'getLastTriggeringQuestId':
+						var id = taro.game.lastTriggeringQuestId;
 						returnValue = id;
 
 						break;
@@ -2782,6 +2790,11 @@ var ParameterComponent = TaroEntity.extend({
 				}
 			},
 
+			computerPlayer: function (text, vars) {
+				var number = self.getValue(text.number, vars);
+				return taro.game.getComputerPlayerByNumber(number);
+			},
+
 			/* unit */
 
 			getTriggeringUnit: function (text, vars) {
@@ -2995,6 +3008,7 @@ var ParameterComponent = TaroEntity.extend({
 
 			getVariable: function (text, vars) {
 				var name = self.getValue(text.variableName, vars);
+				// console.log(name);
 				return self.getVariable(name);
 			},
 
