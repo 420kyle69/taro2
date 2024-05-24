@@ -868,6 +868,7 @@ var ActionComponent = TaroEntity.extend({
 						var unit = self._script.param.getValue(action.unit, vars);
 						var ownerPlayer = unit.getOwner();
 						var userId = ownerPlayer._stats.userId || ownerPlayer._stats.guestUserId;
+						var isGuestUser = !!(!player._stats.userId && player._stats.guestUserId);
 
 						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
 							
@@ -878,7 +879,7 @@ var ActionComponent = TaroEntity.extend({
 							}
 
 							var data = unit.getPersistentData('unit');
-							taro.workerComponent.saveUserData(userId, data, 'unit', 'saveUnitData');
+							taro.workerComponent.saveUserData(userId, data, 'unit', 'saveUnitData', isGuestUser);
 						} else {
 							if (unit && !unit.persistentDataLoaded) {
 								throw new Error('Fail saving unit data bcz persisted data not set correctly');
@@ -890,6 +891,7 @@ var ActionComponent = TaroEntity.extend({
 					case 'savePlayerData':
 						var player = self._script.param.getValue(action.player, vars);
 						var userId = player && player._stats && (player._stats.userId || player._stats.guestUserId);
+						var isGuestUser = !!(!player._stats.userId && player._stats.guestUserId);
 
 						if (player && userId && player.persistentDataLoaded) {
 							
@@ -910,10 +912,10 @@ var ActionComponent = TaroEntity.extend({
 								persistedData.unit = data;
 
 								// save unit and player data both
-								taro.workerComponent.saveUserData(userId, persistedData, null, 'savePlayerData');
+								taro.workerComponent.saveUserData(userId, persistedData, null, 'savePlayerData', isGuestUser);
 							} else {
 								// save player data only
-								taro.workerComponent.saveUserData(userId, persistedData.player, 'player', 'savePlayerData');
+								taro.workerComponent.saveUserData(userId, persistedData.player, 'player', 'savePlayerData', isGuestUser);
 
 								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');
