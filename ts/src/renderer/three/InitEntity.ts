@@ -9,7 +9,6 @@ namespace Renderer {
 			defaultHeight: number;
 			defaultDepth: number;
 			isBillboard = false;
-			is3D: boolean;
 
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				super();
@@ -52,9 +51,8 @@ namespace Renderer {
 					body.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				}
 				body.entity = this;
-				const is3D = (this.is3D = taro.game.data.defaultData.defaultRenderer === '3d');
 				this.rotation.order = 'YXZ';
-				if (is3D) {
+				if (taro.is3D()) {
 					if (!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)) {
 						this.rotation.set(
 							THREE.MathUtils.degToRad(action.rotation.x),
@@ -146,8 +144,7 @@ namespace Renderer {
 						this.position.y = Utils.pixelToWorld(action.position.z);
 					}
 				}
-				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
-				if (is3D) {
+				if (taro.is3D()) {
 					if (
 						!isNaN(action.rotation?.x) &&
 						!isNaN(action.rotation?.y) &&

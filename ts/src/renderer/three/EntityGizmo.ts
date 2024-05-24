@@ -29,10 +29,9 @@ namespace Renderer {
 						} else if (editedEntity instanceof InitEntity) {
 							editedAction = { actionId: editedEntity.action.actionId };
 						}
-						const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 						switch (control.mode) {
 							case 'translate':
-								if (is3D) {
+								if (taro.is3D()) {
 									editedAction['position'] = {
 										x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
 										y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
@@ -49,7 +48,7 @@ namespace Renderer {
 								break;
 							case 'rotate':
 								control.object.rotation.order = 'YXZ';
-								if (is3D) {
+								if (taro.is3D()) {
 									const headingX = control.object.rotation.x;
 									const headingY = control.object.rotation.y;
 									const headingZ = control.object.rotation.z;
@@ -73,7 +72,7 @@ namespace Renderer {
 								}
 								break;
 							case 'scale':
-								if (is3D) {
+								if (taro.is3D()) {
 									if (control.object.body instanceof AnimatedSprite) {
 										editedAction['scale'] = {
 											x: Utils.worldToPixel(control.object.scale.x),
