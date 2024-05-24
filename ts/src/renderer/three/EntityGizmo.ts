@@ -75,9 +75,9 @@ namespace Renderer {
 							case 'scale':
 								if (is3D) {
 									editedAction['scale'] = {
-										x: Utils.worldToPixel(control.object.scale.x),
-										y: Utils.worldToPixel(control.object.scale.z),
-										z: Utils.worldToPixel(control.object.scale.y),
+										x: Utils.worldToPixel(control.object.body.getSize().x),
+										y: Utils.worldToPixel(control.object.body.getSize().z),
+										z: Utils.worldToPixel(control.object.body.getSize().y),
 										function: 'vector3',
 									};
 								} else {

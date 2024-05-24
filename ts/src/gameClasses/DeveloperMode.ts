@@ -830,6 +830,17 @@ class DeveloperMode {
 					) {
 						action.rotation = data.rotation;
 					}
+					if (
+						data.scale &&
+						!isNaN(data.scale.x) &&
+						!isNaN(data.scale.y) &&
+						!isNaN(data.scale.z) &&
+						((action.scale && !isNaN(action.scale.x) && !isNaN(action.scale.y) && !isNaN(action.scale.z)) ||
+							action.width ||
+							action.height)
+					) {
+						action.scale = data.scale;
+					}
 					if (!isNaN(data.width) && !isNaN(action.width)) {
 						action.width = data.width;
 					}

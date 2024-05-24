@@ -61,13 +61,17 @@ namespace Renderer {
 							THREE.MathUtils.degToRad(action.rotation.y),
 							THREE.MathUtils.degToRad(action.rotation.z)
 						);
+					} else if (!isNaN(action.angle)) {
+						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 					}
 					if (!isNaN(action.scale?.x) && !isNaN(action.scale?.y) && !isNaN(action.scale?.z)) {
-						this.scale.set(
+						this.setSize(
 							Utils.pixelToWorld(action.scale.x),
 							Utils.pixelToWorld(action.scale.z),
 							Utils.pixelToWorld(action.scale.y)
 						);
+					} else if (!isNaN(action.width) && !isNaN(action.height)) {
+						this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
 					}
 				} else {
 					if (!isNaN(action.angle)) {
@@ -103,6 +107,16 @@ namespace Renderer {
 				taro.network.send<any>('editInitEntity', action);
 			}
 
+			setSize(x: number, y: number, z: number) {
+				if (this.body instanceof AnimatedSprite) {
+					this.scale.set(x, y, z);
+				} else if (this.body instanceof Model) {
+					this.scale.x = this.body.originalScale.x * (x / this.body.originalSize.x);
+					this.scale.y = this.body.originalScale.y * (y / this.body.originalSize.y);
+					this.scale.z = this.body.originalScale.z * (z / this.body.originalSize.z);
+				}
+			}
+
 			update(action: ActionData): void {
 				//update action in editor
 				if (inGameEditor && inGameEditor.updateAction) {
@@ -131,14 +145,67 @@ namespace Renderer {
 						!isNaN(action.rotation?.y) &&
 						!isNaN(action.rotation?.z) &&
 						((!isNaN(this.action.rotation?.x) && !isNaN(this.action.rotation?.y) && !isNaN(this.action.rotation?.z)) ||
-							!isNaN(this.action.angle))
+							(!isNaN(this.action.angle) && !isNaN(action.angle)))
 					) {
-						this.action.rotation = action.rotation;
+						if (!isNaN(action.angle)) {
+							this.action.angle = action.angle;
+							this.action.rotation = { x: 0, y: action.angle, z: 0 };
+						}
+						if (action.rotation) {
+							this.action.rotation = action.rotation;
+						}
 						this.rotation.set(
-							THREE.MathUtils.degToRad(action.rotation.x),
-							THREE.MathUtils.degToRad(action.rotation.y),
-							THREE.MathUtils.degToRad(action.rotation.z)
+							THREE.MathUtils.degToRad(this.action.rotation.x),
+							THREE.MathUtils.degToRad(this.action.rotation.y),
+							THREE.MathUtils.degToRad(this.action.rotation.z)
 						);
+					}
+					if (
+						!isNaN(action.scale?.x) &&
+						!isNaN(action.scale?.y) &&
+						!isNaN(action.scale?.z) &&
+						((!isNaN(this.action.scale?.x) && !isNaN(this.action.scale?.y) && !isNaN(this.action.scale?.z)) ||
+							(!isNaN(this.action.width) && !isNaN(action.width)) ||
+							(!isNaN(this.action.height) && !isNaN(action.height)))
+					) {
+						if (!isNaN(action.width)) {
+							this.action.width = action.width;
+							this.action.scale.x = action.width;
+						}
+						if (!isNaN(action.height)) {
+							this.action.height = action.height;
+							this.action.scale.z = action.height;
+						}
+						if (action.scale) {
+							this.action.scale = action.scale;
+						}
+						if (isNaN(this.action.scale.x)) {
+							this.action.scale.x = 0;
+						}
+						if (isNaN(this.action.scale.y)) {
+							this.action.scale.y = 0;
+						}
+						if (isNaN(this.action.scale.z)) {
+							this.action.scale.z = 0;
+						}
+						this.setSize(
+							Utils.pixelToWorld(this.action.scale.x),
+							Utils.pixelToWorld(this.action.scale.z),
+							Utils.pixelToWorld(this.action.scale.y)
+						);
+					}
+					if (!isNaN(this.action.width) && !isNaN(action.width)) {
+						this.action.width = action.width;
+						this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(this.action.height));
+					}
+					if (!isNaN(this.action.height) && !isNaN(action.height)) {
+						this.action.height = action.height;
+						this.setSize(Utils.pixelToWorld(this.action.width), 1, Utils.pixelToWorld(action.height));
+					}
+				} else {
+					if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
+						this.action.angle = action.angle;
+						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 					}
 					if (!isNaN(this.action.width) && !isNaN(action.width)) {
 						this.action.width = action.width;
@@ -147,25 +214,6 @@ namespace Renderer {
 					if (!isNaN(this.action.height) && !isNaN(action.height)) {
 						this.action.height = action.height;
 						this.scale.setZ(Utils.pixelToWorld(action.height));
-					}
-				} else {
-					if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
-						this.action.angle = action.angle;
-						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
-					}
-					if (
-						!isNaN(action.scale?.x) &&
-						!isNaN(action.scale?.y) &&
-						!isNaN(action.scale?.z) &&
-						((!isNaN(this.action.scale?.x) && !isNaN(this.action.scale?.y) && !isNaN(this.action.scale?.z)) ||
-							!isNaN(this.action.angle))
-					) {
-						this.action.scale = action.scale;
-						this.scale.set(
-							THREE.MathUtils.degToRad(action.scale.x),
-							THREE.MathUtils.degToRad(action.scale.z),
-							THREE.MathUtils.degToRad(action.scale.y)
-						);
 					}
 				}
 				if (action.wasDeleted) {
