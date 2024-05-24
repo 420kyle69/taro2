@@ -4,7 +4,7 @@ var ItemUiComponent = TaroEntity.extend({
 
 	dragOverTimeout: null,
 
-	DRAG_SCALE: 2.2,
+	DRAG_SCALE: 1.8,
 
 	init: function () {
 		const addPopoverListener = () => {
@@ -335,15 +335,15 @@ var ItemUiComponent = TaroEntity.extend({
 						$(this).popover('hide');
 						$(this).popover('disable');
 
-						event.target.parentElement.classList.add('item-drag-active', 'item-drop-allowed');
+						event.target.parentElement.classList.add('item-drag-active', 'item-drop-main');
 					},
 					stop: function (event) {
 						$(this).popover('enable');
 
-						event.target.parentElement.classList.remove('item-drag-active', 'item-drop-allowed');
+						event.target.parentElement.classList.remove('item-drag-active', 'item-drop-main');
 					},
 					drag: function (event, ui) {
-						const correction = 40;
+						const correction = 30;
 						ui.position.left = ui.position.left - ((event.target.clientWidth * self.DRAG_SCALE) - (event.clientX - ui.offset.left)) + correction;
 						ui.position.top = ui.position.top - ((event.target.clientHeight * self.DRAG_SCALE) - (event.clientY - ui.offset.top)) + correction;
 						// console.log("ui.position", ui.position, "clientX: ", event.clientX, "clientY: ", event.clientY, "offset: ", ui.offset);
