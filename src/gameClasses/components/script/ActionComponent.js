@@ -3192,8 +3192,8 @@ var ActionComponent = TaroEntity.extend({
 								} else {
 									width = parseFloat(width);
 								}
-								if (!isNaN(scale?.z)) {
-									height = parseFloat(scale.z);
+								if (!isNaN(scale?.y)) {
+									height = parseFloat(scale.y);
 								} else {
 									height = parseFloat(height);
 								}
