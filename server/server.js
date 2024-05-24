@@ -497,6 +497,7 @@ var Server = TaroClass.extend({
 						global.gameJson = game;
 						game = JSON.parse(game);
 						game.defaultData = game;
+
 						var data = { data: {} };
 						for (let [key, value] of Object.entries(game)) {
 							data.data[key] = value;
