@@ -81,7 +81,7 @@ namespace Renderer {
 											z: Utils.worldToPixel(0),
 											function: 'vector3',
 										};
-									} else if (control.object.body instanceof THREE.Mesh) {
+									} else if (control.object.body instanceof Model) {
 										editedAction['scale'] = {
 											x: Utils.worldToPixel(control.object.body.getSize().x),
 											y: Utils.worldToPixel(control.object.body.getSize().z),
