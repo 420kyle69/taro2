@@ -1757,6 +1757,16 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					case 'vector3':
+						var x = self.getValue(text.x, vars);
+						var y = self.getValue(text.y, vars);
+						var z = self.getValue(text.z, vars);
+						if (x != undefined && y != undefined && z != undefined) {
+							returnValue = { x: x, y: y, z: z };
+						}
+
+						break;
+
 					case 'getPositionInFrontOfPosition':
 						var position = self.getValue(text.position, vars);
 						var distance = self.getValue(text.distance, vars);

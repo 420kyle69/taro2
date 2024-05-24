@@ -147,6 +147,9 @@ namespace Renderer {
 						} else if (developerMode.active && developerMode.activeTab === 'map') {
 							if (Utils.isLeftButton(event.buttons)) {
 								this.voxelEditor.leftButtonDown = true;
+								//double click
+								let clickDelay = taro._currentTime - lastTime;
+								lastTime = taro._currentTime;
 								switch (developerMode.activeButton) {
 									case 'cursor': {
 										const raycaster = new THREE.Raycaster();
@@ -167,15 +170,12 @@ namespace Renderer {
 											}
 											if (
 												initEntity &&
-												(this.entityEditor.selectedInitEntity === null ||
-													this.entityEditor.selectedInitEntity === undefined ||
-													this.entityEditor.selectedInitEntity.uuid !== initEntity.uuid)
+												(this.entityEditor.selectedEntity === null ||
+													this.entityEditor.selectedEntity === undefined ||
+													this.entityEditor.selectedEntity.uuid !== initEntity.uuid)
 											) {
-												this.entityEditor.selectInitEntity(initEntity);
-												taro.client.emit('entity-billboard', !!initEntity.isBillboard);
-												//double click
-												let clickDelay = taro._currentTime - lastTime;
-												lastTime = taro._currentTime;
+												this.entityEditor.selectEntity(initEntity);
+												taro.client.emit('block-rotation', !!initEntity.isBillboard);
 												if (clickDelay < 350) {
 													if (inGameEditor && inGameEditor.showScriptForEntity) {
 														inGameEditor.showScriptForEntity(initEntity.action.actionId);
@@ -184,7 +184,7 @@ namespace Renderer {
 											}
 										} else {
 											if (!this.entityEditor.gizmo.control.dragging) {
-												this.entityEditor.selectInitEntity(null);
+												this.entityEditor.selectEntity(null);
 												intersects = raycaster.intersectObjects(this.entityManager.entities);
 												if (intersects?.length > 0) {
 													let closest: THREE.Mesh;
@@ -203,17 +203,26 @@ namespace Renderer {
 																name: region.taroEntity._stats.id,
 																x: region.stats.x,
 																y: region.stats.y,
+																z: region.stats.z,
 																width: region.stats.width,
 																height: region.stats.height,
+																depth: region.stats.depth,
 																alpha: region.stats.alpha,
 																inside: region.stats.inside,
 															});
 														}
 													});
 													if (regionList.length === 1) {
-														inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+														if (clickDelay < 350) {
+															inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionList[0]);
+														}
+														const clickedRegionMesh = clickedList[0] as THREE.Mesh & { region: Region };
+														this.entityEditor.selectEntity(clickedRegionMesh.region);
+														taro.client.emit('block-rotation', true);
 													} else if (regionList.length > 1) {
-														inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
+														if (clickDelay < 350) {
+															inGameEditor.showRegionList && inGameEditor.showRegionList(regionList);
+														}
 													}
 												}
 											}
@@ -483,16 +492,18 @@ namespace Renderer {
 			createInitEntity(action: ActionData): void {
 				if (
 					!action.disabled &&
-					action.position?.function === 'xyCoordinate' &&
-					!isNaN(action.position?.x) &&
-					!isNaN(action.position?.y)
+					((action.position?.function === 'xyCoordinate' && !isNaN(action.position?.x) && !isNaN(action.position?.y)) ||
+						(action.position?.function === 'vector3' &&
+							!isNaN(action.position?.x) &&
+							!isNaN(action.position?.y) &&
+							!isNaN(action.position?.z)))
 				) {
 					if (
 						action.type === 'createEntityForPlayerAtPositionWithDimensions' ||
-						(action.type === 'createEntityAtPositionWithDimensions' &&
+						action.type === 'createEntityAtPositionWithDimensions' /*&&
 							!isNaN(action.width) &&
 							!isNaN(action.height) &&
-							!isNaN(action.angle))
+							!isNaN(action.angle)*/
 					) {
 						if (action.actionId && !action.wasDeleted) new InitEntity(action);
 						else {
@@ -504,10 +515,10 @@ namespace Renderer {
 							this.showRepublishWarning = true;
 						}
 					} else if (
-						action.type === 'createUnitForPlayerAtPosition' &&
+						action.type === 'createUnitForPlayerAtPosition' /* &&
 						!isNaN(action.angle) &&
 						!isNaN(action.width) &&
-						!isNaN(action.height)
+						!isNaN(action.height)*/
 					) {
 						if (action.actionId && !action.wasDeleted) new InitEntity(action, 'unit');
 						else {
@@ -589,8 +600,8 @@ namespace Renderer {
 				this.voxelEditor.voxels.updateLayer(new Map(), this.voxelEditor.currentLayerIndex);
 				this.voxelEditor.showAllLayers();
 
-				if (this.entityEditor.selectedInitEntity) {
-					this.entityEditor.selectInitEntity(null);
+				if (this.entityEditor.selectedEntity) {
+					this.entityEditor.selectEntity(null);
 				}
 
 				this.entityManager.initEntities.forEach((initEntity) => {

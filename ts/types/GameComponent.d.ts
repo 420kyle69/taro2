@@ -71,10 +71,24 @@ interface ActionData {
 		function?: string;
 		x: number;
 		y: number;
+		z?: number;
+	};
+	rotation?: {
+		function?: string;
+		x: number;
+		y: number;
+		z: number;
+	};
+	scale?: {
+		function?: string;
+		x: number;
+		y: number;
+		z: number;
 	};
 	angle?: number;
 	width?: number;
 	height?: number;
+	depth?: number;
 	wasCreated?: boolean;
 	wasEdited?: boolean;
 	wasDeleted?: boolean;

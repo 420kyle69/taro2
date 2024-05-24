@@ -7,7 +7,9 @@ namespace Renderer {
 			body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
 			defaultWidth: number;
 			defaultHeight: number;
+			defaultDepth: number;
 			isBillboard = false;
+
 			constructor(action: ActionData, type?: 'unit' | 'item' | 'projectile') {
 				super();
 				this.action = action;
@@ -29,6 +31,7 @@ namespace Renderer {
 				}
 				this.defaultWidth = entityTypeData.bodies?.default?.width;
 				this.defaultHeight = entityTypeData.bodies?.default?.height;
+				this.defaultDepth = entityTypeData.bodies?.default?.depth;
 				this.isBillboard = entityTypeData?.isBillboard ?? false;
 				const renderer = Renderer.Three.instance();
 				let body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
@@ -48,14 +51,43 @@ namespace Renderer {
 					body.setBillboard(entityTypeData.isBillboard, renderer.camera);
 				}
 				body.entity = this;
-				if (!isNaN(action.angle)) {
-					this.rotation.order = 'YXZ';
-					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+				this.rotation.order = 'YXZ';
+				if (taro.is3D()) {
+					if (!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)) {
+						this.rotation.set(
+							THREE.MathUtils.degToRad(action.rotation.x),
+							THREE.MathUtils.degToRad(action.rotation.y),
+							THREE.MathUtils.degToRad(action.rotation.z)
+						);
+					} else if (!isNaN(action.angle)) {
+						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+					}
+					if (!isNaN(action.scale?.x) && !isNaN(action.scale?.y) && !isNaN(action.scale?.z)) {
+						if (body instanceof AnimatedSprite) {
+							this.scale.set(Utils.pixelToWorld(action.scale.x), 1, Utils.pixelToWorld(action.scale.y));
+						} else if (body instanceof Model) {
+							this.setSize(
+								Utils.pixelToWorld(action.scale.x),
+								Utils.pixelToWorld(action.scale.z),
+								Utils.pixelToWorld(action.scale.y)
+							);
+						}
+					} else if (!isNaN(action.width) && !isNaN(action.height)) {
+						if (body instanceof AnimatedSprite) {
+							this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+						} else if (body instanceof Model) {
+							this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+						}
+					}
+				} else {
+					if (!isNaN(action.angle)) {
+						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+					}
+					if (!isNaN(action.width) && !isNaN(action.height)) {
+						this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+					}
 				}
 
-				if (!isNaN(action.width) && !isNaN(action.height)) {
-					this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
-				}
 				if (taro.developerMode.active && taro.developerMode.activeTab === 'map') {
 					body.visible = true;
 				} else {
@@ -64,7 +96,9 @@ namespace Renderer {
 				this.add(this.body);
 				this.position.set(
 					Utils.pixelToWorld(action.position?.x),
-					Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
+					action.position?.z
+						? Utils.pixelToWorld(action.position?.z)
+						: Renderer.Three.getVoxels().calcLayersHeight(0) + 0.1,
 					Utils.pixelToWorld(action.position?.y)
 				);
 				renderer.initEntityLayer.add(this);
@@ -77,6 +111,16 @@ namespace Renderer {
 					action.wasEdited = true;
 				}
 				taro.network.send<any>('editInitEntity', action);
+			}
+
+			setSize(x: number, y: number, z: number) {
+				if (this.body instanceof AnimatedSprite) {
+					this.scale.set(x, y, z);
+				} else if (this.body instanceof Model) {
+					this.scale.x = this.body.originalScale.x * (x / this.body.originalSize.x);
+					this.scale.y = this.body.originalScale.y * (y / this.body.originalSize.y);
+					this.scale.z = this.body.originalScale.z * (z / this.body.originalSize.z);
+				}
 			}
 
 			update(action: ActionData): void {
@@ -96,18 +140,86 @@ namespace Renderer {
 					this.action.position = action.position;
 					this.position.x = Utils.pixelToWorld(action.position.x);
 					this.position.z = Utils.pixelToWorld(action.position.y);
+					if (!isNaN(action.position.z)) {
+						this.position.y = Utils.pixelToWorld(action.position.z);
+					}
 				}
-				if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
-					this.action.angle = action.angle;
-					this.rotation.y = THREE.MathUtils.degToRad(action.angle);
-				}
-				if (!isNaN(this.action.width) && !isNaN(action.width)) {
-					this.action.width = action.width;
-					this.scale.setX(Utils.pixelToWorld(action.width));
-				}
-				if (!isNaN(this.action.height) && !isNaN(action.height)) {
-					this.action.height = action.height;
-					this.scale.setZ(Utils.pixelToWorld(action.height));
+				if (taro.is3D()) {
+					if (
+						!isNaN(action.rotation?.x) &&
+						!isNaN(action.rotation?.y) &&
+						!isNaN(action.rotation?.z) &&
+						((!isNaN(this.action.rotation?.x) && !isNaN(this.action.rotation?.y) && !isNaN(this.action.rotation?.z)) ||
+							(!isNaN(this.action.angle) && !isNaN(action.angle)))
+					) {
+						if (!isNaN(action.angle)) {
+							this.action.angle = action.angle;
+							this.action.rotation = { x: 0, y: action.angle, z: 0 };
+						}
+						if (action.rotation) {
+							this.action.rotation = action.rotation;
+						}
+						this.rotation.set(
+							THREE.MathUtils.degToRad(this.action.rotation.x),
+							THREE.MathUtils.degToRad(this.action.rotation.y),
+							THREE.MathUtils.degToRad(this.action.rotation.z)
+						);
+					}
+					if (
+						!isNaN(action.scale?.x) &&
+						!isNaN(action.scale?.y) &&
+						!isNaN(action.scale?.z) &&
+						((!isNaN(this.action.scale?.x) && !isNaN(this.action.scale?.y) && !isNaN(this.action.scale?.z)) ||
+							(!isNaN(this.action.width) && !isNaN(action.width)) ||
+							(!isNaN(this.action.height) && !isNaN(action.height)))
+					) {
+						if (!isNaN(action.width)) {
+							this.action.width = action.width;
+							this.action.scale.x = action.width;
+						}
+						if (!isNaN(action.height)) {
+							this.action.height = action.height;
+							this.action.scale.z = action.height;
+						}
+						if (action.scale) {
+							this.action.scale = action.scale;
+						}
+						if (isNaN(this.action.scale.x)) {
+							this.action.scale.x = 0;
+						}
+						if (isNaN(this.action.scale.y)) {
+							this.action.scale.y = 0;
+						}
+						if (isNaN(this.action.scale.z)) {
+							this.action.scale.z = 0;
+						}
+						this.setSize(
+							Utils.pixelToWorld(this.action.scale.x),
+							Utils.pixelToWorld(this.action.scale.z),
+							Utils.pixelToWorld(this.action.scale.y)
+						);
+					}
+					if (!isNaN(this.action.width) && !isNaN(action.width)) {
+						this.action.width = action.width;
+						this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(this.action.height));
+					}
+					if (!isNaN(this.action.height) && !isNaN(action.height)) {
+						this.action.height = action.height;
+						this.setSize(Utils.pixelToWorld(this.action.width), 1, Utils.pixelToWorld(action.height));
+					}
+				} else {
+					if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
+						this.action.angle = action.angle;
+						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
+					}
+					if (!isNaN(this.action.width) && !isNaN(action.width)) {
+						this.action.width = action.width;
+						this.scale.setX(Utils.pixelToWorld(action.width));
+					}
+					if (!isNaN(this.action.height) && !isNaN(action.height)) {
+						this.action.height = action.height;
+						this.scale.setZ(Utils.pixelToWorld(action.height));
+					}
 				}
 				if (action.wasDeleted) {
 					const renderer = Renderer.Three.instance();

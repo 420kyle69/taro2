@@ -42,6 +42,7 @@ var Region = TaroEntityPhysics.extend({
 				// Region is only one doing this (not unit/item/projectile). I shouldn't have to do below:
 				width: self._stats.default.width,
 				height: self._stats.default.height,
+				//depth: self._stats.default.depth || 0,
 			};
 
 			var regionDimension = self._stats.default;
@@ -52,10 +53,12 @@ var Region = TaroEntityPhysics.extend({
 			} else {
 				self._translate.x = regionDimension.x + regionDimension.width / 2;
 				self._translate.y = regionDimension.y + regionDimension.height / 2;
+				//self._translate.z = regionDimension.z + regionDimension.depth / 2 || 0;
 			}
 
 			self.updateBody({
 				translate: { x: self._translate.x, y: self._translate.y },
+				//translate: { x: self._translate.x, y: self._translate.y, z: self._translate.z},
 			});
 
 			if (taro.isServer) {
@@ -73,17 +76,19 @@ var Region = TaroEntityPhysics.extend({
 		var regionCordinates = this._stats.default;
 		this.translateTo(
 			regionCordinates.x + regionCordinates.width / 2,
-			regionCordinates.y + regionCordinates.height / 2,
-			0
+			regionCordinates.y + regionCordinates.height / 2
+			//regionCordinates.z + regionCordinates.depth / 2 || 0
 		);
 		this.width(regionCordinates.width);
 		this.height(regionCordinates.height);
+		//this.depth(regionCordinates.depth || 0);
 
 		if (taro.isServer) {
 			var shapeData = {};
 			var normalizer = 0.45;
 			shapeData.width = regionCordinates.width * normalizer;
 			shapeData.height = regionCordinates.height * normalizer;
+			//shapeData.depth = regionCordinates.depth * normalizer;
 			// shapeData.x = regionCordinates.x;
 			// shapeData.y = regionCordinates.y;
 			this._stats.currentBody.fixtures[0].shape.data = shapeData;

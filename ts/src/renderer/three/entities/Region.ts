@@ -6,8 +6,17 @@ namespace Renderer {
 		}
 		export class Region extends Node {
 			gameObject: THREE.Object3D;
-			mesh: THREE.Mesh;
-			stats: { x: number; y: number; width: number; height: number; inside?: string; alpha?: number };
+			mesh: THREE.Mesh & { region?: Region };
+			stats: {
+				x: number;
+				y: number;
+				z?: number;
+				width: number;
+				height: number;
+				depth?: number;
+				inside?: string;
+				alpha?: number;
+			};
 			devModeOnly: boolean;
 			hud = new THREE.Group();
 			label = new Label({ renderOnTop: true });
@@ -34,11 +43,14 @@ namespace Renderer {
 
 				const x = Utils.pixelToWorld(stats.x);
 				const y = Utils.pixelToWorld(stats.y);
+				const z = Utils.pixelToWorld(stats.z) || 0;
 				const width = Utils.pixelToWorld(stats.width);
 				const height = Utils.pixelToWorld(stats.height);
+				const depth = Utils.pixelToWorld(stats.depth) || 3;
 
-				this.hud.position.set(x, 3, y);
-				const geometry = new THREE.BoxGeometry(1, 3, 1);
+				this.hud.position.set(-0.5, 0.5, -0.5);
+				this.hud.scale.set(1 / width, 1 / depth, 1 / height);
+				const geometry = new THREE.BoxGeometry(1, 1, 1);
 				let gameObject = this.gameObject;
 
 				const material = new THREE.MeshBasicMaterial({
@@ -47,9 +59,10 @@ namespace Renderer {
 					transparent: true,
 				});
 
-				const mesh = (this.mesh = new THREE.Mesh(geometry, material));
-				mesh.position.set(x + width / 2, 1.5, y + height / 2);
-				mesh.scale.set(width, 1, height);
+				const mesh = (this.mesh = new THREE.Mesh(geometry, material)) as THREE.Mesh & { region?: Region };
+				mesh.region = this;
+				this.position.set(x + width / 2, z + depth / 2, y + height / 2);
+				this.scale.set(width, depth, height);
 				this.add(mesh);
 
 				if (stats.inside) {
@@ -62,8 +75,6 @@ namespace Renderer {
 					const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x11fa05 }));
 					this.add(line);
 					gameObject = this.gameObject = line;
-					gameObject.position.set(x + width / 2, 1.5, y + height / 2);
-					gameObject.scale.set(width, 1, height);
 				}
 
 				if (taro.developerMode.activeTab === 'map') {
@@ -75,21 +86,16 @@ namespace Renderer {
 				taroEntity.on(
 					'transform',
 					() => {
-						mesh.position.set(
-							Utils.pixelToWorld(stats.x) + Utils.pixelToWorld(stats.width) / 2,
-							1.5,
-							Utils.pixelToWorld(stats.y) + Utils.pixelToWorld(stats.height) / 2
-						);
-						mesh.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
-						if (this.devModeOnly) {
-							gameObject.position.set(
-								Utils.pixelToWorld(stats.x) + Utils.pixelToWorld(stats.width) / 2,
-								1.5,
-								Utils.pixelToWorld(stats.y) + Utils.pixelToWorld(stats.height) / 2
-							);
-							gameObject.scale.set(Utils.pixelToWorld(stats.width), 1, Utils.pixelToWorld(stats.height));
-						}
-						this.hud.position.set(x, 3, y);
+						const x = Utils.pixelToWorld(stats.x);
+						const y = Utils.pixelToWorld(stats.y);
+						const z = Utils.pixelToWorld(stats.z) || 0;
+						const width = Utils.pixelToWorld(stats.width);
+						const height = Utils.pixelToWorld(stats.height);
+						const depth = Utils.pixelToWorld(stats.depth) || 3;
+
+						this.position.set(x + width / 2, z + depth / 2, y + height / 2);
+						this.scale.set(width, depth, height);
+						this.hud.scale.set(1 / width, 1 / depth, 1 / height);
 					},
 					this
 				);
