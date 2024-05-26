@@ -29,9 +29,9 @@ namespace Renderer {
 						rows = entityTypeData.cellSheet.rowCount || 1;
 					}
 				}
-				this.defaultWidth = entityTypeData.bodies?.default?.width;
-				this.defaultHeight = entityTypeData.bodies?.default?.height;
-				this.defaultDepth = entityTypeData.bodies?.default?.depth;
+				const defaultWidth = (this.defaultWidth = entityTypeData.bodies?.default?.width);
+				const defaultHeight = (this.defaultHeight = entityTypeData.bodies?.default?.height);
+				const defaultDepth = (this.defaultDepth = entityTypeData.bodies?.default?.depth);
 				this.isBillboard = entityTypeData?.isBillboard ?? false;
 				const renderer = Renderer.Three.instance();
 				let body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
@@ -67,9 +67,9 @@ namespace Renderer {
 							this.scale.set(Utils.pixelToWorld(action.scale.x), 1, Utils.pixelToWorld(action.scale.y));
 						} else if (body instanceof Model) {
 							this.setSize(
-								Utils.pixelToWorld(action.scale.x),
-								Utils.pixelToWorld(action.scale.z),
-								Utils.pixelToWorld(action.scale.y)
+								Utils.pixelToWorld(defaultWidth * action.scale.x),
+								Utils.pixelToWorld(defaultDepth * action.scale.z),
+								Utils.pixelToWorld(defaultHeight * action.scale.y)
 							);
 						}
 					} else if (!isNaN(action.width) && !isNaN(action.height)) {
@@ -194,9 +194,9 @@ namespace Renderer {
 							this.action.scale.z = 0;
 						}
 						this.setSize(
-							Utils.pixelToWorld(this.action.scale.x),
-							Utils.pixelToWorld(this.action.scale.z),
-							Utils.pixelToWorld(this.action.scale.y)
+							Utils.pixelToWorld(this.defaultHeight * this.action.scale.x),
+							Utils.pixelToWorld(this.defaultDepth * this.action.scale.z),
+							Utils.pixelToWorld(this.defaultHeight * this.action.scale.y)
 						);
 					}
 					if (!isNaN(this.action.width) && !isNaN(action.width)) {
