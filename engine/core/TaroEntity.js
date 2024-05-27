@@ -4430,21 +4430,25 @@ var TaroEntity = TaroObject.extend({
 						switch (attrName) {
 							case 'quests':
 								var gameId = taro.game.data.defaultData._id;
-								Object.entries(newValue).map(([questId, v], idx) => {
-									if (v.completed === true) {
-										delete this.quests.active[gameId][questId];
-										this.quests.completed[gameId].push(questId);
-										return;
-									}
-									if (v.name !== undefined) {
-										this.quests.active[gameId][questId] = v;
-										return;
-									}
-									if (v.progress !== undefined) {
-										this.quests.active[gameId][questId].progress = v.progress;
-										return;
-									}
-								});
+								if (newValue.active !== undefined) {
+									this.quests = newValue;
+								} else {
+									Object.entries(newValue).map(([questId, v], idx) => {
+										if (v.completed === true) {
+											delete this.quests.active[gameId][questId];
+											this.quests.completed[gameId].push(questId);
+											return;
+										}
+										if (v.name !== undefined) {
+											this.quests.active[gameId][questId] = v;
+											return;
+										}
+										if (v.progress !== undefined) {
+											this.quests.active[gameId][questId].progress = v.progress;
+											return;
+										}
+									});
+								}
 								break;
 							case 'anim':
 								var animationId = newValue;
