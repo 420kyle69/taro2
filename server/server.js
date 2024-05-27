@@ -793,7 +793,7 @@ var Server = TaroClass.extend({
 		var self = this;
 
 		for (i in taro.server.clients) {
-			if (taro.server.clients[i]._id == _id) {
+			if (taro.server.clients[i]._id == _id || taro.server.clients[i].guestUserId == _id) {
 				return taro.server.clients[i];
 			}
 		}
