@@ -786,6 +786,15 @@ NetIo.Server = NetIo.EventingClass.extend({
 		}
 	},
 
+	parseCookie: function (str) {
+		return str?.split(';')
+			.map(v => v.split('='))
+			.reduce((acc, v) => {
+				acc[decodeURIComponent(v[0].trim())] = decodeURIComponent(v[1].trim());
+				return acc;
+			}, {});
+	},
+
 	socketConnection: async function (ws, request) {
 		var self = this;
 		var socket = new NetIo.Socket(ws);
@@ -800,8 +809,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const reqUrl = new URL(`https://www.modd.io${request.url}`);
 		const searchParams = reqUrl.searchParams;
 		const token = searchParams.get('token');
-
-
+		
 		try {
 			let decodedToken;
 			if (process.env.ENV !== 'standalone' && taro.workerComponent) {
@@ -897,6 +905,21 @@ NetIo.Server = NetIo.EventingClass.extend({
 					self._userIds[decodedToken.userId] = assignedId;
 				}
 			}
+
+			let guestUserId = null;
+
+			try {
+				const cookies = self.parseCookie(request.headers?.cookie);
+				const guestUserToken = cookies?.modd_guest_token;
+				const decodedGuestUserToken = taro.workerComponent && guestUserToken ? await taro.workerComponent.verifyToken(guestUserToken) : {};
+				guestUserId = decodedGuestUserToken?.guestUserId;
+			} catch (e) {
+				console.log('Error getting guestUserId', e);
+			}
+			
+			console.log('guestUser joining', guestUserId);
+
+			socket._guestUserId = guestUserId;
 
 			taro.server.usedConnectionJwts = filteredUsedConnectionJwts;
 
