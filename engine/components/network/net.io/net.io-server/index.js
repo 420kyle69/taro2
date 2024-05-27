@@ -906,8 +906,17 @@ NetIo.Server = NetIo.EventingClass.extend({
 				}
 			}
 
-			const cookies = self.parseCookie(request.headers?.cookie);
-			const guestUserId = cookies?.guestUserId;
+			let guestUserId = null;
+
+			try {
+				const cookies = self.parseCookie(request.headers?.cookie);
+				const guestUserToken = cookies?.modd_guest_token;
+				const decodedGuestUserToken = taro.workerComponent && guestUserToken ? await taro.workerComponent.verifyToken(guestUserToken) : {};
+				guestUserId = decodedGuestUserToken?.guestUserId;
+			} catch (e) {
+				console.log('Error getting guestUserId', e);
+			}
+			
 			console.log('guestUser joining', guestUserId);
 
 			socket._guestUserId = guestUserId;
