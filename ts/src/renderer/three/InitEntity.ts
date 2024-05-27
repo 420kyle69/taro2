@@ -76,7 +76,11 @@ namespace Renderer {
 						if (body instanceof AnimatedSprite) {
 							this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
 						} else if (body instanceof Model) {
-							this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+							this.setSize(
+								Utils.pixelToWorld(action.width),
+								Utils.pixelToWorld(defaultDepth),
+								Utils.pixelToWorld(action.height)
+							);
 						}
 					}
 				} else {
@@ -201,11 +205,19 @@ namespace Renderer {
 					}
 					if (!isNaN(this.action.width) && !isNaN(action.width)) {
 						this.action.width = action.width;
-						this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(this.action.height));
+						this.setSize(
+							Utils.pixelToWorld(action.width),
+							Utils.pixelToWorld(this.defaultDepth),
+							Utils.pixelToWorld(this.action.height)
+						);
 					}
 					if (!isNaN(this.action.height) && !isNaN(action.height)) {
 						this.action.height = action.height;
-						this.setSize(Utils.pixelToWorld(this.action.width), 1, Utils.pixelToWorld(action.height));
+						this.setSize(
+							Utils.pixelToWorld(this.action.width),
+							Utils.pixelToWorld(this.defaultDepth),
+							Utils.pixelToWorld(action.height)
+						);
 					}
 				} else {
 					if (!isNaN(this.action.angle) && !isNaN(action.angle)) {
