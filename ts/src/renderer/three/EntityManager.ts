@@ -48,12 +48,9 @@ namespace Renderer {
 			}
 
 			destroyInitEntity(initEntity: InitEntity) {
+				const renderer = Three.instance();
+				renderer.entityEditor.selectEntity(null);
 				initEntity.destroy();
-
-				/*const idx = this.initEntities.indexOf(initEntity, 0);
-				if (idx === -1) return;
-
-				this.initEntities.splice(idx, 1);*/
 			}
 
 			destroy(entity: Unit | Item | Region) {

@@ -308,7 +308,8 @@ class DeveloperMode {
 						!isNaN(action.position?.y) &&
 						!isNaN(action.width) &&
 						!isNaN(action.height) &&
-						!isNaN(action.angle)
+						(!isNaN(action.angle) ||
+							(!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)))
 					) {
 						if (
 							(action.type === 'createEntityForPlayerAtPositionWithDimensions' ||
@@ -316,12 +317,14 @@ class DeveloperMode {
 								action.type === 'createUnitForPlayerAtPosition') &&
 							!isNaN(action.width) &&
 							!isNaN(action.height) &&
-							!isNaN(action.angle)
+							(!isNaN(action.angle) ||
+								(!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)))
 						) {
 							if (action.actionId) this.initEntities.push(action);
 						} else if (
 							(action.type === 'createUnitAtPosition' || action.type === 'createProjectileAtPosition') &&
-							!isNaN(action.angle)
+							(!isNaN(action.angle) ||
+								(!isNaN(action.rotation?.x) && !isNaN(action.rotation?.y) && !isNaN(action.rotation?.z)))
 						) {
 							if (action.actionId) this.initEntities.push(action);
 						} else if (action.type === 'spawnItem' || action.type === 'createItemWithMaxQuantityAtPosition') {
@@ -658,7 +661,7 @@ class DeveloperMode {
 						key: data.name,
 						alpha: data.alpha,
 						inside: data.inside,
-					},
+					} as any,
 					id: data.name,
 					value: {
 						x: data.x,
@@ -668,9 +671,17 @@ class DeveloperMode {
 						key: data.name,
 						alpha: data.alpha,
 						inside: data.inside,
-					},
+					} as any,
 				};
-				const region = new Region(regionData);
+				if (taro.is3D()) {
+					regionData.default.z = data.z;
+					regionData.default.depth = data.depth;
+
+					regionData.value.z = data.z;
+					regionData.value.depth = data.depth;
+				}
+
+				new Region(regionData);
 
 				// create new region in game.data
 				taro.regionManager.updateRegionToDatabase(regionData);
@@ -691,8 +702,10 @@ class DeveloperMode {
 						let statsData = [
 							{ x: data.x !== region._stats.default.x ? data.x : null },
 							{ y: data.y !== region._stats.default.y ? data.y : null },
+							{ z: data.z !== region._stats.default.z ? data.z : null },
 							{ width: data.width !== region._stats.default.width ? data.width : null },
 							{ height: data.height !== region._stats.default.height ? data.height : null },
+							{ depth: data.depth !== region._stats.default.depth ? data.depth : null },
 							{ alpha: data.alpha !== region._stats.default.alpha ? data.alpha : null },
 							{ inside: data.inside !== region._stats.default.inside ? data.inside : null },
 						];
@@ -718,8 +731,10 @@ class DeveloperMode {
 					name: data.name,
 					x: data.x,
 					y: data.y,
+					z: data.z,
 					width: data.width,
 					height: data.height,
+					depth: data.depth,
 					userId: data.userId,
 					alpha: data.alpha,
 					inside: data.inside,
@@ -739,8 +754,12 @@ class DeveloperMode {
 					if (variable.newKey) regionData.newKey = variable.newKey;
 					if (!isNaN(variable.value?.x)) regionData.x = variable.value.x;
 					if (!isNaN(variable.value?.y)) regionData.y = variable.value.y;
+					if (!isNaN(variable.value?.z)) regionData.z = variable.value.z;
+
 					if (!isNaN(variable.value?.width)) regionData.width = variable.value.width;
 					if (!isNaN(variable.value?.height)) regionData.height = variable.value.height;
+					if (!isNaN(variable.value?.depth)) regionData.depth = variable.value.depth;
+
 					if (variable.value?.inside || variable.value?.inside === '') regionData.inside = variable.value.inside;
 					if (variable.value?.alpha) regionData.alpha = variable.value.alpha;
 					if (variable.value?.create) regionData.create = variable.value.create;
@@ -800,6 +819,27 @@ class DeveloperMode {
 					}
 					if (!isNaN(data.angle) && !isNaN(action.angle)) {
 						action.angle = data.angle;
+					}
+					if (
+						data.rotation &&
+						!isNaN(data.rotation.x) &&
+						!isNaN(data.rotation.y) &&
+						!isNaN(data.rotation.z) &&
+						((action.rotation && !isNaN(action.rotation.x) && !isNaN(action.rotation.y) && !isNaN(action.rotation.z)) ||
+							action.angle)
+					) {
+						action.rotation = data.rotation;
+					}
+					if (
+						data.scale &&
+						!isNaN(data.scale.x) &&
+						!isNaN(data.scale.y) &&
+						!isNaN(data.scale.z) &&
+						((action.scale && !isNaN(action.scale.x) && !isNaN(action.scale.y) && !isNaN(action.scale.z)) ||
+							action.width ||
+							action.height)
+					) {
+						action.scale = data.scale;
 					}
 					if (!isNaN(data.width) && !isNaN(action.width)) {
 						action.width = data.width;
@@ -1266,14 +1306,24 @@ type MapEditToolEnum = keyof MapEditTool;
 
 type TileData<T extends MapEditToolEnum> = Pick<MapEditTool, T>;
 
+interface RegionVector3 {
+	x: number;
+	y?: number;
+	z?: number;
+}
+
 interface RegionData {
 	userId?: string;
+	position?: RegionVector3;
+	scale?: RegionVector3;
 	name: string;
 	newKey?: string;
 	x?: number;
 	y?: number;
+	z?: number;
 	width?: number;
 	height?: number;
+	depth?: number;
 	inside?: string;
 	alpha?: number;
 	create?: boolean;

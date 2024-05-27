@@ -41,8 +41,10 @@ declare interface EntityStats {
 		id: string;
 		x: number;
 		y: number;
+		z?: number;
 		width: number;
 		height: number;
+		depth?: number;
 		inside?: string;
 		alpha?: number;
 	};

@@ -3183,8 +3183,11 @@ var ActionComponent = TaroEntity.extend({
 						let entityType = self._script.param.getValue(action.entityType, vars);
 						let entityToCreate = self._script.param.getValue(action.entity, vars);
 						var position = self._script.param.getValue(action.position, vars);
+						var rotation = self._script.param.getValue(action.rotation, vars);
+						var scale = self._script.param.getValue(action.scale, vars);
 						var height = self._script.param.getValue(action.height, vars) || 100;
 						var width = self._script.param.getValue(action.width, vars) || 100;
+						var depth = self._script.param.getValue(action.depth, vars) || 0;
 						var angle = self._script.param.getValue(action.angle, vars) || 0;
 
 						const entityTypeData = taro.game.data[entityType] && taro.game.data[entityType][entityToCreate];
@@ -3194,10 +3197,30 @@ var ActionComponent = TaroEntity.extend({
 
 							position.x = parseFloat(position.x);
 							position.y = parseFloat(position.y);
-							angle = parseFloat(angle);
+
+							if (taro.is3D) {
+								if (!isNaN(rotation?.y)) {
+									angle = parseFloat(rotation.y);
+								} else {
+									angle = parseFloat(angle);
+								}
+								if (!isNaN(scale?.x)) {
+									width = parseFloat(scale.x * entityTypeData.bodies.default?.width);
+								} else {
+									width = parseFloat(width);
+								}
+								if (!isNaN(scale?.y)) {
+									height = parseFloat(scale.y * entityTypeData.bodies.default?.height);
+								} else {
+									height = parseFloat(height);
+								}
+							} else {
+								angle = parseFloat(angle);
+								height = parseFloat(height);
+								width = parseFloat(width);
+							}
+
 							var angleInRadians = Math.radians(angle);
-							height = parseFloat(height);
-							width = parseFloat(width);
 
 							let createdEntity = null;
 
@@ -3274,6 +3297,7 @@ var ActionComponent = TaroEntity.extend({
 									},
 									height: height,
 									width: width,
+									depth: depth,
 									scaleDimensions: true,
 								});
 
