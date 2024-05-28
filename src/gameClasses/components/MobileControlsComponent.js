@@ -265,7 +265,12 @@ var MobileControlsComponent = TaroEntity.extend({
 		// append joystick to the gamediv element
 		let gameDiv = document.getElementById('default-ingame-ui-container');
 		// make first child of gameDiv
-		gameDiv.insertBefore(joystickZone, gameDiv.firstChild);
+		// check if standalone
+		if (window.isStandalone) {
+			document.body.append(joystickZone);
+		} else {
+			gameDiv.insertBefore(joystickZone, gameDiv.firstChild);
+		}
 
 		// calculate joystick position based on x and y coordinates
 		const [xPercentage, yPercentage] = [
