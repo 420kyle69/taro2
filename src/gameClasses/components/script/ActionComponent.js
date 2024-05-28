@@ -923,7 +923,13 @@ var ActionComponent = TaroEntity.extend({
 								taro.workerComponent.saveUserData(userId, persistedData, null, 'savePlayerData', isGuestUser);
 							} else {
 								// save player data only
-								taro.workerComponent.saveUserData(userId, persistedData.player, 'player', 'savePlayerData', isGuestUser);
+								taro.workerComponent.saveUserData(
+									userId,
+									persistedData.player,
+									'player',
+									'savePlayerData',
+									isGuestUser
+								);
 
 								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');
@@ -1202,35 +1208,48 @@ var ActionComponent = TaroEntity.extend({
 					case 'removeQuestForPlayer':
 						var player = self._script.param.getValue(action.player, vars);
 						var questId = self._script.param.getValue(action.questId, vars);
-						player.quest.removeQuest(questId);
+						var gameId = taro.game.data.defaultData._id;
+						if (
+							player.quest.active[gameId][questId] !== undefined ||
+							player.quest.completed[gameId].includes(questId) === true
+						) {
+							player.quest.removeQuest(questId);
 
-						taro.game.lastTriggeringQuestId = questId;
-						var triggeredBy = {};
-						if (selectedUnit && selectedUnit.script) {
-							triggeredBy.unitId = selectedUnit.id();
-							selectedUnit.script.trigger('questRemoved', triggeredBy);
+							taro.game.lastTriggeringQuestId = questId;
+							var triggeredBy = {};
+							if (selectedUnit && selectedUnit.script) {
+								triggeredBy.unitId = selectedUnit.id();
+								selectedUnit.script.trigger('questRemoved', triggeredBy);
+							}
+							triggeredBy.playerId = player.id();
+							taro.script.trigger('questRemoved', triggeredBy);
+							// console.log('addQuest', JSON.stringify(player.quests));
 						}
-						triggeredBy.playerId = player.id();
-						taro.script.trigger('questRemoved', triggeredBy);
-						// console.log('addQuest', JSON.stringify(player.quests));
+
 						break;
 
 					case 'addQuestToPlayer':
 						var player = self._script.param.getValue(action.player, vars);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var name = self._script.param.getValue(action.name, vars);
+						var gameId = taro.game.data.defaultData._id;
 						var goal = self._script.param.getValue(action.goal, vars);
 						var description = self._script.param.getValue(action.description, vars);
-						player.quest.addQuest(questId, { name, description, goal, progress: 0 });
-						taro.game.lastTriggeringQuestId = questId;
-						var triggeredBy = {};
-						if (selectedUnit && selectedUnit.script) {
-							triggeredBy.unitId = selectedUnit.id();
-							selectedUnit.script.trigger('questAdded', triggeredBy);
+						if (
+							player.quest.active[gameId][questId] === undefined &&
+							player.quest.completed[gameId].includes(questId) === false
+						) {
+							player.quest.addQuest(questId, { name, description, goal, progress: 0 });
+							taro.game.lastTriggeringQuestId = questId;
+							var triggeredBy = {};
+							if (selectedUnit && selectedUnit.script) {
+								triggeredBy.unitId = selectedUnit.id();
+								selectedUnit.script.trigger('questAdded', triggeredBy);
+							}
+							triggeredBy.playerId = player.id();
+							taro.script.trigger('questAdded', triggeredBy);
+							// console.log('addQuest', JSON.stringify(player.quests));
 						}
-						triggeredBy.playerId = player.id();
-						taro.script.trigger('questAdded', triggeredBy);
-						// console.log('addQuest', JSON.stringify(player.quests));
 						break;
 
 					case 'completeQuest':

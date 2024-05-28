@@ -61,7 +61,9 @@ var QuestComponent = TaroEntity.extend({
 			if (taro.isServer) {
 				self._entity.streamUpdateData([
 					{
-						quests: questId,
+						quests: {
+							[questId]: { removed: true },
+						},
 					},
 				]);
 			}
