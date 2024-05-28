@@ -46,6 +46,7 @@ const mergeableKeys: MergableKeys = {
 	itemTypes: {
 		canMerge: true,
 		preferWorld: true,
+		removeAllMapKeys: true,
 		setIsWorldOnKeys: ['scripts'],
 	},
 	music: {
