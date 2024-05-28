@@ -1210,8 +1210,8 @@ var ActionComponent = TaroEntity.extend({
 						var questId = self._script.param.getValue(action.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
 						if (
-							player.quest.active[gameId][questId] !== undefined ||
-							player.quest.completed[gameId].includes(questId) === true
+							player.quests.active[gameId][questId] !== undefined ||
+							player.quests.completed[gameId].includes(questId) === true
 						) {
 							player.quest.removeQuest(questId);
 
@@ -1236,8 +1236,8 @@ var ActionComponent = TaroEntity.extend({
 						var goal = self._script.param.getValue(action.goal, vars);
 						var description = self._script.param.getValue(action.description, vars);
 						if (
-							player.quest.active[gameId][questId] === undefined &&
-							player.quest.completed[gameId].includes(questId) === false
+							player.quests.active[gameId][questId] === undefined &&
+							player.quests.completed[gameId].includes(questId) === false
 						) {
 							player.quest.addQuest(questId, { name, description, goal, progress: 0 });
 							taro.game.lastTriggeringQuestId = questId;
