@@ -27,6 +27,9 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-contextmenu@2.9.2/dist/jquery.contextMenu.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-contextmenu@2.9.2/dist/jquery.ui.position.min.js"></script>
 
+    <!-- Nipple JS -->
+    <script src="https://cdn.jsdelivr.net/npm/nipplejs@0.10.1/dist/nipplejs.min.js"></script>
+
     <!-- Bootstrap -->
     <!-- https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.2/dist/umd/popper.min.js"></script> -->
@@ -153,14 +156,14 @@
             style="z-index: 1; position: absolute; width: 100%; height: 100%; pointer-events: none;"></div>
 
         <%- include('templates/dev-console'); -%>
-        <%- include('templates/game-editor'); -%>
-        <%- include('templates/menu'); -%>
-        <%- include('templates/shop'); -%>
-        <%- include('templates/gui'); -%>
-        <%- include('templates/chat'); -%>
-        <%- include('templates/inventory'); -%>
-        <%- include('templates/dialogue'); -%>
-        <%- include('templates/trade'); -%>
+            <%- include('templates/game-editor'); -%>
+                <%- include('templates/menu'); -%>
+                    <%- include('templates/shop'); -%>
+                        <%- include('templates/gui'); -%>
+                            <%- include('templates/chat'); -%>
+                                <%- include('templates/inventory'); -%>
+                                    <%- include('templates/dialogue'); -%>
+                                        <%- include('templates/trade'); -%>
     </div>
     <%- include('templates/videochat.ejs'); -%>
 
