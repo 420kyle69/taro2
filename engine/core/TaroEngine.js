@@ -2226,10 +2226,7 @@ var TaroEngine = TaroEntity.extend({
 		let index = -1;
 		if (type === 'top') {
 			index = tilesets.findIndex((tilesheet) => {
-				return (
-					(tilesheet.name === 'tilesheet_complete' || tilesheet.name === 'tilesheet') &&
-					(tilesheet.type === undefined || tilesheet.type === 'top')
-				);
+				return tilesheet.type === undefined || tilesheet.type === 'top';
 			});
 		} else {
 			index = tilesets.findIndex((tilesheet) => {
@@ -2286,14 +2283,14 @@ var TaroEngine = TaroEntity.extend({
 	},
 
 	escapeHtml(input) {
-		return input.replace(/[&<"'>]/g, function(m) {
+		return input.replace(/[&<"'>]/g, function (m) {
 			switch (m) {
 				case '&':
 					return '&amp;';
 				case '<':
 					return '&lt;';
 				case '>':
-					return '&gt;'
+					return '&gt;';
 				case '"':
 					return '&quot;';
 				default:
@@ -2302,7 +2299,7 @@ var TaroEngine = TaroEntity.extend({
 		});
 	},
 
-	is3D () {
+	is3D() {
 		return taro.game.data.defaultData.defaultRenderer === '3d';
 	},
 });
