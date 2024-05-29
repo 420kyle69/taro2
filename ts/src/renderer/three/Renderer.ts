@@ -658,6 +658,7 @@ namespace Renderer {
 
 				const skyboxFacesUrls = taro.game.data.settings.skybox;
 				for (const key in skyboxFacesUrls) {
+					if (!skyboxFacesUrls[key]) continue;
 					sources.push({ name: key, type: 'texture', src: skyboxFacesUrls[key] });
 				}
 

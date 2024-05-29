@@ -97,6 +97,10 @@ namespace Renderer {
 				return (this.textures.get(name) as THREE.Texture) || placeholderTex;
 			}
 
+			getTextureWithoutPlaceholder(name: string) {
+				return this.textures.get(name) as THREE.Texture;
+			}
+
 			getTexturesContaining(name: string) {
 				const textures: THREE.Texture[] = [];
 				for (const [key, value] of this.textures) {
