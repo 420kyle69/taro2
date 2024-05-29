@@ -10,12 +10,12 @@ namespace Renderer {
 			}
 
 			private createMaterialArray() {
-				const left = gAssetManager.getTexture('left');
-				const right = gAssetManager.getTexture('right');
-				const top = gAssetManager.getTexture('top');
-				const bottom = gAssetManager.getTexture('bottom');
-				const front = gAssetManager.getTexture('front');
-				const back = gAssetManager.getTexture('back');
+				const left = gAssetManager.getTextureWithoutPlaceholder('left');
+				const right = gAssetManager.getTextureWithoutPlaceholder('right');
+				const top = gAssetManager.getTextureWithoutPlaceholder('top');
+				const bottom = gAssetManager.getTextureWithoutPlaceholder('bottom');
+				const front = gAssetManager.getTextureWithoutPlaceholder('front');
+				const back = gAssetManager.getTextureWithoutPlaceholder('back');
 
 				if (!(left && right && top && bottom && front && back)) {
 					return [];
