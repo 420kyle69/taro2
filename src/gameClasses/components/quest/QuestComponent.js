@@ -55,18 +55,20 @@ var QuestComponent = TaroEntity.extend({
 		if (questObj.active[gameId][questId] !== undefined) {
 			delete questObj.active[gameId][questId];
 		}
-		var questObj = self._entity.quests;
 		if (questObj.completed[gameId].includes(questId)) {
 			questObj.completed[gameId] = questObj.completed[gameId].filter((v) => v !== questId);
-			if (taro.isServer) {
-				self._entity.streamUpdateData([
-					{
-						quests: {
-							[questId]: { removed: true },
-						},
+		}
+		if (
+			taro.isServer &&
+			(questObj.active[gameId][questId] !== undefined || questObj.completed[gameId].includes(questId))
+		) {
+			self._entity.streamUpdateData([
+				{
+					quests: {
+						[questId]: { removed: true },
 					},
-				]);
-			}
+				},
+			]);
 		}
 	},
 
