@@ -4438,7 +4438,7 @@ var TaroEntity = TaroObject.extend({
 											if (this.quests.active[gameId][questId] !== undefined) {
 												delete this.quests.active[gameId][questId];
 											}
-											this.quests.completed[gameId].filter((id) => id !== questId);
+											this.quests.completed[gameId] = this.quests.completed[gameId].filter((id) => id !== questId);
 
 											return;
 										}
