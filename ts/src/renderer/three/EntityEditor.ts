@@ -10,7 +10,6 @@ namespace Renderer {
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
-				renderer.initEntityLayer.add(this.preview);
 				this.activatePlacement(false);
 
 				this.gizmo = new EntityGizmo();
