@@ -545,7 +545,7 @@ var ItemUiComponent = TaroEntity.extend({
 				requirements = '';
 				for (var key in stats.controls.equipRequirement.playerAttributes) {
 					var requirement = stats.controls.equipRequirement.playerAttributes[key];
-					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementSatisfied(requirement, key, ownerPlayer._stats.attributes) ? 'text-success' : 'text-danger';
+					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementMet(requirement, key, ownerPlayer._stats.attributes) ? 'text-success' : 'text-danger';
 					requirements += `<p class='mb-1 ml-2 no-selection ${requirementsSatisfied}'>${this.requirementTypeString(requirement.type)}${requirement.value} ${ownerPlayer._stats.attributes[key].name || ''}</p>`;
 				}
 
@@ -558,7 +558,7 @@ var ItemUiComponent = TaroEntity.extend({
 				requirements = '';
 				for (var key in stats.controls.equipRequirement.unitAttributes) {
 					var requirement = stats.controls.equipRequirement.unitAttributes[key];
-					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementSatisfied(requirement, key, ownerUnit._stats.attributes) ? 'text-success' : 'text-danger';
+					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementMet(requirement, key, ownerUnit._stats.attributes) ? 'text-success' : 'text-danger';
 					requirements += `<p class='mb-1 ml-2 no-selection ${requirementsSatisfied}'>${this.requirementTypeString(requirement.type)}${requirement.value} ${ownerUnit._stats.attributes[key].name || ''}</p>`;
 				}
 

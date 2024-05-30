@@ -501,7 +501,7 @@ var InventoryComponent = TaroEntity.extend({
 		return { allowed: true, reason: "" };
 	},
 	
-	isAttributeRequirementSatisfied: function (requirement, key, attributes) {
+	isAttributeRequirementMet: function (requirement, key, attributes) {
 		if (attributes[key]) {
 			switch (requirement.type) {
 				case 'atmost':
@@ -537,7 +537,7 @@ var InventoryComponent = TaroEntity.extend({
 			if (equipRequirement.playerAttributes) {
 				for (let key in equipRequirement.playerAttributes) {
 					if (playerAttributes && playerAttributes[key]) {
-						requirementsSatisfied = self.isAttributeRequirementSatisfied(equipRequirement.playerAttributes[key], key, playerAttributes);
+						requirementsSatisfied = self.isAttributeRequirementMet(equipRequirement.playerAttributes[key], key, playerAttributes);
 						if (!requirementsSatisfied) {
 							return false;
 						}
@@ -548,7 +548,7 @@ var InventoryComponent = TaroEntity.extend({
 			if (equipRequirement.unitAttributes) {
 				for (let key in equipRequirement.unitAttributes) {
 					if (unitAttributes && unitAttributes[key]) {
-						requirementsSatisfied = self.isAttributeRequirementSatisfied(equipRequirement.unitAttributes[key], key, unitAttributes);
+						requirementsSatisfied = self.isAttributeRequirementMet(equipRequirement.unitAttributes[key], key, unitAttributes);
 						if (!requirementsSatisfied) {
 							return false;
 						}
