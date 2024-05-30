@@ -250,8 +250,11 @@ var ItemUiComponent = TaroEntity.extend({
 				const item = taro.$(items[itemSlot]);
 				if (type === 'activate') {
 					const currentItemSlot = parseInt(event.currentTarget.parentElement.id.substring(5));
+					if (!items[currentItemSlot]) {
+						return;
+					}
 					event.target.parentElement.classList.add('item-drag-active');
-					if (selectedUnit.inventory.isItemDropAllowed(currentItemSlot, itemSlot, taro.$(items[currentItemSlot]), taro.$(items[itemSlot]))) {
+					if (selectedUnit.inventory.isItemDropAllowed(currentItemSlot, itemSlot, taro.$(items[currentItemSlot]), taro.$(items[itemSlot])).allowed) {
 						event.target.parentElement.classList.add('item-drop-allowed');
 
 						if (item && item._stats.inventorySlotColor) {
@@ -278,11 +281,6 @@ var ItemUiComponent = TaroEntity.extend({
 		if (item) {
 			var itemStats = item._stats;
 			if (itemStats) {
-				var itemDetail = $('<div/>', {
-					style: 'font-size: 16px; width: 250px;',
-					html: this.getItemHtml(itemStats),
-				});
-
 				var itemQuantity = item._stats.quantity !== undefined ? item._stats.quantity : '';
 				// || item._stats.maxQuantity === null
 				if ((item._stats.quantity == 1 && item._stats.maxQuantity == 1) || item._stats.quantity === null) {
@@ -304,11 +302,16 @@ var ItemUiComponent = TaroEntity.extend({
 						'data-container': 'body',
 						'data-toggle': 'popover',
 						'data-placement': options.popover || 'left',
-						'data-content': itemDetail.prop('outerHTML'),
 					}).popover({
 						html: true,
 						animation: false,
 						trigger: 'manual',
+						content: () => {
+							return $('<div/>', {
+								style: 'font-size: 16px; width: 250px;',
+								html: self.getItemHtml(item.id()),
+							}).prop('outerHTML');
+						} 
 					});
 				}
 			}
@@ -368,8 +371,6 @@ var ItemUiComponent = TaroEntity.extend({
 					drop: function (event, ui) {
 						var draggable = ui.draggable;
 						var droppable = $(this);
-						var dragPos = draggable.position();
-						var dropPos = droppable.position();
 						var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
 						var toIndex = parseFloat(droppable[0].parentElement.id.replace('item-', ''));
 
@@ -403,11 +404,8 @@ var ItemUiComponent = TaroEntity.extend({
 						}
 
 						var totalInventorySlot = selectedUnit.inventory.getTotalInventorySize();
-						if (
-							toIndex < totalInventorySlot ||
-							(toIndex >= totalInventorySlot && !fromItem._stats.controls.undroppable)
-						) {
-							//check if try to trade undroppable item
+						var isDropData = selectedUnit.inventory.isItemDropAllowed(fromIndex, toIndex, fromItem, toItem);
+						if (isDropData.allowed) {
 							taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
 							var tempItem = items[fromIndex];
 							items[fromIndex] = items[toIndex];
@@ -417,10 +415,6 @@ var ItemUiComponent = TaroEntity.extend({
 								taro.client.myPlayer.isTrading &&
 								(fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)
 							) {
-								if (fromItem._stats.controls.untradable) {
-									window.setToastMessage('this item cannot be traded', 'error');
-									return;
-								}
 								// visual css stuff
 								if (isTradingItemDragged) {
 									if (!toItem) {
@@ -439,6 +433,8 @@ var ItemUiComponent = TaroEntity.extend({
 								// update other client.
 								taro.tradeUi.sendOfferingItems();
 							}
+						} else if (isDropData.reason) {
+							window.setToastMessage(isDropData.reason, 'error');
 						}
 					},
 				});
@@ -447,9 +443,12 @@ var ItemUiComponent = TaroEntity.extend({
 		return itemDiv;
 	},
 
-	getItemHtml: function (itemStats) {
+	getItemHtml: function (itemId) {
 		var self = this;
-
+		const itemStats = taro.$(itemId)._stats;
+		if (!itemStats) {
+			return '';
+		}
 		// var buffs = self.getBuffList(itemStats);
 		var itemTitle = $('<h4/>', {
 			html: taro.clientSanitizer(itemStats.name),
@@ -507,25 +506,72 @@ var ItemUiComponent = TaroEntity.extend({
 	},
 
 	updateItemDescription: function (item) {
-		var inventorySlotIfPresent = item._stats.slotIndex;
+		// since popover content is calculated dynamically on hover, we don't need to do this.
+		// var inventorySlotIfPresent = item._stats.slotIndex;
+		// if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
+		// 	var popoverContent = $('<div/>', {
+		// 		style: 'font-size: 16px; width: 250px;',
+		// 		html: this.getItemHtml(item.id()),
+		// 	});
 
-		if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
-			var popoverContent = $('<div/>', {
-				style: 'font-size: 16px; width: 250px;',
-				html: this.getItemHtml(item._stats),
-			});
-
-			$(taro.client.getCachedElementById(`slotindex-${inventorySlotIfPresent}`)).attr(
-				'data-content',
-				popoverContent[0].outerHTML
-			);
+		// 	$(taro.client.getCachedElementById(`slotindex-${inventorySlotIfPresent}`)).attr(
+		// 		'data-content',
+		// 		popoverContent[0].outerHTML
+		// 	);
+		// }
+	},
+	requirementTypeString: (type) => {
+		switch (type) {
+			case 'atleast':
+				return '';
+			case 'atmost':
+				return 'max. ';
+			default:
+				return `${type} `;
 		}
 	},
 	getItemPopOverContent: function (stats) {
 		var info = '<div>';
+		var ownerPlayer = taro.client.myPlayer;
+		var ownerUnit = ownerPlayer.getSelectedUnit();
 		if (stats.description) {
 			info += `<p class="mb-1"><span class="item-description">${stats.description} </span></p>`;
 		}
+
+		if (stats.controls.equipRequirement) {
+			var allRequirements = '';
+			var requirements = '';
+			if (stats.controls.equipRequirement.playerAttributes && ownerUnit) {
+				requirements = '';
+				for (var key in stats.controls.equipRequirement.playerAttributes) {
+					var requirement = stats.controls.equipRequirement.playerAttributes[key];
+					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementMet(requirement, key, ownerPlayer._stats.attributes) ? 'text-success' : 'text-danger';
+					requirements += `<p class='mb-1 ml-2 no-selection ${requirementsSatisfied}'>${this.requirementTypeString(requirement.type)}${requirement.value} ${ownerPlayer._stats.attributes[key].name || ''}</p>`;
+				}
+
+				if (requirements) {
+					allRequirements += `${requirements}`;
+				}
+			}
+
+			if (stats.controls.equipRequirement.unitAttributes && ownerUnit) {
+				requirements = '';
+				for (var key in stats.controls.equipRequirement.unitAttributes) {
+					var requirement = stats.controls.equipRequirement.unitAttributes[key];
+					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementMet(requirement, key, ownerUnit._stats.attributes) ? 'text-success' : 'text-danger';
+					requirements += `<p class='mb-1 ml-2 no-selection ${requirementsSatisfied}'>${this.requirementTypeString(requirement.type)}${requirement.value} ${ownerUnit._stats.attributes[key].name || ''}</p>`;
+				}
+
+				if (requirements) {
+					allRequirements += `${requirements}`;
+				}
+			}
+
+			if (allRequirements) {
+				info += `<div class="no-selection"><b>Equip Requirements: </b> <br/> ${allRequirements}</div>`
+			}
+		}
+
 		if (stats && stats.bonus) {
 			if (stats.bonus.consume && Object.keys(stats.bonus.consume).length > 0) {
 				var consumeBonus = '';

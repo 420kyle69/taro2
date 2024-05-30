@@ -163,6 +163,7 @@ var Player = TaroEntity.extend({
 			var data = Object.assign(data, {
 				clientId: self._stats.clientId,
 				name: self._stats.name,
+				playerId: self.id()
 			});
 
 			var unit = new Unit(data);
