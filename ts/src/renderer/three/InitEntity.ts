@@ -64,7 +64,11 @@ namespace Renderer {
 					}
 					if (!isNaN(action.scale?.x) && !isNaN(action.scale?.y) && !isNaN(action.scale?.z)) {
 						if (body instanceof AnimatedSprite) {
-							this.scale.set(Utils.pixelToWorld(action.scale.x), 1, Utils.pixelToWorld(action.scale.y));
+							this.setSize(
+								Utils.pixelToWorld(defaultWidth * action.scale.x),
+								1,
+								Utils.pixelToWorld(defaultHeight * action.scale.y)
+							);
 						} else if (body instanceof Model) {
 							this.setSize(
 								Utils.pixelToWorld(defaultWidth * action.scale.x),
@@ -74,7 +78,7 @@ namespace Renderer {
 						}
 					} else if (!isNaN(action.width) && !isNaN(action.height)) {
 						if (body instanceof AnimatedSprite) {
-							this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+							this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
 						} else if (body instanceof Model) {
 							this.setSize(
 								Utils.pixelToWorld(action.width),
@@ -88,7 +92,7 @@ namespace Renderer {
 						this.rotation.y = THREE.MathUtils.degToRad(action.angle);
 					}
 					if (!isNaN(action.width) && !isNaN(action.height)) {
-						this.scale.set(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
+						this.setSize(Utils.pixelToWorld(action.width), 1, Utils.pixelToWorld(action.height));
 					}
 				}
 
@@ -119,7 +123,7 @@ namespace Renderer {
 
 			setSize(x: number, y: number, z: number) {
 				if (this.body instanceof AnimatedSprite) {
-					this.scale.set(x, y, z);
+					this.scale.set(x, 1, z);
 				} else if (this.body instanceof Model) {
 					this.scale.x = this.body.originalScale.x * (x / this.body.originalSize.x);
 					this.scale.y = this.body.originalScale.y * (y / this.body.originalSize.y);
