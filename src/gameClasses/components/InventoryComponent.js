@@ -180,14 +180,13 @@ var InventoryComponent = TaroEntity.extend({
 		return actualQuantity == undefined || actualQuantity >= requiredQty;
 	},
 
-	isMappedSlotAvailable: function (mappedSlot, itemTypeId) {
+	isMappedSlotAvailable: function (mappedSlot, itemTypeId, ownerPlayer) {
 		var existingItem = this.getItemBySlotNumber(mappedSlot);
 		if (existingItem == undefined) {
 			return true;
 		}
 
 		// even if there's an existing item in the designated slot, if we're in a middle of purchasing an item and the item uses the existing item as a recipe, then allow buying the item
-		var ownerPlayer = this._entity.getOwner();
 		if (ownerPlayer) {
 			var lastOpenedShop = ownerPlayer._stats.lastOpenedShop;
 			if (lastOpenedShop) {
@@ -223,6 +222,10 @@ var InventoryComponent = TaroEntity.extend({
 
 		var mappedSlot = undefined;
 		var isAvailable = false;
+		let ownerPlayer = this._entity.getOwner();
+
+		let equipRequirementMet = self.isEquipRequirementMet(itemData);
+
 		if (mappedSlots != undefined && mappedSlots.length > 0) {
 			for (var i = 0; i < mappedSlots.length; i++) {
 				if (mappedSlots[i] === 'backpack-slots') {
@@ -232,14 +235,18 @@ var InventoryComponent = TaroEntity.extend({
 						j++
 					) {
 						mappedSlot = j;
-						isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId);
+						isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId, ownerPlayer);
 						if (isAvailable) {
 							return mappedSlot;
 						}
 					}
 				} else {
 					mappedSlot = mappedSlots[i];
-					isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId);
+					// if equip requirement not met, only allow items to be placed in backpack.
+					if (mappedSlot <= this._entity._stats.inventorySize && !equipRequirementMet) {
+						continue;
+					}
+					isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId, ownerPlayer);
 					if (isAvailable) {
 						return mappedSlot;
 					}
@@ -252,7 +259,7 @@ var InventoryComponent = TaroEntity.extend({
 		if (itemData.controls?.canMerge != false) {
 			// Check if the item can merge
 			var quantity = itemData.quantity;
-			for (var i = 0; i < totalInventorySize; i++) {
+			for (var i = equipRequirementMet ? 0 : this._entity._stats.inventorySize; i < totalInventorySize; i++) {
 				var itemId = self._entity._stats.itemIds[i];
 				if (itemId) {
 					var item = taro.$(itemId);
@@ -282,7 +289,7 @@ var InventoryComponent = TaroEntity.extend({
 			// if item was mapped to a specific slot, then check if there's available slot in the backpack
 			// if item didn't have mapping, then return the first available slot including both inventory + backpack
 			if (
-				mappedSlot == undefined ||
+				(mappedSlot == undefined && equipRequirementMet) ||
 				(i >= this._entity._stats.inventorySize &&
 					(itemData.controls == undefined ||
 						itemData.controls.backpackAllowed == true ||
@@ -448,26 +455,109 @@ var InventoryComponent = TaroEntity.extend({
 	},
 
 	isItemDropAllowed: function (fromSlot, toSlot, fromItem, toItem) {
-		return (toSlot < this.getTotalInventorySize() ||
-			(toSlot >= this.getTotalInventorySize() &&
-				!fromItem._stats.controls.undroppable &&
-				!fromItem._stats.controls.untradable)) && //check if try to trade undroppable item
-			(fromItem._stats.controls == undefined ||
-				fromItem._stats.controls.permittedInventorySlots == undefined ||
-				fromItem._stats.controls.permittedInventorySlots.length == 0 ||
-				fromItem._stats.controls.permittedInventorySlots.includes(toSlot + 1) ||
-				(toSlot + 1 > this._entity._stats.inventorySize &&
-					(fromItem._stats.controls.backpackAllowed == true ||
-						fromItem._stats.controls.backpackAllowed == undefined ||
-						fromItem._stats.controls.backpackAllowed == null))) && // any item can be moved into backpack slots if the backpackAllowed property is true
-			(!toItem || (toItem._stats.controls == undefined ||
-				toItem._stats.controls.permittedInventorySlots == undefined ||
-				toItem._stats.controls.permittedInventorySlots.length == 0 ||
-				toItem._stats.controls.permittedInventorySlots.includes(fromSlot + 1) ||
-				(fromSlot + 1 > this._entity._stats.inventorySize &&
-					(toItem._stats.controls.backpackAllowed == true ||
-						toItem._stats.controls.backpackAllowed == undefined ||
-						toItem._stats.controls.backpackAllowed == null))))
+		const totalInventorySize = this.getTotalInventorySize();
+		const inventorySize = this._entity._stats.inventorySize;
+	
+		if (toSlot >= totalInventorySize) {
+			if (fromItem._stats.controls.undroppable) {
+				return { allowed: false, reason: "Item is undroppable" };
+			}
+			if (fromItem._stats.controls.untradable) {
+				return { allowed: false, reason: "Item is untradable" };
+			}
+		}
+
+		if (toItem && fromSlot >= totalInventorySize) {
+			if (toItem._stats.controls.undroppable) {
+				return { allowed: false, reason: "Item is undroppable" };
+			}
+			if (toItem._stats.controls.untradable) {
+				return { allowed: false, reason: "Item is untradable" };
+			}
+		}
+	
+		if (toSlot + 1 <= inventorySize && !this.isEquipRequirementMet(fromItem._stats)) {
+			return { allowed: false, reason: `'${fromItem._stats.name}' equip requirements not met.` };
+		}
+	
+		if (toItem && fromSlot + 1 <= inventorySize && !this.isEquipRequirementMet(toItem._stats)) {
+			return { allowed: false, reason: `'${toItem._stats.name}' equip requirements not met.` };
+		}
+		
+		if (fromItem._stats.controls?.permittedInventorySlots?.length > 0) {
+			if (!fromItem._stats.controls.permittedInventorySlots.includes(toSlot + 1) &&
+				(toSlot + 1 <= inventorySize || fromItem._stats.controls.backpackAllowed === false)) {
+				return { allowed: false, reason: "" };
+			}
+		}
+	
+		if (toItem?._stats.controls?.permittedInventorySlots?.length > 0) {
+			if (!toItem._stats.controls.permittedInventorySlots.includes(fromSlot + 1) &&
+				(fromSlot + 1 <= inventorySize || toItem._stats.controls.backpackAllowed === false)) {
+				return { allowed: false, reason: "" };
+			}
+		}
+	
+		return { allowed: true, reason: "" };
+	},
+	
+	isAttributeRequirementSatisfied: function (requirement, key, attributes) {
+		if (attributes[key]) {
+			switch (requirement.type) {
+				case 'atmost':
+					if (attributes[key].value > requirement.value) {
+						return false;
+					}
+					break;
+				case 'exactly':
+					if (attributes[key].value != requirement.value) {
+						return false;
+					}
+					break;
+				case 'atleast':
+				default:
+					if (attributes[key].value < requirement.value) {
+						return false;
+					}
+					break;
+			}
+			return true;
+		}
+		return true;
+	},
+
+	isEquipRequirementMet: function (itemData) {
+		let self = this;
+		let ownerPlayer = self._entity.getOwner();
+		let playerAttributes = ownerPlayer?._stats.attributes;
+		let unitAttributes = self._entity._stats.attributes;
+
+		if (typeof itemData.controls?.equipRequirement === 'object') {
+			let equipRequirement = itemData.controls.equipRequirement;
+			if (equipRequirement.playerAttributes) {
+				for (let key in equipRequirement.playerAttributes) {
+					if (playerAttributes && playerAttributes[key]) {
+						requirementsSatisfied = self.isAttributeRequirementSatisfied(equipRequirement.playerAttributes[key], key, playerAttributes);
+						if (!requirementsSatisfied) {
+							return false;
+						}
+					}
+				}
+			};
+
+			if (equipRequirement.unitAttributes) {
+				for (let key in equipRequirement.unitAttributes) {
+					if (unitAttributes && unitAttributes[key]) {
+						requirementsSatisfied = self.isAttributeRequirementSatisfied(equipRequirement.unitAttributes[key], key, unitAttributes);
+						if (!requirementsSatisfied) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
 	}
 });
 

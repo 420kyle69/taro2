@@ -72,6 +72,10 @@ var Unit = TaroEntityPhysics.extend({
 			}
 		}
 
+		if (data.playerId) {
+			self.ownerPlayer = taro.$(data.playerId);
+		}
+		
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData, true);
 
@@ -1217,10 +1221,11 @@ var Unit = TaroEntityPhysics.extend({
 		var totalQuantityTakenFromItem = 0;
 		var removeQueued = false;
 		var returnQueued = false;
+		var equipRequirementMet = self.inventory.isEquipRequirementMet(itemData);
 
 		if (self.canCarryItem(itemData)) {
 			// immediately consumable item doesn't require inventory space
-			if (itemData.isUsedOnPickup && self.canUseItem(itemData)) {
+			if (itemData.isUsedOnPickup && self.canUseItem(itemData) && equipRequirementMet) {
 				// if item is not an entity, create a new item instance
 				if (!isItemAnEntity) {
 					item = new Item(itemData);
@@ -1242,7 +1247,7 @@ var Unit = TaroEntityPhysics.extend({
 				if (!!itemData.controls?.canMerge) {
 					// insert/merge itemData's quantity into matching items in the inventory
 					var totalInventorySize = this.inventory.getTotalInventorySize();
-					for (var i = 0; i < totalInventorySize; i++) {
+					for (var i = equipRequirementMet ? 0 : this._stats.inventorySize; i < totalInventorySize; i++) {
 						var currentItemId = self._stats.itemIds[i];
 						if (currentItemId) {
 							var currentItem = taro.$(currentItemId);
@@ -1994,7 +1999,7 @@ var Unit = TaroEntityPhysics.extend({
 					if (itemData) {
 						itemData.quantity = persistedItem.quantity;
 						itemData.itemTypeId = persistedItem.itemTypeId;
-						if (self.pickUpItem(itemData)) {
+						if (self.pickUpItem(itemData, persistedItem.slotIndex)) {
 							var givenItem = taro.$(taro.game.lastCreatedItemId);
 							if (givenItem && givenItem.getOwnerUnit() == this) {
 								givenItem.loadPersistentData(persistedItem);
