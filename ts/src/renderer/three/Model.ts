@@ -54,6 +54,24 @@ namespace Renderer {
 				});
 			}
 
+			setColor(color: number, time = 0) {
+				this.traverse((child) => {
+					if (child instanceof THREE.Mesh) {
+						// Convert to basic material to avoid lighting
+						const material = new THREE.MeshBasicMaterial();
+						THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
+						child.material = material;
+						const originalColor = child.material.color.getHex();
+						child.material.color.setHex(color);
+						if (time > 0) {
+							setTimeout(() => {
+								child.material.color.setHex(originalColor);
+							}, time);
+						}
+					}
+				});
+			}
+
 			getCenter() {
 				this.aabb.setFromObject(this.scene);
 				return this.aabb.getCenter(this.center);
