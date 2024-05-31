@@ -6,7 +6,6 @@ var QuestComponent = TaroEntity.extend({
 		var self = this;
 		self._entity = entity;
 		var gameId = taro.game.data.defaultData._id;
-		// TODO handle the default value here
 		if (self._entity.quests.active[gameId] === undefined) {
 			self._entity.quests.active[gameId] = {};
 		}

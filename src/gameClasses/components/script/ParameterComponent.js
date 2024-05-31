@@ -473,6 +473,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'getQuestObject':
 						var player = self.getValue(text.player, vars);
+						player?.quest.init(player);
 						var questId = self.getValue(text.questId, vars);
 						var quests = player.quests;
 						var gameId = taro.game.data.defaultData._id;
@@ -484,6 +485,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'getAllActiveQuestObjectsInThisMap':
 						var player = self.getValue(text.player, vars);
+						player?.quest.init(player);
 						var quests = player.quests;
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
@@ -495,6 +497,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'getAllActiveQuestObjects':
 						var player = self.getValue(text.player, vars);
+						player?.quest.init(player);
 						var quests = player.quests;
 						if (quests && quests.active) {
 							returnValue = quests.active;
@@ -504,6 +507,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'getQuestProgress':
 						var player = self.getValue(text.player, vars);
+						player?.quest.init(player);
 						var questId = self.getValue(text.questId, vars);
 						var quests = player.quests;
 						var gameId = taro.game.data.defaultData._id;
@@ -515,6 +519,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'isQuestProgressCompleted':
 						var player = self.getValue(text.player, vars);
+						player?.quest.init(player);
 						var questId = self.getValue(text.questId, vars);
 						var quests = player.quests;
 						var gameId = taro.game.data.defaultData._id;
@@ -571,6 +576,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'isQuestActive':
 						var player = self.getValue(text.player, vars);
+						player?.quest.init(player);
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
 						var quests = player?.quests;
@@ -580,6 +586,7 @@ var ParameterComponent = TaroEntity.extend({
 
 					case 'isQuestCompleted':
 						var player = self.getValue(text.player, vars);
+						player?.quest.init(player);
 						var questId = self.getValue(text.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
 						var quests = player.quests;
