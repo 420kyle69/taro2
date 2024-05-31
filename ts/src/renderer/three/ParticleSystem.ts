@@ -86,6 +86,7 @@ namespace Renderer {
 					points.matrixAutoUpdate = false;
 					// eslint-disable-next-line @typescript-eslint/no-empty-function
 					points.updateMatrixWorld = function () {};
+					points.renderOrder = 498; // Higher than entities, lower than HUD
 
 					this.add(points);
 				}
@@ -493,8 +494,7 @@ namespace Renderer {
     else if (vTexture == 15.0) gl_FragColor = texture2D(textures[15], vUv) * vColor;
 
     gl_FragColor.rgb *= gl_FragColor.a;
-	if (gl_FragColor.a < 0.5) discard;
-	gl_FragColor.a *= vBlend;
+		gl_FragColor.a *= vBlend;
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
