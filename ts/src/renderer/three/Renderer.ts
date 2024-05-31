@@ -574,9 +574,9 @@ namespace Renderer {
 				}
 				if (this.entityManager.initEntities.length === 0) {
 					// create images for entities created in initialize script
-					Object.values(taro.game.data.scripts).forEach((script) => {
+					Object.values(taro?.game?.data?.scripts ?? {}).forEach((script) => {
 						if (script.triggers?.[0]?.type === 'gameStart') {
-							Object.values(script.actions).forEach((action) => {
+							Object.values(script?.actions ?? {}).forEach((action) => {
 								this.createInitEntity(action);
 							});
 						}
@@ -637,9 +637,9 @@ namespace Renderer {
 				});
 
 				const taroEntities = [
-					...Object.values(data.unitTypes),
-					...Object.values(data.projectileTypes),
-					...Object.values(data.itemTypes),
+					...Object.values(data?.unitTypes ?? {}),
+					...Object.values(data?.projectileTypes ?? {}),
+					...Object.values(data?.itemTypes ?? {}),
 				];
 
 				for (const taroEntity of taroEntities) {
@@ -651,13 +651,14 @@ namespace Renderer {
 					AnimationManager.instance().createAnimationsFromTaroData(url, taroEntity);
 				}
 
-				for (const taroEntity of Object.values(data.particleTypes)) {
+				for (const taroEntity of Object.values(data?.particleTypes ?? {})) {
 					const key = taroEntity.url;
 					sources.push({ name: `particle/${key}`, type: 'texture', src: Utils.patchAssetUrl(key) });
 				}
 
 				const skyboxFacesUrls = taro.game.data.settings.skybox;
 				for (const key in skyboxFacesUrls) {
+					if (!skyboxFacesUrls[key]) continue;
 					sources.push({ name: key, type: 'texture', src: skyboxFacesUrls[key] });
 				}
 
