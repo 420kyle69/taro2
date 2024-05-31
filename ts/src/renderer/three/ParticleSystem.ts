@@ -86,6 +86,7 @@ namespace Renderer {
 					points.matrixAutoUpdate = false;
 					// eslint-disable-next-line @typescript-eslint/no-empty-function
 					points.updateMatrixWorld = function () {};
+					points.renderOrder = 498; // Higher than entities, lower than HUD
 
 					this.add(points);
 				}
