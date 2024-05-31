@@ -1207,6 +1207,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'removeQuestForPlayer':
 						var player = self._script.param.getValue(action.player, vars);
+						player.quest.init(player);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
 						if (
@@ -1230,6 +1231,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'addQuestToPlayer':
 						var player = self._script.param.getValue(action.player, vars);
+						player.quest.init(player);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var name = self._script.param.getValue(action.name, vars);
 						var gameId = taro.game.data.defaultData._id;
@@ -1254,6 +1256,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'completeQuest':
 						var player = self._script.param.getValue(action.player, vars);
+						player.quest.init(player);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var gameId = taro.game.data.defaultData._id;
 						var newObj = player.quests;
@@ -1274,6 +1277,7 @@ var ActionComponent = TaroEntity.extend({
 
 					case 'setQuestProgress':
 						var player = self._script.param.getValue(action.player, vars);
+						player.quest.init(player);
 						var questId = self._script.param.getValue(action.questId, vars);
 						var progress = self._script.param.getValue(action.progress, vars);
 
