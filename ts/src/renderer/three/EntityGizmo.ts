@@ -59,9 +59,9 @@ namespace Renderer {
 									const degreesY = THREE.MathUtils.radToDeg(radiansY);
 									const degreesZ = THREE.MathUtils.radToDeg(radiansZ);
 									editedAction['rotation'] = {
-										x: degreesX,
-										y: degreesY,
-										z: degreesZ,
+										x: 360 - (degreesX % 360),
+										y: 360 - (degreesY % 360),
+										z: 360 - (degreesZ % 360),
 										function: 'vector3',
 									};
 								} else {
