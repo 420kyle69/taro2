@@ -72,7 +72,7 @@ namespace Renderer {
 								}
 								break;
 							case 'scale':
-								if (taro.is3D()) {
+								if (taro.is3D() && !(renderer.entityEditor.selectedEntity instanceof Region)) {
 									if (control.object.body instanceof AnimatedSprite) {
 										editedAction['scale'] = {
 											x: Utils.worldToPixel(control.object.scale.x),
@@ -102,6 +102,7 @@ namespace Renderer {
 								editedAction['position'].y -= Utils.worldToPixel(control.object.scale.z) / 2;
 								editedAction['position'].z -= Utils.worldToPixel(control.object.scale.y) / 2;
 							}
+							console.log('editedAction', editedAction);
 							inGameEditor.updateRegionInReact &&
 								inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
 						}
