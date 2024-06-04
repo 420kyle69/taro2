@@ -72,7 +72,7 @@ namespace Renderer {
 								}
 								break;
 							case 'scale':
-								if (taro.is3D() && !(renderer.entityEditor.selectedEntity instanceof Region)) {
+								if (taro.is3D()) {
 									if (control.object.body instanceof AnimatedSprite) {
 										editedAction['scale'] = {
 											x: Utils.worldToPixel(control.object.scale.x),
@@ -97,6 +97,8 @@ namespace Renderer {
 						if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
 							renderer.entityEditor.selectedEntity.edit(editedAction);
 						} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
+							editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
+							editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
 							if (editedAction['position']) {
 								editedAction['position'].x -= Utils.worldToPixel(control.object.scale.x) / 2;
 								editedAction['position'].y -= Utils.worldToPixel(control.object.scale.z) / 2;
