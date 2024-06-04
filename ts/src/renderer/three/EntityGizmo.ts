@@ -97,6 +97,13 @@ namespace Renderer {
 						if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
 							renderer.entityEditor.selectedEntity.edit(editedAction);
 						} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
+							editedAction['position'] = {
+								x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+								y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+								function: 'xyCoordinate',
+							};
+							editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
+							editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
 							if (editedAction['position']) {
 								editedAction['position'].x -= Utils.worldToPixel(control.object.scale.x) / 2;
 								editedAction['position'].y -= Utils.worldToPixel(control.object.scale.z) / 2;
