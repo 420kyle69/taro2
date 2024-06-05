@@ -176,10 +176,10 @@ namespace Renderer {
 											) {
 												this.entityEditor.selectEntity(initEntity);
 												taro.client.emit('block-rotation', !!initEntity.isBillboard);
-												if (clickDelay < 350) {
-													if (inGameEditor && inGameEditor.showScriptForEntity) {
-														inGameEditor.showScriptForEntity(initEntity.action.actionId);
-													}
+											} else if (clickDelay < 350) {
+												console.log('showing script for entity', initEntity.action.actionId);
+												if (inGameEditor && inGameEditor.showScriptForEntity) {
+													inGameEditor.showScriptForEntity(initEntity.action.actionId);
 												}
 											}
 										} else {
