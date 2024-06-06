@@ -41,7 +41,7 @@ namespace Renderer {
 				this.scene.scale.z = this.originalScale.z * (z / this.originalSize.z);
 			}
 
-			setOpacity(opacity: number) {
+			setOpacity(opacity: number, time = undefined) {
 				this.traverse((child) => {
 					if (child instanceof THREE.Mesh) {
 						// Convert to basic material to avoid lighting
@@ -50,6 +50,29 @@ namespace Renderer {
 						child.material = material;
 						child.material.transparent = true;
 						child.material.opacity = opacity;
+						if (time !== undefined) {
+							setTimeout(() => {
+								child.material.opacity = 1;
+							}, time);
+						}
+					}
+				});
+			}
+
+			setColor(color: number, time = 0) {
+				this.traverse((child) => {
+					if (child instanceof THREE.Mesh) {
+						// Convert to basic material to avoid lighting
+						const material = new THREE.MeshBasicMaterial();
+						THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
+						child.material = material;
+						const originalColor = child.material.color.getHex();
+						child.material.color.setHex(color);
+						if (time > 0) {
+							setTimeout(() => {
+								child.material.color.setHex(originalColor);
+							}, time);
+						}
 					}
 				});
 			}

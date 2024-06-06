@@ -75,7 +75,7 @@ var Unit = TaroEntityPhysics.extend({
 		if (data.playerId) {
 			self.ownerPlayer = taro.$(data.playerId);
 		}
-		
+
 		// initialize body & texture of the unit
 		self.changeUnitType(data.type, data.defaultData, true);
 
@@ -1821,6 +1821,7 @@ var Unit = TaroEntityPhysics.extend({
 							self.updateFadingText(newValue[0], newValue[1]);
 						}
 						break;
+
 					case 'ownerPlayerId':
 						self._stats[attrName] = newValue;
 						if (taro.isClient && taro.client.myPlayer?.id() !== newValue) {

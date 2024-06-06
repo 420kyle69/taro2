@@ -169,6 +169,10 @@ namespace Renderer {
 					entity.add(text);
 				});
 
+				taroEntity.on('set-opacity', (data: { opacity: number; time?: number }) => {
+					entity.body.setOpacity(data.opacity, data.time);
+				});
+
 				return entity;
 			}
 
