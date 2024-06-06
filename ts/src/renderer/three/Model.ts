@@ -41,7 +41,7 @@ namespace Renderer {
 				this.scene.scale.z = this.originalScale.z * (z / this.originalSize.z);
 			}
 
-			setOpacity(opacity: number) {
+			setOpacity(opacity: number, time = undefined) {
 				this.traverse((child) => {
 					if (child instanceof THREE.Mesh) {
 						// Convert to basic material to avoid lighting
@@ -50,6 +50,11 @@ namespace Renderer {
 						child.material = material;
 						child.material.transparent = true;
 						child.material.opacity = opacity;
+						if (time !== undefined) {
+							setTimeout(() => {
+								child.material.opacity = 1;
+							}, time);
+						}
 					}
 				});
 			}

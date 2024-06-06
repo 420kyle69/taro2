@@ -34,11 +34,16 @@ namespace Renderer {
 				}
 			}
 
-			setOpacity(opacity: number) {
+			setOpacity(opacity: number, time = undefined) {
 				(this.sprite.material as THREE.Material).opacity = opacity;
+				if (time !== undefined) {
+					setTimeout(() => {
+						(this.sprite.material as THREE.Material).opacity = 1;
+					}, time);
+				}
 			}
 
-			setColor(color: number, time = 0) {
+			/*setColor(color: number, time = 0) {
 				console.log('setColor', color, time, this.sprite);
 				this.traverse((child) => {
 					if (child instanceof THREE.Mesh) {
@@ -46,7 +51,7 @@ namespace Renderer {
 						/*const material = new THREE.MeshBasicMaterial();
 						THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
 						child.material = material;*/
-						const originalColor = child.material.color.getHex();
+			/*const originalColor = child.material.color.getHex();
 						child.material.color.setHex(color);
 						child.material.needsUpdate = true;
 						child.material.opacity = 0.5;
@@ -58,7 +63,7 @@ namespace Renderer {
 						}
 					}
 				});
-			}
+			}*/
 
 			setScale(sx: number, sy: number) {
 				this.scaleUnflipped.set(sx, sy);

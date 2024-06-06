@@ -175,7 +175,6 @@ namespace Renderer {
 													this.entityEditor.selectedEntity.uuid !== initEntity.uuid)
 											) {
 												this.entityEditor.selectEntity(initEntity);
-												initEntity.body.setColor(0xffffff, 100);
 												taro.client.emit('block-rotation', !!initEntity.isBillboard);
 												if (clickDelay < 350) {
 													if (inGameEditor && inGameEditor.showScriptForEntity) {

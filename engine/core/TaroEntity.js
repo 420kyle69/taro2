@@ -1053,7 +1053,13 @@ var TaroEntity = TaroObject.extend({
 	 * @return {*} "this" when arguments are passed to allow method
 	 * chaining or the current value if no arguments are specified.
 	 */
-	opacity: function (val) {
+	opacity: function (val, time = undefined) {
+		if (taro.isClient) {
+			this.emit('set-opacity', {
+				opacity: val,
+				time: time,
+			});
+		}
 		if (val !== undefined) {
 			this._opacity = val;
 			return this;
@@ -4354,6 +4360,12 @@ var TaroEntity = TaroObject.extend({
 								this.depth(data.depth);
 							}
 							break;
+						case 'setOpacity':
+							if (taro.isClient) {
+								newValue = newValue.split('|-|');
+								this.opacity(newValue[0], newValue[1]);
+							}
+							break;
 
 						case 'flip':
 							this._stats[attrName] = newValue;
@@ -4398,6 +4410,7 @@ var TaroEntity = TaroObject.extend({
 								'useQueued',
 								'isHidden',
 								'cameraTrackedUnitId',
+								'setOpacity',
 							];
 							var dataIsAttributeRelated = [
 								'attributes',
