@@ -1375,7 +1375,7 @@ var ParameterComponent = TaroEntity.extend({
 						break;
 
 					case 'currentTimeStamp':
-						returnValue = Date.now() / 1000;
+						returnValue = Date.now();
 
 						break;
 
