@@ -1491,7 +1491,7 @@ var ParameterComponent = TaroEntity.extend({
 						break;
 
 					case 'getServerAge':
-						const timestampStr = taro.server.started_at;
+						const timestampStr = taro.server.startedAt;
 						const timestamp = new Date(timestampStr);
 						const millisecondsSinceEpoch = timestamp.getTime();
 
@@ -1500,7 +1500,7 @@ var ParameterComponent = TaroEntity.extend({
 						break;
 
 					case 'getServerStartTime':
-						returnValue = new Date(taro.server.started_at);
+						returnValue = new Date(taro.server.startedAt);
 
 						break;
 
