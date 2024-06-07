@@ -658,7 +658,7 @@ var Item = TaroEntityPhysics.extend({
 				let newQuantity = self._stats.quantity - self.quantityCost;
 				self.updateQuantity(newQuantity);
 				if (newQuantity <= 0) {
-					item.script.trigger('ThisItemsQuantityBecomesZero');
+					self.script.trigger('ThisItemsQuantityBecomesZero');
 				}
 			}
 		}
