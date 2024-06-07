@@ -655,7 +655,11 @@ var Item = TaroEntityPhysics.extend({
 
 			// update quantity if quantity is changing
 			if (isUsed && self._stats.quantity > 0 && self.quantityCost > 0) {
-				self.updateQuantity(self._stats.quantity - self.quantityCost);
+				let newQuantity = self._stats.quantity - self.quantityCost;
+				self.updateQuantity(newQuantity);
+				if (newQuantity <= 0) {
+					item.script.trigger('ThisItemsQuantityBecomesZero');
+				}
 			}
 		}
 	},
@@ -907,7 +911,7 @@ var Item = TaroEntityPhysics.extend({
 	changeSlotIndex: function (index) {
 		var self = this;
 		var owner = self.getOwnerUnit();
-		
+
 		if (taro.isServer) {
 			this._stats.slotIndex = index;
 			this.streamUpdateData([{ slotIndex: index }]);
@@ -915,9 +919,9 @@ var Item = TaroEntityPhysics.extend({
 		// if item is in its owner's backpack, hide it
 		if (owner) {
 			let triggerParams = { unitId: owner.id(), itemId: self.id() };
-			self.script.trigger('thisItemChangesInventorySlot', triggerParams); // this entity (item) (need to rename rename 'itemIsUsed' -> 'thisItemIsUsed')		
+			self.script.trigger('thisItemChangesInventorySlot', triggerParams); // this entity (item) (need to rename rename 'itemIsUsed' -> 'thisItemIsUsed')
 			owner.script.trigger('thisUnitMovesItemInInventory', triggerParams); // this entity (unit)
-		
+
 			if (this._stats.slotIndex >= owner._stats.inventorySize) {
 				this.hide();
 			} else if (this._stats.slotIndex < owner._stats.inventorySize) {
