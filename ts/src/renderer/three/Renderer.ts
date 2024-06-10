@@ -225,6 +225,21 @@ namespace Renderer {
 														}
 													}
 												}
+											} else if (clickDelay < 350) {
+												const region = this.entityEditor.selectedEntity as Region;
+												const regionData = {
+													name: region.taroEntity._stats.id,
+													x: region.stats.x,
+													y: region.stats.y,
+													z: region.stats.z,
+													width: region.stats.width,
+													height: region.stats.height,
+													depth: region.stats.depth,
+													alpha: region.stats.alpha,
+													inside: region.stats.inside,
+												} as RegionData;
+
+												inGameEditor.addNewRegion && inGameEditor.addNewRegion(regionData);
 											}
 										}
 
