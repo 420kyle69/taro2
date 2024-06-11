@@ -10,207 +10,161 @@ namespace Renderer {
 				this.init();
 			}
 
+			generateEditedAction() {
+				const renderer = Three.instance();
+				const currentCamera = (this.currentCamera = renderer.camera.instance);
+				const orbit = renderer.camera.controls;
+				const control = this.control;
+				const editedEntity = control.object;
+				let editedAction = {};
+				if (editedEntity instanceof Region) {
+					editedAction = { name: editedEntity.taroEntity._stats.id };
+				} else if (editedEntity instanceof InitEntity) {
+					editedAction = { actionId: editedEntity.action.actionId };
+				}
+				switch (control.mode) {
+					case 'translate':
+						if (taro.is3D()) {
+							editedAction['position'] = {
+								x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+								y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+								z: Renderer.Three.Utils.worldToPixel(control.object.position.y),
+								function: 'vector3',
+							};
+						} else {
+							editedAction['position'] = {
+								x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+								y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+								function: 'xyCoordinate',
+							};
+						}
+						break;
+					case 'rotate':
+						control.object.rotation.order = 'YXZ';
+						if (taro.is3D()) {
+							const headingX = control.object.rotation.x;
+							const headingY = control.object.rotation.y;
+							const headingZ = control.object.rotation.z;
+							const radiansX = headingX > 0 ? headingX : 2 * Math.PI + headingX;
+							const radiansY = headingY > 0 ? headingY : 2 * Math.PI + headingY;
+							const radiansZ = headingZ > 0 ? headingZ : 2 * Math.PI + headingZ;
+							const degreesX = THREE.MathUtils.radToDeg(radiansX);
+							const degreesY = THREE.MathUtils.radToDeg(radiansY);
+							const degreesZ = THREE.MathUtils.radToDeg(radiansZ);
+							editedAction['rotation'] = {
+								x: degreesX,
+								y: degreesY,
+								z: degreesZ,
+								function: 'vector3',
+							};
+						} else {
+							const heading = control.object.rotation.y;
+							const radians = heading > 0 ? heading : 2 * Math.PI + heading;
+							const degrees = THREE.MathUtils.radToDeg(radians);
+							editedAction['angle'] = degrees;
+						}
+						break;
+					case 'scale':
+						if (taro.is3D()) {
+							if (control.object.body instanceof AnimatedSprite) {
+								editedAction['scale'] = {
+									x: control.object.scale.x,
+									y: control.object.scale.z,
+									z: 0,
+									function: 'vector3',
+								};
+							} else if (control.object.body instanceof Model) {
+								editedAction['scale'] = {
+									x: Utils.worldToPixel(control.object.body.getSize().x / control.object.defaultWidth),
+									y: Utils.worldToPixel(control.object.body.getSize().z / control.object.defaultDepth),
+									z: Utils.worldToPixel(control.object.body.getSize().y / control.object.defaultHeight),
+									function: 'vector3',
+								};
+							}
+						} else {
+							editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
+							editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
+						}
+						break;
+				}
+				if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
+					editedAction['position'] = {
+						x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
+						y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
+						function: 'xyCoordinate',
+					};
+					editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
+					editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
+					if (editedAction['position']) {
+						editedAction['position'].x -= Utils.worldToPixel(control.object.scale.x) / 2;
+						editedAction['position'].y -= Utils.worldToPixel(control.object.scale.z) / 2;
+						editedAction['position'].z -= Utils.worldToPixel(control.object.scale.y) / 2;
+					}
+				}
+				return editedAction;
+			}
+
 			init() {
 				const renderer = Three.instance();
 				const currentCamera = (this.currentCamera = renderer.camera.instance);
 				const orbit = renderer.camera.controls;
 				const control = (this.control = new TransformControls(currentCamera, renderer.renderer.domElement));
 				this.undoAction = {};
-				control.addEventListener('dragging-changed', function (event) {
-					if (event.value) {
-						this.prev_rotation = control.object.rotation.y;
-					}
-					orbit.enabled = !event.value;
-					if (!event.value) {
-						// drag ended
-						const editedEntity = control.object;
-						let editedAction = {};
-						if (editedEntity instanceof Region) {
-							editedAction = { name: editedEntity.taroEntity._stats.id };
-						} else if (editedEntity instanceof InitEntity) {
-							editedAction = { actionId: editedEntity.action.actionId };
+				control.addEventListener(
+					'dragging-changed',
+					function (event) {
+						if (event.value) {
+							this.prev_rotation = control.object.rotation.y;
 						}
-						switch (control.mode) {
-							case 'translate':
-								if (taro.is3D()) {
-									editedAction['position'] = {
-										x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
-										y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
-										z: Renderer.Three.Utils.worldToPixel(control.object.position.y),
-										function: 'vector3',
-									};
-								} else {
-									editedAction['position'] = {
-										x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
-										y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
-										function: 'xyCoordinate',
-									};
-								}
-								break;
-							case 'rotate':
-								control.object.rotation.order = 'YXZ';
-								if (taro.is3D()) {
-									const headingX = control.object.rotation.x;
-									const headingY = control.object.rotation.y;
-									const headingZ = control.object.rotation.z;
-									const radiansX = headingX > 0 ? headingX : 2 * Math.PI + headingX;
-									const radiansY = headingY > 0 ? headingY : 2 * Math.PI + headingY;
-									const radiansZ = headingZ > 0 ? headingZ : 2 * Math.PI + headingZ;
-									const degreesX = THREE.MathUtils.radToDeg(radiansX);
-									const degreesY = THREE.MathUtils.radToDeg(radiansY);
-									const degreesZ = THREE.MathUtils.radToDeg(radiansZ);
-									editedAction['rotation'] = {
-										x: degreesX,
-										y: degreesY,
-										z: degreesZ,
-										function: 'vector3',
-									};
-								} else {
-									const heading = control.object.rotation.y;
-									const radians = heading > 0 ? heading : 2 * Math.PI + heading;
-									const degrees = THREE.MathUtils.radToDeg(radians);
-									editedAction['angle'] = degrees;
-								}
-								break;
-							case 'scale':
-								if (taro.is3D()) {
-									if (control.object.body instanceof AnimatedSprite) {
-										editedAction['scale'] = {
-											x: Utils.worldToPixel(control.object.scale.x),
-											y: Utils.worldToPixel(control.object.scale.z),
-											z: Utils.worldToPixel(0),
-											function: 'vector3',
-										};
-									} else if (control.object.body instanceof Model) {
-										editedAction['scale'] = {
-											x: Utils.worldToPixel(control.object.body.getSize().x / control.object.defaultWidth),
-											y: Utils.worldToPixel(control.object.body.getSize().z / control.object.defaultDepth),
-											z: Utils.worldToPixel(control.object.body.getSize().y / control.object.defaultHeight),
-											function: 'vector3',
-										};
-									}
-								} else {
-									editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
-									editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
-								}
-								break;
-						}
-						if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
-							const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
-							Renderer.Three.instance().voxelEditor.commandController.addCommand(
-								{
-									func: () => {
-										(renderer.entityEditor.selectedEntity as InitEntity).edit(editedAction);
+						orbit.enabled = !event.value;
+						if (!event.value) {
+							// drag ended
+							const editedAction = this.generateEditedAction();
+							if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
+								const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
+								const nowEntity = renderer.entityEditor.selectedEntity;
+								Renderer.Three.instance().voxelEditor.commandController.addCommand(
+									{
+										func: () => {
+											(nowEntity as InitEntity).edit(editedAction);
+										},
+										undo: () => {
+											(nowEntity as InitEntity).edit(nowUndoAction);
+										},
 									},
-									undo: () => {
-										(renderer.entityEditor.selectedEntity as InitEntity).edit(nowUndoAction);
+									true,
+									true
+								);
+								this.undoAction = {};
+							} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
+								const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
+								Renderer.Three.instance().voxelEditor.commandController.addCommand(
+									{
+										func: () => {
+											inGameEditor.updateRegionInReact &&
+												inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
+										},
+										undo: () => {
+											inGameEditor.updateRegionInReact &&
+												inGameEditor.updateRegionInReact(nowUndoAction as RegionData, 'threejs');
+										},
 									},
-								},
-								true,
-								true
-							);
-							this.undoAction = {};
-						} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
-							editedAction['position'] = {
-								x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
-								y: Renderer.Three.Utils.worldToPixel(control.object.position.z),
-								function: 'xyCoordinate',
-							};
-							editedAction['width'] = Utils.worldToPixel(control.object.scale.x);
-							editedAction['height'] = Utils.worldToPixel(control.object.scale.z);
-							if (editedAction['position']) {
-								editedAction['position'].x -= Utils.worldToPixel(control.object.scale.x) / 2;
-								editedAction['position'].y -= Utils.worldToPixel(control.object.scale.z) / 2;
-								editedAction['position'].z -= Utils.worldToPixel(control.object.scale.y) / 2;
-							}
-							const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
-							Renderer.Three.instance().voxelEditor.commandController.addCommand(
-								{
-									func: () => {
-										inGameEditor.updateRegionInReact &&
-											inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
-									},
-									undo: () => {
-										inGameEditor.updateRegionInReact &&
-											inGameEditor.updateRegionInReact(nowUndoAction as RegionData, 'threejs');
-									},
-								},
-								true,
-								true
-							);
+									true,
+									true
+								);
 
-							this.undoAction = {};
-						}
-					} else {
-						if (this.undoAction === undefined) {
-							this.undoAction = {};
-						}
-						if (this.undoAction.name === undefined && this.undoAction.actionId === undefined) {
-							if (renderer.entityEditor.selectedEntity instanceof Region) {
-								this.undoAction = { name: renderer.entityEditor.selectedEntity.taroEntity._stats.id };
-							} else if (renderer.entityEditor.selectedEntity instanceof InitEntity) {
-								this.undoAction = { actionId: renderer.entityEditor.selectedEntity.action.actionId };
+								this.undoAction = {};
 							}
-							switch (control.mode) {
-								case 'translate': {
-									if (taro.is3D()) {
-										this.undoAction['position'] = {
-											x: Renderer.Three.Utils.worldToPixel(
-												renderer.entityEditor.selectedEntity instanceof InitEntity
-													? renderer.entityEditor.selectedEntity.position.x
-													: renderer.entityEditor.selectedEntity.stats.x
-											),
-											y: Renderer.Three.Utils.worldToPixel(
-												renderer.entityEditor.selectedEntity instanceof InitEntity
-													? renderer.entityEditor.selectedEntity.position.z
-													: renderer.entityEditor.selectedEntity.stats.z
-											),
-											z: Renderer.Three.Utils.worldToPixel(
-												renderer.entityEditor.selectedEntity instanceof InitEntity
-													? renderer.entityEditor.selectedEntity.position.y
-													: renderer.entityEditor.selectedEntity.stats.y
-											),
-											function: 'vector3',
-										};
-									} else {
-										this.undoAction['position'] = {
-											x: Renderer.Three.Utils.worldToPixel(
-												renderer.entityEditor.selectedEntity instanceof InitEntity
-													? renderer.entityEditor.selectedEntity.body.position.x
-													: renderer.entityEditor.selectedEntity.stats.x
-											),
-											y: Renderer.Three.Utils.worldToPixel(
-												renderer.entityEditor.selectedEntity instanceof InitEntity
-													? renderer.entityEditor.selectedEntity.body.position.z
-													: renderer.entityEditor.selectedEntity.stats.z
-											),
-											function: 'xyCoordinate',
-										};
-									}
-
-									if (renderer.entityEditor.selectedEntity instanceof Region) {
-										this.undoAction['position'] = {
-											x: Renderer.Three.Utils.worldToPixel(
-												renderer.entityEditor.selectedEntity instanceof InitEntity
-													? renderer.entityEditor.selectedEntity.body.position.x
-													: renderer.entityEditor.selectedEntity.stats.x
-											),
-											y: Renderer.Three.Utils.worldToPixel(
-												renderer.entityEditor.selectedEntity instanceof InitEntity
-													? renderer.entityEditor.selectedEntity.body.position.z
-													: renderer.entityEditor.selectedEntity.stats.z
-											),
-											function: 'xyCoordinate',
-										};
-										this.undoAction['width'] = renderer.entityEditor.selectedEntity.stats.width;
-										this.undoAction['height'] = renderer.entityEditor.selectedEntity.stats.height;
-									}
-									break;
-								}
+						} else {
+							if (this.undoAction === undefined) {
+								this.undoAction = {};
+							}
+							if (this.undoAction.name === undefined && this.undoAction.actionId === undefined) {
+								this.undoAction = this.generateEditedAction();
 							}
 						}
-					}
-				});
+					}.bind(this)
+				);
 
 				renderer.scene.add(control);
 
