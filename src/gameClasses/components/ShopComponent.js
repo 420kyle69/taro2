@@ -148,6 +148,7 @@ var ShopComponent = TaroEntity.extend({
 				// listen for item modal close.
 				$(document).on('hidden.bs.modal', '#modd-item-shop-modal', function () {
 					$('.popover').remove();
+					self.isItemShopOpen = false;
 					taro.client.myPlayer.control.updatePlayerInputStatus();
 				});
 
@@ -481,7 +482,6 @@ var ShopComponent = TaroEntity.extend({
 			case 'purchase':
 				$('#purchasable-purchase-modal').modal('hide');
 				text = '<strong>Item purchased.</strong>';
-				taro.shop.openItemShop();
 				break;
 			case 'advanced-tier':
 				text = '<strong>Advanced tier required to make coin purchases.</strong>';
@@ -1002,6 +1002,8 @@ var ShopComponent = TaroEntity.extend({
 	},
 	openItemShop: function (type, selectedTab) {
 		var self = this;
+
+		self.isItemShopOpen = true;
 		if (!taro.game.data.shops) return;
 		self.currentType = type || self.currentType;
 		if (!self.currentType) return;

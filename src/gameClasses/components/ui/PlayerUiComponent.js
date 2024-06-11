@@ -17,8 +17,6 @@ var PlayerUiComponent = TaroEntity.extend({
 
 		self.playerAttributeDivElement = null;
 
-		self.moddItemShopModalElement = null;
-
 		$('#custom-ingame-ui-container').hide();
 		window.renderHBSTemplate &&
 			window.renderHBSTemplate({}, taro.game.data?.ui?.inGameUiFull?.htmlData, 'custom-ingame-ui-container');
@@ -147,9 +145,7 @@ var PlayerUiComponent = TaroEntity.extend({
 		self.updatePlayerAttributeValues(attributes, true);
 
 		// update shop as player points are changed and when shop modal is open
-
-		self.moddItemShopModalElement = taro.client.getCachedElementById('modd-item-shop-modal');
-		if (self.moddItemShopModalElement && self.moddItemShopModalElement.classList.contains('show')) {
+		if (taro.shop.isItemShopOpen) {
 			taro.shop.openItemShop();
 		}
 	},
@@ -191,7 +187,9 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 		if (needUpdateDiv) {
 			this.updatePlayerAttributesDiv(attributes);
-		}
+		} else if (taro.shop.isItemShopOpen) {
+			taro.shop.openItemShop();
+		};
 	},
 
 	shouldRenderAttribute: function (attribute) {
