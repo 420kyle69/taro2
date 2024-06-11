@@ -3223,11 +3223,11 @@ var ActionComponent = TaroEntity.extend({
 							position.x = parseFloat(position.x);
 							position.y = parseFloat(position.y);
 
-							if (taro.is3D) {
+							if (taro.is3D()) {
 								if (!isNaN(rotation?.y)) {
 									angle = parseFloat(360 - (rotation.y % 360));
 								} else {
-									angle = parseFloat(angle);
+									angle = parseFloat(360 - (angle % 360));
 								}
 								if (!isNaN(scale?.x)) {
 									width = parseFloat(scale.x * entityTypeData.bodies.default?.width);
