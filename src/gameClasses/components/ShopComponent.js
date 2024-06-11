@@ -481,6 +481,7 @@ var ShopComponent = TaroEntity.extend({
 			case 'purchase':
 				$('#purchasable-purchase-modal').modal('hide');
 				text = '<strong>Item purchased.</strong>';
+				taro.shop.openItemShop();
 				break;
 			case 'advanced-tier':
 				text = '<strong>Advanced tier required to make coin purchases.</strong>';
