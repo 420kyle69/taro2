@@ -157,7 +157,8 @@ namespace Renderer {
 						!isNaN(action.rotation?.x) &&
 						!isNaN(action.rotation?.y) &&
 						!isNaN(action.rotation?.z) &&
-						((!isNaN(this.action.rotation?.x) && !isNaN(this.action.rotation?.y) && !isNaN(this.action.rotation?.z)) ||
+						(this.action.rotation === undefined ||
+							(!isNaN(this.action.rotation?.x) && !isNaN(this.action.rotation?.y) && !isNaN(this.action.rotation?.z)) ||
 							(!isNaN(this.action.angle) && !isNaN(action.angle)))
 					) {
 						if (!isNaN(action.angle)) {
@@ -167,6 +168,7 @@ namespace Renderer {
 						if (action.rotation) {
 							this.action.rotation = action.rotation;
 						}
+
 						this.rotation.set(
 							THREE.MathUtils.degToRad(this.action.rotation.x),
 							THREE.MathUtils.degToRad(this.action.rotation.y),
@@ -177,7 +179,8 @@ namespace Renderer {
 						!isNaN(action.scale?.x) &&
 						!isNaN(action.scale?.y) &&
 						!isNaN(action.scale?.z) &&
-						((!isNaN(this.action.scale?.x) && !isNaN(this.action.scale?.y) && !isNaN(this.action.scale?.z)) ||
+						(this.action.scale === undefined ||
+							(!isNaN(this.action.scale?.x) && !isNaN(this.action.scale?.y) && !isNaN(this.action.scale?.z)) ||
 							(!isNaN(this.action.width) && !isNaN(action.width)) ||
 							(!isNaN(this.action.height) && !isNaN(action.height)))
 					) {
@@ -201,11 +204,7 @@ namespace Renderer {
 						if (isNaN(this.action.scale.z)) {
 							this.action.scale.z = 0;
 						}
-						this.setSize(
-							Utils.pixelToWorld(this.defaultHeight * this.action.scale.x),
-							Utils.pixelToWorld(this.defaultDepth * this.action.scale.z),
-							Utils.pixelToWorld(this.defaultHeight * this.action.scale.y)
-						);
+						this.setSize(this.action.scale.x, this.action.scale.z, this.action.scale.y);
 					}
 					if (!isNaN(this.action.width) && !isNaN(action.width)) {
 						this.action.width = action.width;
