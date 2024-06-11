@@ -5,6 +5,7 @@ namespace Renderer {
 			control: TransformControls;
 			dimension: '2d' | '3d' = '3d';
 			prev_rotation: number;
+			undoAction: Record<string, any> = {};
 			constructor() {
 				this.init();
 			}
@@ -14,7 +15,7 @@ namespace Renderer {
 				const currentCamera = (this.currentCamera = renderer.camera.instance);
 				const orbit = renderer.camera.controls;
 				const control = (this.control = new TransformControls(currentCamera, renderer.renderer.domElement));
-
+				this.undoAction = {};
 				control.addEventListener('dragging-changed', function (event) {
 					if (event.value) {
 						this.prev_rotation = control.object.rotation.y;
@@ -95,7 +96,20 @@ namespace Renderer {
 								break;
 						}
 						if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
-							renderer.entityEditor.selectedEntity.edit(editedAction);
+							const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
+							Renderer.Three.instance().voxelEditor.commandController.addCommand(
+								{
+									func: () => {
+										(renderer.entityEditor.selectedEntity as InitEntity).edit(editedAction);
+									},
+									undo: () => {
+										(renderer.entityEditor.selectedEntity as InitEntity).edit(nowUndoAction);
+									},
+								},
+								true,
+								true
+							);
+							this.undoAction = {};
 						} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
 							editedAction['position'] = {
 								x: Renderer.Three.Utils.worldToPixel(control.object.position.x),
@@ -109,8 +123,91 @@ namespace Renderer {
 								editedAction['position'].y -= Utils.worldToPixel(control.object.scale.z) / 2;
 								editedAction['position'].z -= Utils.worldToPixel(control.object.scale.y) / 2;
 							}
-							inGameEditor.updateRegionInReact &&
-								inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
+							const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
+							Renderer.Three.instance().voxelEditor.commandController.addCommand(
+								{
+									func: () => {
+										inGameEditor.updateRegionInReact &&
+											inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
+									},
+									undo: () => {
+										inGameEditor.updateRegionInReact &&
+											inGameEditor.updateRegionInReact(nowUndoAction as RegionData, 'threejs');
+									},
+								},
+								true,
+								true
+							);
+
+							this.undoAction = {};
+						}
+					} else {
+						if (this.undoAction === undefined) {
+							this.undoAction = {};
+						}
+						if (this.undoAction.name === undefined && this.undoAction.actionId === undefined) {
+							if (renderer.entityEditor.selectedEntity instanceof Region) {
+								this.undoAction = { name: renderer.entityEditor.selectedEntity.taroEntity._stats.id };
+							} else if (renderer.entityEditor.selectedEntity instanceof InitEntity) {
+								this.undoAction = { actionId: renderer.entityEditor.selectedEntity.action.actionId };
+							}
+							switch (control.mode) {
+								case 'translate': {
+									if (taro.is3D()) {
+										this.undoAction['position'] = {
+											x: Renderer.Three.Utils.worldToPixel(
+												renderer.entityEditor.selectedEntity instanceof InitEntity
+													? renderer.entityEditor.selectedEntity.position.x
+													: renderer.entityEditor.selectedEntity.stats.x
+											),
+											y: Renderer.Three.Utils.worldToPixel(
+												renderer.entityEditor.selectedEntity instanceof InitEntity
+													? renderer.entityEditor.selectedEntity.position.z
+													: renderer.entityEditor.selectedEntity.stats.z
+											),
+											z: Renderer.Three.Utils.worldToPixel(
+												renderer.entityEditor.selectedEntity instanceof InitEntity
+													? renderer.entityEditor.selectedEntity.position.y
+													: renderer.entityEditor.selectedEntity.stats.y
+											),
+											function: 'vector3',
+										};
+									} else {
+										this.undoAction['position'] = {
+											x: Renderer.Three.Utils.worldToPixel(
+												renderer.entityEditor.selectedEntity instanceof InitEntity
+													? renderer.entityEditor.selectedEntity.body.position.x
+													: renderer.entityEditor.selectedEntity.stats.x
+											),
+											y: Renderer.Three.Utils.worldToPixel(
+												renderer.entityEditor.selectedEntity instanceof InitEntity
+													? renderer.entityEditor.selectedEntity.body.position.z
+													: renderer.entityEditor.selectedEntity.stats.z
+											),
+											function: 'xyCoordinate',
+										};
+									}
+
+									if (renderer.entityEditor.selectedEntity instanceof Region) {
+										this.undoAction['position'] = {
+											x: Renderer.Three.Utils.worldToPixel(
+												renderer.entityEditor.selectedEntity instanceof InitEntity
+													? renderer.entityEditor.selectedEntity.body.position.x
+													: renderer.entityEditor.selectedEntity.stats.x
+											),
+											y: Renderer.Three.Utils.worldToPixel(
+												renderer.entityEditor.selectedEntity instanceof InitEntity
+													? renderer.entityEditor.selectedEntity.body.position.z
+													: renderer.entityEditor.selectedEntity.stats.z
+											),
+											function: 'xyCoordinate',
+										};
+										this.undoAction['width'] = renderer.entityEditor.selectedEntity.stats.width;
+										this.undoAction['height'] = renderer.entityEditor.selectedEntity.stats.height;
+									}
+									break;
+								}
+							}
 						}
 					}
 				});
