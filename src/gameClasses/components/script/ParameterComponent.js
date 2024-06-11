@@ -3186,6 +3186,13 @@ var ParameterComponent = TaroEntity.extend({
 					}
 				}
 			},
+
+			numberOfInvitesByPlayer: function (text, vars) {
+				var player = self.getValue(text.player, vars);
+				if (player) {
+					return player._stats.invitedUsersCount || 0;
+				}
+			}
 		};
 	},
 });
