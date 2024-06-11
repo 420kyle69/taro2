@@ -47,7 +47,7 @@ var TimerComponent = TaroEntity.extend({
 	},
 
 	getTimeLimit: function () {
-		let timeLimitMin = 10; // kill t1/t2 if empty for 10 mins
+		let timeLimitMin = 5; // kill t1/t2 if empty for 5 mins
 		// const totalPlayCount = taro.server.totalPlayCount || 0;
 
 		// // add 1 minute for every 2000 total play count

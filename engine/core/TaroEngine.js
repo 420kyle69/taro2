@@ -94,7 +94,7 @@ var TaroEngine = TaroEntity.extend({
 				});
 			};
 
-			this.emptyTimeLimit = 10 * 60 * 1000; // in ms - kill t1/t2 if empty for 10 mins
+			this.emptyTimeLimit = 5 * 60 * 1000; // in ms - kill t1/t2 if empty for 5 mins
 		}
 
 		// Setup components
@@ -215,7 +215,7 @@ var TaroEngine = TaroEntity.extend({
 	},
 
 	getIdleTimeoutMs: function () {
-		var defaultValue = 10; // kill t1/t2 if empty for 10 mins
+		var defaultValue = 5; // kill t1/t2 if empty for 5 mins
 		var idleTimeoutHours = taro.server.tier == '0' ? taro.game.data.defaultData.privateServerIdleTimeout : 0;
 		var timeoutMins = idleTimeoutHours ? idleTimeoutHours * 60 : defaultValue;
 
