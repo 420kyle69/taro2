@@ -1754,7 +1754,7 @@ var TaroEngine = TaroEntity.extend({
 						// gameTier and serverTier could be different in some cases since Tier 4 games are now being hosted on Tier 2 servers.
 						// Kill T1 T2, T5 or any other server if it's been empty for 10+ mins. Also, do not kill T2 servers if they are hosting a T4 game
 						if (gameTier !== '4' && taro.now - self.serverEmptySince > self.emptyTimeLimit) {
-							taro.server.kill("game's been empty for too long (10 min)");
+							taro.server.kill("game's been empty for too long (5 mins)");
 						}
 					} else {
 						self.serverEmptySince = null;
