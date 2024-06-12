@@ -91,6 +91,7 @@ var GameComponent = TaroEntity.extend({
 			allPurchasables: data.allPurchasables, // allPurchasables includes equipped and purchased items of the player for current game
 			attributes: data.attributes,
 			highscore: data.highscore,
+			invitedUsersCount: data.invitedUsersCount,
 			lastPlayed: data.lastPlayed,
 			userId: data._id,
 			isAdBlockEnabled: data.isAdBlockEnabled,
