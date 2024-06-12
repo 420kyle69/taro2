@@ -56,7 +56,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		// 						case 'unmute': {
 		// 							mutedUsers.splice(index, 1);
 		// 							$.ajax({
-		// 								url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
+		// 								url: `${window.BASE_URL}/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
 		// 								type: 'POST',
 		// 								success: function (data) {
 		// 									console.log(data);											// alert('request sent');
@@ -67,7 +67,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		// 						case 'mute': {
 		// 							mutedUsers.push(taro.scoreboard.selectedUser.userId);
 		// 							$.ajax({
-		// 								url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
+		// 								url: `${window.BASE_URL}/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
 		// 								type: 'POST',
 		// 								success: function (data) {
 		// 									console.log(data);											// alert('request sent');
@@ -77,7 +77,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		// 						}
 		// 						case 'addFriend': {
 		// 							$.ajax({
-		// 								url: `/api/user/request/${taro.scoreboard.selectedUser.userId}`,
+		// 								url: `${window.BASE_URL}/api/user/request/${taro.scoreboard.selectedUser.userId}`,
 		// 								type: 'POST',
 		// 								success: function (data) {
 		// 									alert('request sent');

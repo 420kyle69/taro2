@@ -507,7 +507,7 @@ var MenuUiComponent = TaroEntity.extend({
 
 			$.ajax({
 				type: 'GET',
-				url: `/api/game-server/${gameId}`,
+				url: `${window.BASE_URL}/api/game-server/${gameId}`,
 				success: function (res) {
 					if (res.status == 'success') {
 						var servers = res.message;
