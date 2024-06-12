@@ -1,6 +1,6 @@
 var pathArray = window.location.href.split('/');
-var taroRoot = `${window.BASE_URL}/engine/`;
-var taroClientRoot = `${window.BASE_URL}/src/`;
+var taroRoot = window.BASE_URL ? `${window.BASE_URL}/engine/` : `http://${pathArray[2]}/engine/`;
+var taroClientRoot = window.BASE_URL ? `${window.BASE_URL}/src/` : `http://${pathArray[2]}/src/`;
 
 console.log('taroRoot', taroRoot);
 
