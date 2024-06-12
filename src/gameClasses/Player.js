@@ -732,7 +732,7 @@ var Player = TaroEntity.extend({
 								);
 
 								if (window.joinGameSent.completed > 7000) {
-									$.post('/api/log', {
+									$.post(`${window.BASE_URL}/api/log`, {
 										event: 'rollbar',
 										text:
 											`${Date.now()}:- JoinGame took ${window.joinGameSent.completed}ms to join player` +
@@ -743,7 +743,7 @@ var Player = TaroEntity.extend({
 									});
 								}
 								if (self._stats.processedJoinGame > 7000) {
-									$.post('/api/log', {
+									$.post(`${window.BASE_URL}/api/log`, {
 										event: 'rollbar',
 										text:
 											`${Date.now()}JoinGame took ${window.joinGameSent.completed}ms to create player` +
