@@ -91,6 +91,8 @@ var Unit = TaroEntityPhysics.extend({
 
 		self._stats.buffs = [];
 
+		self.ownedItems = {};
+
 		if (taro.isServer) {
 			// store mapping between clientIds (to whom minimap unit of this unit is visible)
 			// and their respective color because sometimes it may happen that unit is not yet created on client
@@ -1708,7 +1710,6 @@ var Unit = TaroEntityPhysics.extend({
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
-		// console.log("unit streamUpdateData", queuedData)
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
