@@ -1710,6 +1710,7 @@ var Unit = TaroEntityPhysics.extend({
 	// update unit's stats in the server side first, then update client side as well.
 	streamUpdateData: function (queuedData, clientId) {
 		var self = this;
+		// console.log("unit streamUpdateData", queuedData)
 		TaroEntity.prototype.streamUpdateData.call(this, queuedData, clientId);
 
 		for (var i = 0; i < queuedData.length; i++) {
