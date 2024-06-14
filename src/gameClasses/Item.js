@@ -73,7 +73,9 @@ var Item = TaroEntityPhysics.extend({
 
 			if (this._stats.ownerUnitId) {
 				const ownerUnit = taro.$(this._stats.ownerUnitId);
-				ownerUnit.ownedItems[this.id()] = this;
+				if (ownerUnit) {
+					ownerUnit.ownedItems[this.id()] = this;
+				}
 				//this.setOwnerUnit(taro.$(this._stats.ownerUnitId));
 			}
 		}
