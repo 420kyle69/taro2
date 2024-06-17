@@ -853,6 +853,9 @@ var ClientNetworkEvents = {
 		if (data && data.type == 'sendPlayerToMap') {
 			if (window.STATIC_EXPORT_ENABLED) {
 				window.sessionStorage.setItem('redirectToGameData', JSON.stringify(data));
+				if (window.STATIC_EXPORT_ENABLED) {
+					window.PokiSDK?.gameplayStop();
+				}
 				window.location.reload();
 			} else {
 				const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&autoJoinToken=${data.autoJoinToken}${data.serverId ? '&serverId=' + data.serverId : ''}`;
