@@ -811,7 +811,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const token = searchParams.get('token');
 		
 		if (taro.workerComponent && !taro.workerComponent.acceptingPlayers) {
-			socket.close('Server not accepting players, please try again later.');
+			socket.close('Server not accepting players, refresh to join another server.');
 			console.log('Server not accepting players', token);
 			return;
 		}
