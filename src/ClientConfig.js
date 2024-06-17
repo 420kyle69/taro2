@@ -9,9 +9,13 @@ var taroClientConfig = {
 		'/lib/rexuiplugin.min.js',
 		'/lib/rexvirtualjoystickplugin.min.js',
 		'/lib/three.min.js',
+		'/lib/DRACOLoader.js',
+		'/lib/GLTFLoader.js',
 		'/lib/OrbitControls.js',
-    '/lib/tween.umd.js',
-    '/lib/three_mesh_bvh.umd.js',
+		'/lib/TransformControls.js',
+		'/lib/tween.umd.js',
+		'/lib/three_mesh_bvh.umd.js',
+		'/lib/SkeletonUtils.js',
 
 		'/gameClasses/Player.js',
 		'/gameClasses/Unit.js',
@@ -59,7 +63,7 @@ var taroClientConfig = {
 
 		'/gameClasses/components/entity/AttributeComponent.js',
 		'/gameClasses/components/entity/VariableComponent.js',
-
+		'/gameClasses/components/quest/QuestComponent.js',
 		/* Standard game scripts */
 		'/gameClasses/DeveloperMode.js',
 		'/gameClasses/EntitiesToRender.js',
@@ -68,6 +72,8 @@ var taroClientConfig = {
 		'/gameClasses/VisibilityMask.js',
 		/* color helpers */
 		'utils/Colors.js',
+
+		'/helpers/merge-game-json.js',
 
 		/* tile calc */
 		'/gameClasses/Combinator.js',
@@ -114,23 +120,39 @@ var taroClientConfig = {
 
 		// Three.js Renderer
 		'renderer/three/Utils.js',
-    'renderer/three/EntityManager.js',
-		'renderer/three/TextureRepository.js',
-    'renderer/three/Node.js',
+		'renderer/three/AssetManager.js',
+		'renderer/three/AnimationManager.js',
+		'renderer/three/Node.js',
+		'renderer/three/EntityManager.js',
+		'renderer/three/ParticleSystem.js',
 		'renderer/three/Voxels.js',
 		'renderer/three/Renderer.js',
 		'renderer/three/Camera.js',
 		'renderer/three/Sprite.js',
-		'renderer/three/Label.js',
 		'renderer/three/AnimatedSprite.js',
-		'renderer/three/Unit.js',
-		'renderer/three/AttributeBar.js',
-		'renderer/three/ChatBubble.js',
-		'renderer/three/Sky.js',
-		'renderer/three/Tileset.js',
-		'renderer/three/Particles.js',
-    'renderer/three/FloatingText.js',
-    'renderer/three/DynamicFloatingText.js',
+		'renderer/three/Skybox.js',
+		'renderer/three/TextureSheet.js',
+		'renderer/three/EntityGizmo.js',
+		'renderer/three/EntityEditor.js',
+		'renderer/three/InitEntity.js',
+		'renderer/three/VoxelEditor.js',
+		'renderer/three/VoxelMarker.js',
+		'renderer/three/MarkerLines.js',
+		'renderer/three/Model.js',
+
+		'renderer/three/Mapper.js',
+		'renderer/three/hud/Element.js',
+		'renderer/three/hud/ProgressBar.js',
+		'renderer/three/hud/Attributes.js',
+		'renderer/three/hud/Label.js',
+		'renderer/three/hud/FloatingText.js',
+		'renderer/three/hud/DynamicFloatingText.js',
+		'renderer/three/hud/ChatBubble.js',
+
+		'renderer/three/entities/Entity.js',
+		'renderer/three/entities/Unit.js',
+		'renderer/three/entities/Item.js',
+		'renderer/three/entities/Region.js',
 
 		'/client.js',
 		'/index.js',

@@ -1,7 +1,7 @@
 declare class TaroEngine extends TaroClass {
 	profiler: any;
 	script: any;
-	clearLayer: (payload: TileData<"clear">) => void;
+	clearLayer: (payload: TileData<'clear'>) => void;
 
 	newIdHex(): any;
 	tiled: any;
@@ -60,7 +60,7 @@ declare class TaroEngine extends TaroClass {
 
 	constructor(options: object);
 
-	createFrontBuffer(autoSize: boolean, dontScale?: boolean): void
+	createFrontBuffer(autoSize: boolean, dontScale?: boolean): void;
 	engineStep(currentTime: number, ctx: number): void;
 
 	physics: {
@@ -77,7 +77,7 @@ declare class TaroEngine extends TaroClass {
 		recordLeak?: (...args: any) => any;
 		tryRecordLeak?: (...args: any) => any;
 		destroyB2dObj?: (...args: any) => any;
-		box2D?: typeof Box2D & EmscriptenModule
+		box2D?: typeof Box2D & EmscriptenModule;
 		_scaleRatio: number;
 	};
 
@@ -87,4 +87,16 @@ declare class TaroEngine extends TaroClass {
 	menuUi: MenuUiComponent;
 
 	mapEditorUI: any;
+
+	getTilesetFromType: ({
+		tilesets,
+		type,
+		onlyIndex,
+	}: {
+		tilesets: Array<any>;
+		type: 'top' | 'side';
+		onlyIndex?: boolean;
+	}) => any;
+
+	is3D: () => boolean;
 }

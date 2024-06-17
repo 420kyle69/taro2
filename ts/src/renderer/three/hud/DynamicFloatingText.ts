@@ -15,14 +15,15 @@ namespace Renderer {
 			) {
 				super();
 
-				const label = new Label(text, color, true);
-				label.position.set(x, y, z);
-				label.setOffset(new THREE.Vector2(offsetX, offsetY));
+				const label = new Label({ x, y, z, text, color, renderOnTop: true });
+				const xOffsetInLabelWidthUnits = offsetX / label.width;
+				const yOffsetInLabelHeightUnits = offsetY / label.height;
+				label.setCenter(xOffsetInLabelWidthUnits, yOffsetInLabelHeightUnits);
 				this.add(label);
 				this.label = label;
 
 				new TWEEN.Tween({ opacity: 1 })
-					.to({ offsetInPixels: label.offset.y + 40, opacity: 0 }, duration)
+					.to({ opacity: 0 }, duration)
 					.onUpdate(({ opacity }) => {
 						label.setOpacity(opacity);
 					})
@@ -54,12 +55,13 @@ namespace Renderer {
 				const xMin = 2;
 				const xMax = 2;
 				const leftOrRight = Math.random() < 0.5 ? -1 : 1;
-				const xOffset = randFloatBetween(xMin, xMax) * leftOrRight;
+				const xOffset = Utils.worldToPixel(randFloatBetween(xMin, xMax) * leftOrRight);
 
 				new TWEEN.Tween({ xOffset: 0 })
 					.to({ xOffset: xOffset }, duration)
 					.onUpdate(({ xOffset }) => {
-						label.setOffsetX(Utils.worldToPixel(xOffset));
+						const offsetInLabelWidth = xOffset / label.width;
+						label.setCenterX(offsetInLabelWidth);
 					})
 					.start();
 
@@ -67,20 +69,22 @@ namespace Renderer {
 				const yMax = 2;
 				// const upOrDown = Math.random() < 0.5 ? -1 : 1;
 				const upOrDown = 1;
-				const yOffset = randFloatBetween(yMin, yMax) * upOrDown;
+				const yOffset = Utils.worldToPixel(randFloatBetween(yMin, yMax) * upOrDown);
 
 				new TWEEN.Tween({ yOffset: 0 })
 					.to({ yOffset: yOffset }, tweenUpDuration)
 					.easing(TWEEN.Easing.Quintic.Out)
 					.onUpdate(({ yOffset }) => {
-						label.setOffsetY(Utils.worldToPixel(yOffset));
+						const offsetInLabelHeights = yOffset / label.height;
+						label.setCenterY(offsetInLabelHeights);
 					})
 					.onComplete(() => {
 						new TWEEN.Tween({ yOffset: yOffset })
 							.to({ yOffset: 0 }, tweenDownDuration)
 							.easing(TWEEN.Easing.Quadratic.In)
 							.onUpdate(({ yOffset }) => {
-								label.setOffsetY(Utils.worldToPixel(yOffset));
+								const offsetInLabelHeights = yOffset / label.height;
+								label.setCenterY(offsetInLabelHeights);
 							})
 							.start();
 					})
@@ -89,11 +93,11 @@ namespace Renderer {
 
 			static create(config: DynamicFloatingTextConfig, zOffset = 0) {
 				return new DynamicFloatingText(
-					Utils.pixelToWorld(config.x) - 0.5,
+					Utils.pixelToWorld(config.x),
 					// Will only look good top down orthographic currently; Need to get
 					// correct height from engine when the engine uses 3D coords.
 					zOffset,
-					Utils.pixelToWorld(config.y) - 0.5,
+					Utils.pixelToWorld(config.y),
 					config.text,
 					config.color,
 					config.duration

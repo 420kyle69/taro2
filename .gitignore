@@ -2,7 +2,6 @@ build/
 heapdump/
 log.log
 typings/**
-.vscode/
 .dockerignore
 Dockerfile
 commands
@@ -149,3 +148,12 @@ src/renderer
 
 src/utils/Colors.js
 src/utils/Colors.js.map
+
+src/helpers/merge-game-json.js
+src/helpers/merge-game-json.js.map
+
+engine/components/physics/*.js
+engine/components/physics/*.js.map
+src/utils/*.js
+src/utils/*.js.map
+engine/components/physics/rapier3d

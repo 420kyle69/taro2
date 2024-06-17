@@ -4,9 +4,10 @@ var ScoreboardComponent = TaroEntity.extend({
 
 	init: function () {
 		var self = this;
+		TaroObject.prototype.init.call(this);
 		self.scoreAttributeId = taro.game.data.settings.scoreAttributeId;
 		self.isUpdateQueued = false;
-		self._hidden = false;
+		self._stats.isHidden = false;
 
 		self.setUI();
 	},
@@ -18,9 +19,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		} else {
 			$('#scoreboard-header').addClass('h5');
 			$('#scoreboard').addClass('h6');
-			$('#leaderboard')
-				.addClass('h3')
-				.removeClass('d-none');
+			$('#leaderboard').addClass('h3').removeClass('d-none');
 		}
 
 		// due to rendering order, on standalone, leaderboard is rendered behind
@@ -57,7 +56,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		// 						case 'unmute': {
 		// 							mutedUsers.splice(index, 1);
 		// 							$.ajax({
-		// 								url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
+		// 								url: `${window.BASE_URL}/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
 		// 								type: 'POST',
 		// 								success: function (data) {
 		// 									console.log(data);											// alert('request sent');
@@ -68,7 +67,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		// 						case 'mute': {
 		// 							mutedUsers.push(taro.scoreboard.selectedUser.userId);
 		// 							$.ajax({
-		// 								url: `/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
+		// 								url: `${window.BASE_URL}/api/user/toggle-mute/${taro.scoreboard.selectedUser.userId}`,
 		// 								type: 'POST',
 		// 								success: function (data) {
 		// 									console.log(data);											// alert('request sent');
@@ -78,7 +77,7 @@ var ScoreboardComponent = TaroEntity.extend({
 		// 						}
 		// 						case 'addFriend': {
 		// 							$.ajax({
-		// 								url: `/api/user/request/${taro.scoreboard.selectedUser.userId}`,
+		// 								url: `${window.BASE_URL}/api/user/request/${taro.scoreboard.selectedUser.userId}`,
 		// 								type: 'POST',
 		// 								success: function (data) {
 		// 									alert('request sent');
@@ -109,30 +108,65 @@ var ScoreboardComponent = TaroEntity.extend({
 		// });
 	},
 
-	queueUpdate: function() {
+	queueUpdate: function () {
 		this.isUpdateQueued = true;
 	},
 
-	convertNumbersToKMB: function (labelValue) {
-		if (taro.game.data.settings.prettifyingScoreboard) {
-			// Nine Zeroes for Billions
-			return Math.abs(Number(labelValue)) >= 1.0e+9
-
-				? `${(Math.abs(Number(labelValue)) / 1.0e+9).toFixed(2)}B`
-				// Six Zeroes for Millions
-				: Math.abs(Number(labelValue)) >= 1.0e+6
-
-					? `${(Math.abs(Number(labelValue)) / 1.0e+6).toFixed(2)}M`
-					// Three Zeroes for Thousands
-					: Math.abs(Number(labelValue)) >= 1.0e+3
-
-						? `${(Math.abs(Number(labelValue)) / 1.0e+3).toFixed(2)}K`
-
-						: Math.abs(Number(labelValue));
-		} else {
-			return labelValue;
+	convertNumbersToKMB: function (value) {
+		if (!taro.game.data.settings.prettifyingScoreboard) {
+			return value; // do not convert if scoreboard is not prettified
 		}
+
+		const suffixes = [
+			'',
+			'K',
+			'M',
+			'B',
+			'T',
+			'Qa',
+			'Qi',
+			'Sx',
+			'Sp',
+			'Oc',
+			'No',
+			'De',
+			'Un',
+			'Do',
+			'Tr',
+			'Qad',
+			'Qid',
+			'Sxd',
+			'Spd',
+			'Od',
+			'Nd',
+			'Vi',
+		];
+
+		// Convert the value to a number and take its absolute value
+		let absValue = Math.abs(Number(value));
+		// Initialize the returnValue with the original value
+		let returnValue = value;
+
+		// Check if the absolute value is greater than or equal to 1000
+		if (absValue >= 1000) {
+			// Calculate the index for suffix selection
+			const index = Math.max(0, Math.floor(Math.log10(absValue) / 3));
+
+			// Ensure the index is within the range of suffixes
+			if (index <= suffixes.length - 1) {
+				// Select the appropriate suffix based on the index
+				const suffix = suffixes[index];
+				// Calculate the adjusted value and concatenate it with the suffix
+				returnValue = `${(absValue / Math.pow(10, 3 * index)).toFixed(2)}${suffix}`;
+			} else {
+				// Number is too large, return in scientific notation
+				returnValue = absValue.toExponential(2);
+			}
+		}
+
+		return returnValue;
 	},
+
 	update: function () {
 		var self = this;
 		var DEFAULT_COLOR = 'white';
@@ -140,22 +174,18 @@ var ScoreboardComponent = TaroEntity.extend({
 		var scoreboardElement = taro.client.getCachedElementById('scoreboard');
 		var leaderboardToggleElement = taro.client.getCachedElementById('leaderboard-toggle');
 
-
 		if (taro.isClient && scoreboardElement && leaderboardToggleElement) {
+			scoreboardElement.innerHTML = '';
 
-			scoreboardElement.innerHTML = ''
-
-			if (self._hidden) {
+			if (self._stats.isHidden) {
 				if (leaderboardToggleElement) {
-					leaderboardToggleElement.innerHTML = 
-					`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">
+					leaderboardToggleElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
 				 	</svg>`;
 				}
 			} else {
 				if (leaderboardToggleElement) {
-					leaderboardToggleElement.innerHTML =
-					`<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">>
+					leaderboardToggleElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="leaderboard-arrow">>
 						<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
 					</svg>`;
 				}
@@ -164,10 +194,10 @@ var ScoreboardComponent = TaroEntity.extend({
 				var players = taro.$$('player');
 
 				players.forEach(function (player) {
-					if (player._stats && (
+					if (
+						player._stats &&
 						// only display human players on scoreboard
 						player._stats.controlledBy == 'human'
-					)
 					) {
 						var playerId = player.id();
 						var score = 0;
@@ -180,7 +210,7 @@ var ScoreboardComponent = TaroEntity.extend({
 
 						sortedScores.push({
 							key: playerId,
-							value: score
+							value: score,
 						});
 					}
 				});
@@ -225,18 +255,20 @@ var ScoreboardComponent = TaroEntity.extend({
 								id: `scoreboard-player-rank-${i}`,
 								class: `cursor-pointer scoreboard-user-entry ${playerIsSelf}`,
 								style: `color: ${color};font-weight:${defaultFontWeight}`,
-								onContextMenu: `window.showUserDropdown({ event, userId: '${player._stats.userId}' })`
-							}).append(
-								$('<span/>', {
-									class: 'scoreboard-player-name',
-									html: `${readableName}`
-								})
-							).append(
-								$('<small/>', {
-									class: 'scoreboard-player-score',
-									html: `<span> ${self.convertNumbersToKMB(sortedScores[i].value)}</span>`
-								})
-							)
+								onContextMenu: `window.showUserDropdown({ event, userId: '${player._stats.userId}' })`,
+							})
+								.append(
+									$('<span/>', {
+										class: 'scoreboard-player-name',
+										html: `${readableName}`,
+									})
+								)
+								.append(
+									$('<small/>', {
+										class: 'scoreboard-player-score',
+										html: `<span> ${self.convertNumbersToKMB(sortedScores[i].value)}</span>`,
+									})
+								)
 						);
 					}
 				}
@@ -247,20 +279,19 @@ var ScoreboardComponent = TaroEntity.extend({
 	},
 
 	hideScores: function () {
-		this._hidden = true;
+		this._stats.isHidden = true;
 	},
 
 	showScores: function () {
-		this._hidden = false;
+		this._stats.isHidden = false;
 	},
 
 	toggleScores: function () {
-		this._hidden = !this._hidden;
+		this._stats.isHidden = !this._stats.isHidden;
 		this.update();
-	}
-
+	},
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = ScoreboardComponent;
 }

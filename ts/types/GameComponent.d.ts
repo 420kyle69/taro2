@@ -20,6 +20,8 @@ interface EntityData {
 		unitAbilities: Record<string, UnitAbility>;
 	};
 	id: string;
+
+	is3DObject?: boolean;
 }
 
 interface UnitAbility {
@@ -46,6 +48,12 @@ interface ScriptData {
 	deleted?: boolean;
 }
 
+interface ScriptChangesData {
+	scriptData: Record<string, ScriptData>;
+	action: string;
+	clientId: string;
+}
+
 interface ActionData {
 	player?: {
 		variableName: string;
@@ -63,10 +71,24 @@ interface ActionData {
 		function?: string;
 		x: number;
 		y: number;
+		z?: number;
+	};
+	rotation?: {
+		function?: string;
+		x: number;
+		y: number;
+		z: number;
+	};
+	scale?: {
+		function?: string;
+		x: number;
+		y: number;
+		z: number;
 	};
 	angle?: number;
 	width?: number;
 	height?: number;
+	depth?: number;
 	wasCreated?: boolean;
 	wasEdited?: boolean;
 	wasDeleted?: boolean;

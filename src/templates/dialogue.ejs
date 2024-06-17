@@ -26,7 +26,7 @@
                 <h5 class="modal-title">{{dialogue.dialogueTitle}}</h5>
             </div>
           {{/if}}
-          
+
             <div class="modal-body">
                 <div class="row row-eq-height">
                     <div class="{{ternary dialogue.image 'col-4' 'd-none'}}" id="modd-dialogue-image-container">
@@ -64,7 +64,7 @@
                                         <button class="w-100 btn btn-light border btn-block text-left dialogue-option">
                                             <i class="d-none fa fa-check mr-2 option-check"></i>
                                             <span>{{name}}<span>
-                                        </button>  
+                                        </button>
                                     {{/each}}
                                 </div>
                             </div>
@@ -80,8 +80,8 @@
     <start-script>
     // below part mainly contains code related to input modal
     var isDismissible = {{ternary inputModal.isDismissible true false}};
-    window.addEventListener('click', function(e){   
-        if (!document.getElementById('player-input-modal').contains(e.target)){
+    window.addEventListener('click', function(e){
+        if (document.getElementById('player-input-modal') && !document.getElementById('player-input-modal').contains(e.target)){
           // Clicked in box
         }
     });
@@ -98,7 +98,7 @@
 
 
     var message = {{{ json dialogue.message }}};
-    var letterPrintSpeed = {{ternary dialogue.letterPrintSpeed dialogue.letterPrintSpeed 0}}; 
+    var letterPrintSpeed = {{ternary dialogue.letterPrintSpeed dialogue.letterPrintSpeed 0}};
 
     var messageHeight = $('#modd-dialogue-message').innerHeight();
     $('#modd-dialogue-message').css('min-height', messageHeight);

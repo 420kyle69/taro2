@@ -19,6 +19,70 @@ namespace Renderer {
 				return `${url}?v=1`;
 			}
 
+			export function fillRect(
+				ctx: CanvasRenderingContext2D,
+				x: number,
+				y: number,
+				width: number,
+				height: number,
+				color: string,
+				alpha = 1
+			) {
+				const fillColor = new THREE.Color(color).getHex();
+				const red = (fillColor & 0xff0000) >>> 16;
+				const green = (fillColor & 0xff00) >>> 8;
+				const blue = fillColor & 0xff;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
+				ctx.fillRect(x, y, width, height);
+			}
+
+			export function strokeRect(
+				ctx: CanvasRenderingContext2D,
+				x: number,
+				y: number,
+				width: number,
+				height: number,
+				color: string,
+				lineWidth: number,
+				alpha = 1
+			) {
+				if (lineWidth === 0) return;
+
+				const fillColor = new THREE.Color(color).getHex();
+				const red = (fillColor & 0xff0000) >>> 16;
+				const green = (fillColor & 0xff00) >>> 8;
+				const blue = fillColor & 0xff;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
+				ctx.lineWidth = lineWidth;
+
+				// Stroke inside the rect instead of on the edge
+				const lineWidthHalf = lineWidth / 2;
+				const xMin = x + lineWidthHalf;
+				const xMax = x + width - lineWidthHalf;
+				const yMin = y + lineWidthHalf;
+				const yMax = y + height - lineWidthHalf;
+
+				ctx.beginPath();
+				ctx.moveTo(xMin, yMin);
+				ctx.lineTo(xMin, yMax);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(xMax, yMin);
+				ctx.lineTo(xMax, yMax);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(xMin - lineWidthHalf, yMin);
+				ctx.lineTo(xMax + lineWidthHalf, yMin);
+				ctx.stroke();
+
+				ctx.beginPath();
+				ctx.moveTo(xMin - lineWidthHalf, yMax);
+				ctx.lineTo(xMax + lineWidthHalf, yMax);
+				ctx.stroke();
+			}
+
 			export function fillRoundedRect(
 				ctx: CanvasRenderingContext2D,
 				x: number,
@@ -27,7 +91,7 @@ namespace Renderer {
 				height: number,
 				radius: number,
 				color: string,
-				opacity = 1
+				alpha = 1
 			) {
 				var tl = radius;
 				var tr = radius;
@@ -35,11 +99,10 @@ namespace Renderer {
 				var br = radius;
 
 				const fillColor = new THREE.Color(color).getHex();
-				const fillAlpha = opacity;
 				const red = (fillColor & 0xff0000) >>> 16;
 				const green = (fillColor & 0xff00) >>> 8;
 				const blue = fillColor & 0xff;
-				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
 
 				ctx.beginPath();
 				ctx.moveTo(x + tl, y);
@@ -62,36 +125,44 @@ namespace Renderer {
 				height: number,
 				radius: number,
 				color: string,
-				opacity = 1
+				strokeThickness: number,
+				alpha = 1
 			) {
+				if (strokeThickness === 0) return;
+
 				var tl = radius;
 				var tr = radius;
 				var bl = radius;
 				var br = radius;
 
-				const lineWidth = 2;
 				const lineColor = new THREE.Color(color).getHex();
-				const lineAlpha = opacity;
 				const red = (lineColor & 0xff0000) >>> 16;
 				const green = (lineColor & 0xff00) >>> 8;
 				const blue = lineColor & 0xff;
-				ctx.strokeStyle = `rgba(${red},${green},${blue},${lineAlpha})`;
-				ctx.lineWidth = lineWidth;
+				ctx.strokeStyle = `rgba(${red},${green},${blue},${alpha})`;
+				ctx.lineWidth = strokeThickness;
+
+				// Stroke inside the rect instead of on the edge
+				const lineWidthHalf = strokeThickness / 2;
+				const xMin = x + lineWidthHalf;
+				const xMax = x + width - lineWidthHalf;
+				const yMin = y + lineWidthHalf;
+				const yMax = y + height - lineWidthHalf;
 
 				ctx.beginPath();
-				ctx.moveTo(x + tl, y);
-				ctx.lineTo(x + width - tr, y);
-				ctx.moveTo(x + width - tr, y);
-				ctx.arc(x + width - tr, y + tr, tr, -(Math.PI * 0.5), 0);
-				ctx.lineTo(x + width, y + height - br);
-				ctx.moveTo(x + width, y + height - br);
-				ctx.arc(x + width - br, y + height - br, br, 0, Math.PI * 0.5);
-				ctx.lineTo(x + bl, y + height);
-				ctx.moveTo(x + bl, y + height);
-				ctx.arc(x + bl, y + height - bl, bl, Math.PI * 0.5, Math.PI);
-				ctx.lineTo(x, y + tl);
-				ctx.moveTo(x, y + tl);
-				ctx.arc(x + tl, y + tl, tl, -Math.PI, -(Math.PI * 0.5));
+				ctx.moveTo(xMin + tl, yMin);
+				ctx.lineTo(xMax - tr, yMin);
+				ctx.moveTo(xMax - tr, yMin);
+				ctx.arc(xMax - tr, yMin + tr, tr, -(Math.PI * 0.5), 0);
+				ctx.lineTo(xMax, yMax - br);
+				ctx.moveTo(xMax, yMax - br);
+				ctx.arc(xMax - br, yMax - br, br, 0, Math.PI * 0.5);
+				ctx.lineTo(xMin + bl, yMax);
+				ctx.moveTo(xMin + bl, yMax);
+				ctx.arc(xMin + bl, yMax - bl, bl, Math.PI * 0.5, Math.PI);
+				ctx.lineTo(xMin, yMin + tl);
+				ctx.moveTo(xMin, yMin + tl);
+				ctx.arc(xMin + tl, yMin + tl, tl, -Math.PI, -(Math.PI * 0.5));
 				ctx.stroke();
 			}
 
@@ -104,14 +175,13 @@ namespace Renderer {
 				x2: number,
 				y2: number,
 				color: string,
-				opacity = 1
+				alpha = 1
 			) {
 				const fillColor = new THREE.Color(color).getHex();
-				const fillAlpha = opacity;
 				const red = (fillColor & 0xff0000) >>> 16;
 				const green = (fillColor & 0xff00) >>> 8;
 				const blue = fillColor & 0xff;
-				ctx.fillStyle = `rgba(${red},${green},${blue},${fillAlpha})`;
+				ctx.fillStyle = `rgba(${red},${green},${blue},${alpha})`;
 
 				ctx.beginPath();
 				ctx.moveTo(x0, y0);
@@ -164,8 +234,33 @@ namespace Renderer {
 				return depth * 0.001;
 			}
 
+			export function isLeftButton(buttons: number) {
+				return !!(buttons & 1);
+			}
+
 			export function isRightButton(buttons: number) {
 				return !!(buttons & 2);
+			}
+
+			export function isHexColor(str: string) {
+				return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3}|[A-Fa-f0-9]{8})$/.test(str);
+			}
+
+			export function isHexColorWithAlpha(str: string) {
+				return /^#([A-Fa-f0-9]{8})$/.test(str);
+			}
+
+			export function getHexAlpha(hex: string) {
+				return isHexColorWithAlpha(hex) ? parseInt(hex.slice(7), 16) / 255 : 1;
+			}
+
+			export function toFixedWithoutZeros(num: number, precision: number) {
+				return `${Number.parseFloat(num.toFixed(precision))}`;
+			}
+
+			export function formatNumber(value: number, decimalPlaces = 0, trailingZeros = false) {
+				if (value === undefined || value === null) return '';
+				return trailingZeros ? value.toFixed(decimalPlaces).toString() : toFixedWithoutZeros(value, decimalPlaces);
 			}
 		}
 	}

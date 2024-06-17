@@ -6,7 +6,6 @@ declare interface EntityStats {
 	userId: string;
 	defaultData: any;
 	isMobile: boolean;
-	isBillboard?: boolean;
 
 	name: string;
 	nameLabelColor?: string;
@@ -14,6 +13,7 @@ declare interface EntityStats {
 		jointType: string;
 		width: number;
 		height: number;
+		depth: number;
 	};
 	cellSheet: {
 		columnCount: number;
@@ -34,13 +34,17 @@ declare interface EntityStats {
 			framesPerSecond: number;
 			loopCount: number;
 			name: string;
+			threeAnimationKey: string;
 		}
 	>;
 	default?: {
+		id: string;
 		x: number;
 		y: number;
+		z?: number;
 		width: number;
 		height: number;
+		depth?: number;
 		inside?: string;
 		alpha?: number;
 	};
@@ -57,4 +61,5 @@ declare interface EntityStats {
 	cameraPointerLock?: boolean;
 	cameraPitchRange?: { min: number; max: number };
 	cameraOffset?: { x: number; y: number; z: number };
+	is3DObject?: boolean;
 }

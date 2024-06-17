@@ -16,29 +16,38 @@ var InventoryComponent = TaroEntity.extend({
 		// render inventory slots on client end
 		var entity = this._entity;
 		var ownerPlayer = entity.getOwner();
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
-		if (ownerPlayer && taro.isClient && entity._stats.clientId === taro.network.id() && ownerPlayer._stats.selectedUnitId == entity.id()) {
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot ' : 'inventory-slot ';
+		if (
+			ownerPlayer &&
+			taro.isClient &&
+			entity._stats.clientId === taro.network.id() &&
+			ownerPlayer._stats.selectedUnitId == entity.id()
+		) {
 			$('#inventory-slots').html('');
 			$('#inventory-slots-key-stroke').html('');
 			for (var i = 0; i < this._entity._stats.inventorySize; i++) {
-				$('#inventory-slots').append($('<div/>', {
-					id: `item-${i}`,
-					name: i,
-					class: `btn inventory-item-button p-0 ${mobileClass}`,
-					style: 'position: relative;',
-					role: 'button'
-				}).on('click', function () {
-					var slotIndex = parseInt($(this).attr('name')) + 1;
-					if (taro.client.myPlayer) {
-						taro.client.myPlayer.control.keyDown('key', slotIndex);
-					}
-				}));
+				$('#inventory-slots').append(
+					$('<div/>', {
+						id: `item-${i}`,
+						name: i,
+						class: `btn inventory-item-button p-0 ${mobileClass}`,
+						style: 'position: relative;',
+						role: 'button',
+					}).on('click', function () {
+						var slotIndex = parseInt($(this).attr('name')) + 1;
+						if (taro.client.myPlayer) {
+							taro.client.myPlayer.control.keyDown('key', slotIndex);
+						}
+					})
+				);
 
-				$('#inventory-slots-key-stroke').append($('<div/>', {
-					id: `item-key-stroke-${i}`,
-					name: `key-${i}`,
-					class: 'item-key-stroke'
-				}));
+				$('#inventory-slots-key-stroke').append(
+					$('<div/>', {
+						id: `item-key-stroke-${i}`,
+						name: `key-${i}`,
+						class: 'item-key-stroke',
+					})
+				);
 
 				var item = this.getItemBySlotNumber(i + 1);
 				if (item) {
@@ -52,10 +61,10 @@ var InventoryComponent = TaroEntity.extend({
 		this.update();
 	},
 
-	createBackpack () {
+	createBackpack() {
 		var entity = this._entity;
 		var backpackSize = entity._stats.backpackSize;
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot ' : 'inventory-slot ';
 
 		if (backpackSize > 0) {
 			this.updateBackpackButton(true);
@@ -65,13 +74,15 @@ var InventoryComponent = TaroEntity.extend({
 			for (var i = inventorySize; i < backpackSize + inventorySize; i++) {
 				$('#backpack-items-div').append(
 					$('<div/>', {
-						class: 'col-sm-4 margin-top-4'
-					}).append($('<div/>', {
-						id: `item-${i}`,
-						name: i,
-						class: `btn inventory-item-button p-0 ${mobileClass}`,
-						role: 'button'
-					}))
+						class: 'col-sm-4 margin-top-4',
+					}).append(
+						$('<div/>', {
+							id: `item-${i}`,
+							name: i,
+							class: `btn inventory-item-button p-0 ${mobileClass}`,
+							role: 'button',
+						})
+					)
 				);
 
 				var item = this.getItemBySlotNumber(i + 1);
@@ -84,7 +95,7 @@ var InventoryComponent = TaroEntity.extend({
 		}
 	},
 	createTradingSlots: function () {
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot' : 'inventory-slot ';
 		if (this._entity._stats.inventorySize) {
 			var totalInventorySize = this.getTotalInventorySize();
 			// total 5 trading slots
@@ -97,8 +108,8 @@ var InventoryComponent = TaroEntity.extend({
 					$('<div/>', {
 						id: `item-${i}`,
 						name: i,
-						class: `btn btn-light trade-slot inventory-item-button ${mobileClass}`,
-						role: 'button'
+						class: `btn btn-light trade-slot inventory-item-button p-0 ${mobileClass}`,
+						role: 'button',
 					})
 				);
 
@@ -112,7 +123,7 @@ var InventoryComponent = TaroEntity.extend({
 			inventoryBtn.show();
 			setTimeout(function () {
 				$('#backpack-wrapper').css({
-					bottom: $('#my-score-div').height() + 40
+					bottom: $('#my-score-div').height() + 40,
 				});
 			}, 1000);
 		} else {
@@ -122,12 +133,16 @@ var InventoryComponent = TaroEntity.extend({
 
 	getSameItemsFromInventory: function (itemTypeId) {
 		var items = this._entity._stats.itemIds;
-		return items && items.filter((id) => {
-			var item = taro.$(id);
-			if (item && item._stats && item._stats.itemTypeId === itemTypeId) {
-				return true;
-			}
-		}) || [];
+		return (
+			(items &&
+				items.filter((id) => {
+					var item = taro.$(id);
+					if (item && item._stats && item._stats.itemTypeId === itemTypeId) {
+						return true;
+					}
+				})) ||
+			[]
+		);
 	},
 
 	hasItem: function (itemTypeId) {
@@ -165,6 +180,31 @@ var InventoryComponent = TaroEntity.extend({
 		return actualQuantity == undefined || actualQuantity >= requiredQty;
 	},
 
+	isMappedSlotAvailable: function (mappedSlot, itemTypeId, ownerPlayer) {
+		var existingItem = this.getItemBySlotNumber(mappedSlot);
+		if (existingItem == undefined) {
+			return true;
+		}
+
+		// even if there's an existing item in the designated slot, if we're in a middle of purchasing an item and the item uses the existing item as a recipe, then allow buying the item
+		if (ownerPlayer) {
+			var lastOpenedShop = ownerPlayer._stats.lastOpenedShop;
+			if (lastOpenedShop) {
+				var shopItems = taro.game.data.shops[lastOpenedShop] ? taro.game.data.shops[lastOpenedShop].itemTypes : [];
+				var shopData = shopItems[itemTypeId];
+				if (shopData) {
+					if (
+						existingItem &&
+						existingItem._stats.removeWhenEmpty &&
+						existingItem._stats.quantity == shopData.price.requiredItemTypes[existingItem._stats.itemTypeId]
+					) {
+						return true;
+					}
+				}
+			}
+		}
+	},
+
 	/**
 	 * Return the inventory's first available slot considering the given item's type. If inventory has matching items already, then it'll consider how new item's quantity will be distributed, and eventually be added
 	 * @param {*} itemData
@@ -175,29 +215,40 @@ var InventoryComponent = TaroEntity.extend({
 		var itemTypeId = itemData.itemTypeId;
 
 		// check if we can assign itemData to its assigned designatedSlot.
-		var mappedSlots = (itemData.controls && Array.isArray(itemData.controls.permittedInventorySlots)) ? itemData.controls.permittedInventorySlots : undefined;
+		var mappedSlots =
+			itemData.controls && Array.isArray(itemData.controls.permittedInventorySlots)
+				? itemData.controls.permittedInventorySlots
+				: undefined;
+
 		var mappedSlot = undefined;
+		var isAvailable = false;
+		let ownerPlayer = this._entity.getOwner();
+
+		let equipRequirementMet = self.isEquipRequirementMet(itemData);
+
 		if (mappedSlots != undefined && mappedSlots.length > 0) {
 			for (var i = 0; i < mappedSlots.length; i++) {
-				mappedSlot = mappedSlots[i];
-				var existingItem = this.getItemBySlotNumber(mappedSlot);
-				if (existingItem == undefined) {
-					return mappedSlot;
-				}
-
-				// even if there's an existing item in the designated slot, if we're in a middle of purchasing an item and the item uses the existing item as a recipe, then allow buying the item
-				var ownerPlayer = this._entity.getOwner();
-				if (ownerPlayer) {
-					var lastOpenedShop = ownerPlayer._stats.lastOpenedShop;
-					if (lastOpenedShop) {
-						var shopItems = taro.game.data.shops[lastOpenedShop] ? taro.game.data.shops[lastOpenedShop].itemTypes : [];
-						var itemData = taro.shop.getItemById(itemTypeId);
-						var shopData = shopItems[itemTypeId];
-						if (shopData) {
-							if (existingItem && existingItem._stats.removeWhenEmpty && existingItem._stats.quantity == shopData.price.requiredItemTypes[existingItem._stats.itemTypeId]) {
-								return mappedSlot;
-							}
+				if (mappedSlots[i] === 'backpack-slots') {
+					for (
+						let j = this._entity._stats.inventorySize + 1;
+						j <= this._entity._stats.inventorySize + this._entity._stats.backpackSize;
+						j++
+					) {
+						mappedSlot = j;
+						isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId, ownerPlayer);
+						if (isAvailable) {
+							return mappedSlot;
 						}
+					}
+				} else {
+					mappedSlot = mappedSlots[i];
+					// if equip requirement not met, only allow items to be placed in backpack.
+					if (mappedSlot <= this._entity._stats.inventorySize && !equipRequirementMet) {
+						continue;
+					}
+					isAvailable = this.isMappedSlotAvailable(mappedSlot, itemTypeId, ownerPlayer);
+					if (isAvailable) {
+						return mappedSlot;
 					}
 				}
 			}
@@ -205,9 +256,10 @@ var InventoryComponent = TaroEntity.extend({
 
 		// check if this item can be merged with an existing item in the inventory
 		var totalInventorySize = this.getTotalInventorySize();
-		if (itemData.controls?.canMerge != false) { // Check if the item can merge
+		if (itemData.controls?.canMerge != false) {
+			// Check if the item can merge
 			var quantity = itemData.quantity;
-			for (var i = 0; i < totalInventorySize; i++) {
+			for (var i = equipRequirementMet ? 0 : this._entity._stats.inventorySize; i < totalInventorySize; i++) {
 				var itemId = self._entity._stats.itemIds[i];
 				if (itemId) {
 					var item = taro.$(itemId);
@@ -219,12 +271,12 @@ var InventoryComponent = TaroEntity.extend({
 						}
 
 						// matching item isn't full, and new item can fit in.
-						if (item._stats.maxQuantity - item._stats.quantity > quantity) {
+						if (item._stats.maxQuantity - item._stats.quantity >= quantity) {
 							return i + 1;
 						} else {
 							if (item._stats.quantity != undefined) {
 								// new item's quantity isn't enough to fill the existing item's. Deduct new item's quantity. and move on. This isn't done for undefined items
-								quantity -= (item._stats.maxQuantity - item._stats.quantity);
+								quantity -= item._stats.maxQuantity - item._stats.quantity;
 							}
 						}
 					}
@@ -237,17 +289,11 @@ var InventoryComponent = TaroEntity.extend({
 			// if item was mapped to a specific slot, then check if there's available slot in the backpack
 			// if item didn't have mapping, then return the first available slot including both inventory + backpack
 			if (
-				mappedSlot == undefined ||
-				(
-					i >= this._entity._stats.inventorySize &&
-					(
-						itemData.controls == undefined ||
-						(
-							itemData.controls.backpackAllowed == true ||
-							itemData.controls.backpackAllowed == undefined
-						)
-					)
-				)
+				(mappedSlot == undefined && equipRequirementMet) ||
+				(i >= this._entity._stats.inventorySize &&
+					(itemData.controls == undefined ||
+						itemData.controls.backpackAllowed == true ||
+						itemData.controls.backpackAllowed == undefined))
 			) {
 				var itemId = self._entity._stats.itemIds[i];
 				if (!(itemId && taro.$(itemId))) {
@@ -256,7 +302,8 @@ var InventoryComponent = TaroEntity.extend({
 			}
 		}
 
-		if (mappedSlot && mappedSlots.length == 1) { // give slot-specific message when item had ONE mapped slot. (e.g. glock in slot 2. Not slot 2 AND 3)
+		if (mappedSlot && mappedSlots.length == 1) {
+			// give slot-specific message when item had ONE mapped slot. (e.g. glock in slot 2. Not slot 2 AND 3)
 			self._entity.reasonForFailingToPickUpItem = `slot ${mappedSlot} is occupied`;
 		}
 		return undefined;
@@ -267,8 +314,7 @@ var InventoryComponent = TaroEntity.extend({
 		var self = this;
 		var unit = this._entity;
 
-		if (slotIndex == undefined)
-			slotIndex = self.getFirstAvailableSlotForItem();
+		if (slotIndex == undefined) slotIndex = self.getFirstAvailableSlotForItem();
 
 		if (slotIndex != undefined && item && unit.canCarryItem(item._stats)) {
 			if (taro.isServer) {
@@ -276,6 +322,8 @@ var InventoryComponent = TaroEntity.extend({
 				self._entity._stats.itemIds[slotIndex] = item.id();
 				if (slotIndex != self._entity.currentItemIndex) {
 					item._stats.slotIndex = slotIndex;
+				}
+				if (slotIndex >= unit._stats.inventorySize) {
 					item.hide();
 				}
 			} else if (taro.isClient && self._entity._stats.clientId === taro.network.id()) {
@@ -287,11 +335,6 @@ var InventoryComponent = TaroEntity.extend({
 					}
 				}
 			}
-			const triggerParams = { unitId: unit.id(), itemId: item.id() };
-			//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
-			item.script.trigger('thisItemIsPickedUp', triggerParams); // this entity (item)
-			unit.script.trigger('thisUnitPickedUpAnItem', triggerParams); // this entity (unit)
-			taro.script.trigger('unitPickedAnItem', triggerParams); // unit picked item (need to rename rename 'unitPickedAnItem' -> 'unitPickedUpAnItem')
 		}
 
 		return slotIndex;
@@ -312,10 +355,12 @@ var InventoryComponent = TaroEntity.extend({
 		for (var k = 0; k < self._entity._stats.itemIds.length; k++) {
 			var id = self._entity._stats.itemIds[k];
 			var item = taro.$(id);
-			if (item &&
+			if (
+				item &&
 				item._stats &&
 				item._stats.itemTypeId === itemTypeId &&
-				(item._stats.quantity < item._stats.maxQuantity || item._stats.maxQuantity === undefined)) {
+				(item._stats.quantity < item._stats.maxQuantity || item._stats.maxQuantity === undefined)
+			) {
 				return item;
 			}
 		}
@@ -331,7 +376,7 @@ var InventoryComponent = TaroEntity.extend({
 		}
 
 		if (taro.isServer) {
-			unit.streamUpdateData([{ itemIds: unit._stats.itemIds }]);
+			unit.streamUpdateData([{ itemIds: unit._stats.itemIds }], unit._stats.clientId);
 		} else if (taro.isClient) {
 			if (taro.client.myPlayer && taro.client.myPlayer._stats.selectedUnitId == unit.id() && itemExistInItemIds) {
 				$(taro.client.getCachedElementById(`item-${slotIndex}`)).html('');
@@ -352,8 +397,7 @@ var InventoryComponent = TaroEntity.extend({
 
 	// get item from inventory slot using slot number (starting from 1)
 	getItemBySlotNumber: function (slotNumber) {
-		if (slotNumber == undefined)
-			return null;
+		if (slotNumber == undefined) return null;
 
 		if (this._entity._stats.itemIds) {
 			var itemId = this._entity._stats.itemIds[slotNumber - 1];
@@ -378,7 +422,8 @@ var InventoryComponent = TaroEntity.extend({
 				// 5 for trading items
 
 				var totalInventorySize = this.getTotalInventorySize();
-				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) { // +5 for trade slots?
+				for (var slotIndex = 0; slotIndex < totalInventorySize + 5; slotIndex++) {
+					// +5 for trade slots?
 					var itemId = this._entity._stats.itemIds[slotIndex];
 					var item = taro.$(itemId);
 
@@ -405,12 +450,117 @@ var InventoryComponent = TaroEntity.extend({
 	},
 
 	getTotalInventorySize: function () {
-		this._entity._stats.backpackSize = (this._entity._stats.backpackSize > 0) ? this._entity._stats.backpackSize : 0; // backward compatibility incase backpackSize == undefined
+		this._entity._stats.backpackSize = this._entity._stats.backpackSize > 0 ? this._entity._stats.backpackSize : 0; // backward compatibility incase backpackSize == undefined
 		return this._entity._stats.inventorySize + this._entity._stats.backpackSize;
-	}
+	},
 
+	isItemDropAllowed: function (fromSlot, toSlot, fromItem, toItem) {
+		const totalInventorySize = this.getTotalInventorySize();
+		const inventorySize = this._entity._stats.inventorySize;
+	
+		if (toSlot >= totalInventorySize) {
+			if (fromItem._stats.controls.undroppable) {
+				return { allowed: false, reason: "Item is undroppable" };
+			}
+			if (fromItem._stats.controls.untradable) {
+				return { allowed: false, reason: "Item is untradable" };
+			}
+		}
+
+		if (toItem && fromSlot >= totalInventorySize) {
+			if (toItem._stats.controls.undroppable) {
+				return { allowed: false, reason: "Item is undroppable" };
+			}
+			if (toItem._stats.controls.untradable) {
+				return { allowed: false, reason: "Item is untradable" };
+			}
+		}
+	
+		if (toSlot + 1 <= inventorySize && !this.isEquipRequirementMet(fromItem._stats)) {
+			return { allowed: false, reason: `'${fromItem._stats.name}' equip requirements not met.` };
+		}
+	
+		if (toItem && fromSlot + 1 <= inventorySize && !this.isEquipRequirementMet(toItem._stats)) {
+			return { allowed: false, reason: `'${toItem._stats.name}' equip requirements not met.` };
+		}
+		
+		if (fromItem._stats.controls?.permittedInventorySlots?.length > 0) {
+			if (!fromItem._stats.controls.permittedInventorySlots.includes(toSlot + 1) &&
+				(toSlot + 1 <= inventorySize || fromItem._stats.controls.backpackAllowed === false)) {
+				return { allowed: false, reason: "" };
+			}
+		}
+	
+		if (toItem?._stats.controls?.permittedInventorySlots?.length > 0) {
+			if (!toItem._stats.controls.permittedInventorySlots.includes(fromSlot + 1) &&
+				(fromSlot + 1 <= inventorySize || toItem._stats.controls.backpackAllowed === false)) {
+				return { allowed: false, reason: "" };
+			}
+		}
+	
+		return { allowed: true, reason: "" };
+	},
+	
+	isAttributeRequirementMet: function (requirement, key, attributes) {
+		if (attributes[key]) {
+			switch (requirement.type) {
+				case 'atmost':
+					if (attributes[key].value > requirement.value) {
+						return false;
+					}
+					break;
+				case 'exactly':
+					if (attributes[key].value != requirement.value) {
+						return false;
+					}
+					break;
+				case 'atleast':
+				default:
+					if (attributes[key].value < requirement.value) {
+						return false;
+					}
+					break;
+			}
+			return true;
+		}
+		return true;
+	},
+
+	isEquipRequirementMet: function (itemData) {
+		let self = this;
+		let ownerPlayer = self._entity.getOwner();
+		let playerAttributes = ownerPlayer?._stats.attributes;
+		let unitAttributes = self._entity._stats.attributes;
+
+		if (typeof itemData.controls?.equipRequirement === 'object') {
+			let equipRequirement = itemData.controls.equipRequirement;
+			if (equipRequirement.playerAttributes) {
+				for (let key in equipRequirement.playerAttributes) {
+					if (playerAttributes && playerAttributes[key]) {
+						requirementsSatisfied = self.isAttributeRequirementMet(equipRequirement.playerAttributes[key], key, playerAttributes);
+						if (!requirementsSatisfied) {
+							return false;
+						}
+					}
+				}
+			};
+
+			if (equipRequirement.unitAttributes) {
+				for (let key in equipRequirement.unitAttributes) {
+					if (unitAttributes && unitAttributes[key]) {
+						requirementsSatisfied = self.isAttributeRequirementMet(equipRequirement.unitAttributes[key], key, unitAttributes);
+						if (!requirementsSatisfied) {
+							return false;
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = InventoryComponent;
 }

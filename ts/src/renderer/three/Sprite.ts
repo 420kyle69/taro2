@@ -5,11 +5,9 @@ namespace Renderer {
 			billboard = false;
 			scaleUnflipped = new THREE.Vector2(1, 1);
 
-			private layer = 3;
 			private depth = 1;
 			private flipX = 1;
 			private flipY = 1;
-			private zOffset = 0;
 			private angleOffset = 0;
 
 			constructor(protected tex: THREE.Texture) {
@@ -17,17 +15,13 @@ namespace Renderer {
 
 				const geometry = new THREE.PlaneGeometry(1, 1);
 				geometry.rotateX(-Math.PI / 2);
-				const material = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+				const material = new THREE.MeshBasicMaterial({
+					map: tex,
+					transparent: true,
+					alphaTest: 0.3,
+				});
 				this.sprite = new THREE.Mesh(geometry, material);
 				this.add(this.sprite);
-
-				const renderer = Renderer.Three.instance();
-				renderer.camera.onChange(() => {
-					if (this.billboard) {
-						this.faceCamera(renderer.camera);
-						this.correctZOffsetBasedOnCameraAngle();
-					}
-				});
 			}
 
 			setBillboard(billboard: boolean, camera: Camera) {
@@ -35,8 +29,41 @@ namespace Renderer {
 				if (this.billboard) {
 					this.faceCamera(camera);
 					this.correctZOffsetBasedOnCameraAngle();
+				} else {
+					this.resetRotation();
 				}
 			}
+
+			setOpacity(opacity: number, time = undefined) {
+				(this.sprite.material as THREE.Material).opacity = opacity;
+				if (time !== undefined) {
+					setTimeout(() => {
+						(this.sprite.material as THREE.Material).opacity = 1;
+					}, time);
+				}
+			}
+
+			/*setColor(color: number, time = 0) {
+				console.log('setColor', color, time, this.sprite);
+				this.traverse((child) => {
+					if (child instanceof THREE.Mesh) {
+						// Convert to basic material to avoid lighting
+						/*const material = new THREE.MeshBasicMaterial();
+						THREE.MeshBasicMaterial.prototype.copy.call(material, child.material);
+						child.material = material;*/
+			/*const originalColor = child.material.color.getHex();
+						child.material.color.setHex(color);
+						child.material.needsUpdate = true;
+						child.material.opacity = 0.5;
+						if (time > 0) {
+							setTimeout(() => {
+								child.material.color.setHex(originalColor);
+								child.material.opacity = 1;
+							}, time);
+						}
+					}
+				});
+			}*/
 
 			setScale(sx: number, sy: number) {
 				this.scaleUnflipped.set(sx, sy);
@@ -47,20 +74,9 @@ namespace Renderer {
 				this.sprite.rotation.y = rad;
 			}
 
-			setLayer(layer: number) {
-				this.layer = layer;
-				this.calcRenderOrder();
-			}
-
 			setDepth(depth: number) {
 				this.depth = depth;
 				this.calcRenderOrder();
-			}
-
-			setZOffset(offset: number) {
-				this.zOffset = offset;
-				this.calcRenderOrder();
-				this.correctZOffsetBasedOnCameraAngle();
 			}
 
 			setTexture(tex: THREE.Texture) {
@@ -73,13 +89,29 @@ namespace Renderer {
 				this.setScale(this.scaleUnflipped.x, this.scaleUnflipped.y);
 			}
 
+			getSize() {
+				return { width: this.scaleUnflipped.x, height: this.scaleUnflipped.y };
+			}
+
 			getSizeInPixels() {
 				return { width: Utils.worldToPixel(this.scaleUnflipped.x), height: Utils.worldToPixel(this.scaleUnflipped.y) };
 			}
 
+			update(_dt: number) {
+				if (this.billboard) {
+					this.faceCamera(Three.instance().camera);
+					this.correctZOffsetBasedOnCameraAngle();
+				}
+
+				const parent = this.parent as Unit | Item;
+				const isOwnedItem = parent && parent instanceof Item && parent.ownerUnit;
+				if (isOwnedItem) {
+					this.position.y = parent.ownerUnit.body.position.y;
+				}
+			}
+
 			private calcRenderOrder() {
-				this.sprite.renderOrder = this.layer * 100 + this.depth;
-				this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + this.zOffset;
+				this.sprite.position.y = Utils.getDepthZOffset(this.depth);
 			}
 
 			private faceCamera(camera: Camera) {
@@ -88,13 +120,25 @@ namespace Renderer {
 			}
 
 			private correctZOffsetBasedOnCameraAngle() {
-				let angle = Math.abs(Renderer.Three.instance().camera.getElevationAngle() * (Math.PI / 180));
+				let angle = Math.abs(Renderer.Three.instance().camera.getElevationAngle());
 				angle = Math.PI * 0.5 - angle;
 				let halfHeight = this.scaleUnflipped.y * 0.5;
 				const adj = Math.cos(angle) * halfHeight;
 				this.angleOffset = Math.tan(angle) * adj;
-				const offset = this.zOffset + this.angleOffset;
-				this.position.y = Utils.getLayerZOffset(this.layer) + Utils.getDepthZOffset(this.depth) + offset;
+				const offset = this.angleOffset;
+
+				const parent = this.parent as Unit | Item;
+				const isNotItemOrUnownedItem =
+					(parent && !(parent instanceof Item)) || (parent && parent instanceof Item && !parent.ownerUnit);
+
+				if (isNotItemOrUnownedItem) {
+					this.position.y = Utils.getDepthZOffset(this.depth) + offset;
+				}
+			}
+
+			private resetRotation() {
+				this.rotation.set(0, 0, 0);
+				this.calcRenderOrder();
 			}
 		}
 	}

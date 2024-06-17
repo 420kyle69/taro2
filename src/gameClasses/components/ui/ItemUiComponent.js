@@ -4,12 +4,32 @@ var ItemUiComponent = TaroEntity.extend({
 
 	dragOverTimeout: null,
 
+	DRAG_SCALE: 1.8,
+
 	init: function () {
 		const addPopoverListener = () => {
-			$('#backpack-items-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-				$('.popover').popover('hide');
-				$(this).popover('show');
-			});
+			let timeoutForPopover = null;
+
+			$('#backpack-items-div')
+				.on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					if (taro.isMobile) return;
+					$('.popover').popover('hide');
+					$(this).popover('show');
+				})
+				.on('touchstart', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					timeoutForPopover = setTimeout(() => {
+						// check if the element contains a class ui-draggable-dragging
+						// if it does, then don't show the popover
+						if (!$(this).hasClass('ui-draggable-dragging')) {
+							$(this).popover('show');
+						}
+					}, 500);
+				})
+				.on('touchend', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					clearTimeout(timeoutForPopover);
+					$('.popover').popover('hide');
+				});
+
 			$('#trade-div').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
 				$('.popover').popover('hide');
 				$(this).popover('show');
@@ -18,10 +38,23 @@ var ItemUiComponent = TaroEntity.extend({
 				$('.popover').popover('hide');
 				$(this).popover('show');
 			});
-			$('#inventory-slots').on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
-				$('.popover').popover('hide');
-				$(this).popover('show');
-			});
+			$('#inventory-slots')
+				.on('mouseenter', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					if (taro.isMobile) return;
+					$('.popover').popover('hide');
+					$(this).popover('show');
+				})
+				.on('touchstart', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					timeoutForPopover = setTimeout(() => {
+						if (!$(this).hasClass('ui-draggable-dragging')) {
+							$(this).popover('show');
+						}
+					}, 500);
+				})
+				.on('touchend', '.inventory-item-button.inventory-slot>.item-div.draggable-item', function () {
+					clearTimeout(timeoutForPopover);
+					$('.popover').popover('hide');
+				});
 		};
 
 		if (document.getElementById('backpack-items-div')) {
@@ -50,11 +83,13 @@ var ItemUiComponent = TaroEntity.extend({
 					const chatEleY2 = rect.bottom;
 
 					// Check if the pointer is within boundaries
-					return event.clientX > chatEleX &&
+					return (
+						event.clientX > chatEleX &&
 						event.clientX < chatEleX2 &&
 						event.clientY > chatEleY &&
-						event.clientY < chatEleY2;
-				}
+						event.clientY < chatEleY2
+					);
+				};
 
 				let isElementInside = false;
 				document.querySelectorAll('#inventory-slots, #backpack, #trade-div').forEach((element) => {
@@ -62,7 +97,8 @@ var ItemUiComponent = TaroEntity.extend({
 				});
 
 				ui.draggable.css({
-					left: 0, top: 0
+					left: 0,
+					top: 0,
 				});
 
 				if (isElementInside) {
@@ -78,10 +114,10 @@ var ItemUiComponent = TaroEntity.extend({
 
 				if (itemId) {
 					taro.network.send('dropItemToCanvas', {
-						itemId: itemId
+						itemId: itemId,
 					});
 				}
-			}
+			},
 		});
 
 		jQuery.fn.swap = function (b) {
@@ -109,13 +145,10 @@ var ItemUiComponent = TaroEntity.extend({
 
 	updateItemInfo: function (item) {
 		if (item && item._stats) {
-			$(taro.client.getCachedElementById('item-name')).html(
-				taro.clientSanitizer(item._stats.name)
-			);
+			$(taro.client.getCachedElementById('item-name')).html(taro.clientSanitizer(item._stats.name));
 
 			var ammoStr = '';
-			if (item._stats.ammo != undefined)
-				ammoStr = `${item._stats.ammo} / ${item._stats.ammoTotal}`;
+			if (item._stats.ammo != undefined) ammoStr = `${item._stats.ammo} / ${item._stats.ammoTotal}`;
 
 			// $("#item-ammo").html(ammoStr)
 		} else {
@@ -127,25 +160,30 @@ var ItemUiComponent = TaroEntity.extend({
 	updateItemSlot: function (item, slotIndex) {
 		var self = this;
 		var owner = item && item.getOwnerUnit();
-		var equipmentAllowed = (owner && owner._stats.equipmentAllowed);
+		var equipmentAllowed = owner && owner._stats.equipmentAllowed;
 		// update item info on bottom-right corner if it's currently selected item
 
+		let additionalStyle = '';
 		if (item && item._stats && item._stats.inventorySlotColor) {
-			var color = `background-image: radial-gradient(rgba(0, 0, 0, 0),${item._stats.inventorySlotColor})`;
+			additionalStyle = `background-image: radial-gradient(rgba(0, 0, 0, 0),${item._stats.inventorySlotColor})`;
 		} else {
-			var color = 'background-image: none';
+			additionalStyle = 'background-image: none';
 		}
 
 		var element = $(taro.client.getCachedElementById(`item-${slotIndex}`));
 		// var element = $(`#item-${slotIndex}`);
 		element.html(
 			self.getItemCooldownOverlay(slotIndex).add(
-				self.getItemDiv(item, {
-					popover: 'top',
-					isDraggable: true,
-					isPurchasable: false,
-					bgColor: color
-				}, slotIndex)
+				self.getItemDiv(
+					item,
+					{
+						popover: 'top',
+						isDraggable: true,
+						isPurchasable: false,
+						additionalStyle,
+					},
+					slotIndex
+				)
 			)
 		);
 
@@ -163,7 +201,6 @@ var ItemUiComponent = TaroEntity.extend({
 		// }
 	},
 	updateItemQuantity: function (item) {
-
 		var itemSlot = $(taro.client.getCachedElementById(`slotindex-${item._stats.slotIndex}`));
 		// var itemSlot = $(`#slotindex-${item._stats.slotIndex}`);
 
@@ -186,11 +223,11 @@ var ItemUiComponent = TaroEntity.extend({
 		}
 	},
 	getItemSlotDiv: function (itemStats, options) {
-		var mobileClass = taro.isMobile ? 'inventory-slot-mobile ' : 'inventory-slot ';
+		var mobileClass = taro.isMobile ? 'inventory-slot-mobile inventory-slot ' : 'inventory-slot ';
 		if (itemStats) {
 			var itemSlot = $('<div/>', {
 				id: itemStats.id,
-				class: `btn btn-secondary ${mobileClass}`
+				class: `btn btn-secondary ${mobileClass}`,
 			}).append(this.getItemDiv(itemStats, options));
 
 			if (options.isPurchasable) {
@@ -203,16 +240,47 @@ var ItemUiComponent = TaroEntity.extend({
 		}
 	},
 
+	updateDroppableActivate: function (event, type) {
+		if (type && event.target.parentElement) {
+			const itemSlot = parseInt(event.target.parentElement.id.substring(5));
+			var selectedUnit = taro.client.myPlayer.getSelectedUnit();
+			var items = selectedUnit._stats.itemIds;
+			const totalInventorySize = selectedUnit.inventory.getTotalInventorySize();
+			if (/*totalInventorySize && itemSlot < totalInventorySize*/ true) {
+				const item = taro.$(items[itemSlot]);
+				if (type === 'activate') {
+					const currentItemSlot = parseInt(event.currentTarget.parentElement.id.substring(5));
+					if (!items[currentItemSlot]) {
+						return;
+					}
+					event.target.parentElement.classList.add('item-drag-active');
+					if (selectedUnit.inventory.isItemDropAllowed(currentItemSlot, itemSlot, taro.$(items[currentItemSlot]), taro.$(items[itemSlot])).allowed) {
+						event.target.parentElement.classList.add('item-drop-allowed');
+
+						if (item && item._stats.inventorySlotColor) {
+							// const computedBackgroundImage = window.getComputedStyle(event.target).backgroundImage;
+							event.target.style.background = item._stats.inventorySlotColor;
+						}
+					} else {
+						event.target.parentElement.classList.add('item-drop-deny');
+					}
+				} else if (type === 'deactivate') {
+					event.target.parentElement.classList.remove('item-drag-active', 'item-drop-allowed', 'item-drop-deny');
+
+					if (item && item._stats.inventorySlotColor) {
+						// const computedBackgroundImage = window.getComputedStyle(event.target).backgroundImage;
+						event.target.style.background = null;
+					}
+				}
+			}
+		}
+	},
+
 	getItemDiv: function (item, options, slotIndex) {
 		var self = this;
 		if (item) {
 			var itemStats = item._stats;
 			if (itemStats) {
-				var itemDetail = $('<div/>', {
-					style: 'font-size: 16px; width: 250px;',
-					html: this.getItemHtml(itemStats)
-				});
-
 				var itemQuantity = item._stats.quantity !== undefined ? item._stats.quantity : '';
 				// || item._stats.maxQuantity === null
 				if ((item._stats.quantity == 1 && item._stats.maxQuantity == 1) || item._stats.quantity === null) {
@@ -220,25 +288,31 @@ var ItemUiComponent = TaroEntity.extend({
 				}
 
 				var img = itemStats.inventoryImage || (itemStats.cellSheet ? itemStats.cellSheet.url : '');
-				var mobileClass = taro.isMobile ? 'height:17px;max-width:20px;object-fit:contain' : 'height:30px;max-width:27px;object-fit:contain';
+				var mobileClass = taro.isMobile
+					? 'height:28px;max-width:28px;object-fit:contain'
+					: 'height:35px;max-width:35px;object-fit:contain';
 				var isTrading = options.isTrading;
 				if (img) {
 					var itemDiv = $('<div/>', {
 						id: `slotindex-${slotIndex}`,
-						class: 'item-div draggable-item ' + options.isActive,
-						style: 'height:100%; ' + options.bgColor,
+						class: `item-div draggable-item ${options.isActive}`,
+						style: `height:100%; ${options.additionalStyle}`,
 						role: 'button',
-						html: `<div class='${!isTrading ? 'absolute-center' : ''}'><img src='${img}' style='${mobileClass}'/></div><small class='quantity'>${!isNaN(parseFloat(itemQuantity)) && parseFloat(itemQuantity) || ''}</small>`,
+						html: `<div class='${!isTrading ? 'absolute-center' : ''}'><img src='${img}' style='${mobileClass}'/></div><small class='quantity'>${(!isNaN(parseFloat(itemQuantity)) && parseFloat(itemQuantity)) || ''}</small>`,
 						'data-container': 'body',
 						'data-toggle': 'popover',
 						'data-placement': options.popover || 'left',
-						'data-content': itemDetail.prop('outerHTML')
-					})
-						.popover({
-							html: true,
-							animation: false,
-							trigger: 'manual'
-						});
+					}).popover({
+						html: true,
+						animation: false,
+						trigger: 'manual',
+						content: () => {
+							return $('<div/>', {
+								style: 'font-size: 16px; width: 250px;',
+								html: self.getItemHtml(item.id()),
+							}).prop('outerHTML');
+						} 
+					});
 				}
 			}
 		} else {
@@ -246,113 +320,142 @@ var ItemUiComponent = TaroEntity.extend({
 				id: `slotindex-${slotIndex}`,
 				class: 'item-div draggable-item',
 				style: 'height:100%',
-				role: 'button'
+				role: 'button',
 			});
 		}
 		if (options.isDraggable && itemDiv) {
-			itemDiv.draggable({
-				revert: 'invalid',
-				cursor: 'move',
-				// helper: "clone",
-				zIndex: 10000,
-				containment: 'window',
-				appendTo: 'body',
-				tolerance: "touch",
-				start: function (event, ui) { // when being dragged, disable popover. it doesn't need to be enabled later, because updateInventory overwrites popover div
-					$('.popover').popover('disable');
-				}
-			}).droppable({
-				// over: function (event, ui) {
-				// 	ui.draggable.addClass('item-dragged-over')
-				// },
-				// out: function (event, ui) {
-				// 	clearTimeout(this.dragOverTimeout);
-				// 	this.dragOverTimeout = setTimeout(() => {
-				// 		ui.draggable.removeClass('item-dragged-over');
-				// 	}, 100);
-				// },
-				drop: function (event, ui) {
-					var draggable = ui.draggable; var droppable = $(this);
-					var dragPos = draggable.position(); var dropPos = droppable.position();
-					var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
-					var toIndex = parseFloat(droppable[0].parentElement.id.replace('item-', ''));
+			itemDiv
+				.draggable({
+					revert: 'invalid',
+					cursor: 'move',
+					// helper: "clone",
+					zIndex: 10000,
+					containment: 'window',
+					appendTo: 'body',
+					tolerance: 'touch',
+					start: function (event, ui) {
+						// when being dragged, disable popover. it doesn't need to be enabled later, because updateInventory overwrites popover div
+						$(this).popover('hide');
+						$(this).popover('disable');
 
-					var isTradingItemDragged = ui.draggable[0].parentElement.classList.contains('trade-slot');
-					var isItemDroppedOnTradeSlot = droppable[0].parentElement.classList.contains('trade-slot');
-					draggable.css({
-						// left: dropPos.left + 'px',
-						// top: dropPos.top + 'px'
-						left: 0, top: 0
-					});
+						event.target.parentElement.classList.add('item-drag-active', 'item-drop-main');
+					},
+					stop: function (event) {
+						$(this).popover('enable');
 
-					droppable.css({
-						// left: dragPos.left + 'px',
-						// top: dragPos.top + 'px'
-						left: 0, top: 0
-					});
-
-					var selectedUnit = taro.client.myPlayer.getSelectedUnit();
-					var items = selectedUnit._stats.itemIds;
-
-					var fromItem = taro.$(items[fromIndex]);
-					var toItem = taro.$(items[toIndex]);
-					if (fromItem) {
-						fromItem.stopUsing();
+						event.target.parentElement.classList.remove('item-drag-active', 'item-drop-main');
+					},
+					drag: function (event, ui) {
+						const correction = 30;
+						ui.position.left = ui.position.left - ((event.target.clientWidth * self.DRAG_SCALE) - (event.clientX - ui.offset.left)) + correction;
+						ui.position.top = ui.position.top - ((event.target.clientHeight * self.DRAG_SCALE) - (event.clientY - ui.offset.top)) + correction;
+						// console.log("ui.position", ui.position, "clientX: ", event.clientX, "clientY: ", event.clientY, "offset: ", ui.offset);
 					}
+				})
+				.droppable({
+					// over: function (event, ui) {
+					// 	ui.draggable.addClass('item-dragged-over')
+					// },
+					// out: function (event, ui) {
+					// 	clearTimeout(this.dragOverTimeout);
+					// 	this.dragOverTimeout = setTimeout(() => {
+					// 		ui.draggable.removeClass('item-dragged-over');
+					// 	}, 100);
+					// },
+					activate: function (event, ui) {
+						self.updateDroppableActivate(event, 'activate');
+					},
+					deactivate: function (event, ui) {
+						self.updateDroppableActivate(event, 'deactivate');
+					},
+					drop: function (event, ui) {
+						var draggable = ui.draggable;
+						var droppable = $(this);
+						var fromIndex = parseFloat(ui.draggable[0].parentElement.id.replace('item-', ''));
+						var toIndex = parseFloat(droppable[0].parentElement.id.replace('item-', ''));
 
-					if (toItem) {
-						toItem.stopUsing();
-					}
+						var isTradingItemDragged = ui.draggable[0].parentElement.classList.contains('trade-slot');
+						var isItemDroppedOnTradeSlot = droppable[0].parentElement.classList.contains('trade-slot');
+						draggable.css({
+							// left: dropPos.left + 'px',
+							// top: dropPos.top + 'px'
+							left: 0,
+							top: 0,
+						});
 
-					var totalInventorySlot = selectedUnit.inventory.getTotalInventorySize();
-					if (toIndex < totalInventorySlot || (toIndex >= totalInventorySlot && !fromItem._stats.controls.undroppable)) { //check if try to trade undroppable item
-						taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
-						var tempItem = items[fromIndex];
-						items[fromIndex] = items[toIndex];
-						items[toIndex] = tempItem;
+						droppable.css({
+							// left: dragPos.left + 'px',
+							// top: dragPos.top + 'px'
+							left: 0,
+							top: 0,
+						});
 
-						if (taro.client.myPlayer.isTrading && (fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)) {
-							if (fromItem._stats.controls.untradable) {
-								window.setToastMessage('this item cannot be traded', 'error');
-								return;
-							}
-							// visual css stuff
-							if (isTradingItemDragged) {
-								if (!toItem) {
-									ui.draggable[0].parentElement.classList.remove('trade-item-added');
-								}
-							}
-							if (isItemDroppedOnTradeSlot) {
-								droppable[0].parentElement.classList.add('trade-item-added');
-							}
+						var selectedUnit = taro.client.myPlayer.getSelectedUnit();
+						var items = selectedUnit._stats.itemIds;
 
-							$('#you-accept').removeClass('active');
-							$('#trader-accept').removeClass('active');
-							$('#accept-trade-button').removeClass('disabled-trade-button');
-							$('#accept-trade-text').text('Accept');
-
-							// update other client.
-							taro.tradeUi.sendOfferingItems();
+						var fromItem = taro.$(items[fromIndex]);
+						var toItem = taro.$(items[toIndex]);
+						if (fromItem) {
+							fromItem.stopUsing();
 						}
-					}
-				}
-			});
+
+						if (toItem) {
+							toItem.stopUsing();
+						}
+
+						var totalInventorySlot = selectedUnit.inventory.getTotalInventorySize();
+						var isDropData = selectedUnit.inventory.isItemDropAllowed(fromIndex, toIndex, fromItem, toItem);
+						if (isDropData.allowed) {
+							taro.network.send('swapInventory', { from: fromIndex, to: toIndex });
+							var tempItem = items[fromIndex];
+							items[fromIndex] = items[toIndex];
+							items[toIndex] = tempItem;
+
+							if (
+								taro.client.myPlayer.isTrading &&
+								(fromIndex >= totalInventorySlot || toIndex >= totalInventorySlot)
+							) {
+								// visual css stuff
+								if (isTradingItemDragged) {
+									if (!toItem) {
+										ui.draggable[0].parentElement.classList.remove('trade-item-added');
+									}
+								}
+								if (isItemDroppedOnTradeSlot) {
+									droppable[0].parentElement.classList.add('trade-item-added');
+								}
+
+								$('#you-accept').removeClass('active');
+								$('#trader-accept').removeClass('active');
+								$('#accept-trade-button').removeClass('disabled-trade-button');
+								$('#accept-trade-text').text('Accept');
+
+								// update other client.
+								taro.tradeUi.sendOfferingItems();
+							}
+						} else if (isDropData.reason) {
+							window.setToastMessage(isDropData.reason, 'error');
+						}
+					},
+				});
 		}
 
 		return itemDiv;
 	},
 
-	getItemHtml: function (itemStats) {
+	getItemHtml: function (itemId) {
 		var self = this;
-
+		const itemStats = taro.$(itemId)._stats;
+		if (!itemStats) {
+			return '';
+		}
 		// var buffs = self.getBuffList(itemStats);
-
 		var itemTitle = $('<h4/>', {
-			html: itemStats.name
+			html: taro.clientSanitizer(itemStats.name),
 		});
 
 		var itemDiv = $('<div/>', {
-			class: 'caption '
+			class: 'caption ',
 		});
 
 		// console.log(itemStats)
@@ -387,7 +490,8 @@ var ItemUiComponent = TaroEntity.extend({
 		let itemCDDiv = $('<div/>', {
 			id: `item-cooldown-overlay-${slotIndex}`,
 			class: 'item-cooldown-overlay ',
-			style: 'position: absolute; bottom: 0; width: 100%; height: 0; background-color: #101010aa; z-index: 10001; pointer-events: none', /* higher than item-div */
+			style:
+				'position: absolute; bottom: 0; width: 100%; height: 0; background-color: #101010aa; z-index: 10001; pointer-events: none' /* higher than item-div */,
 		});
 		return itemCDDiv;
 	},
@@ -402,22 +506,72 @@ var ItemUiComponent = TaroEntity.extend({
 	},
 
 	updateItemDescription: function (item) {
-		var inventorySlotIfPresent = item._stats.slotIndex
+		// since popover content is calculated dynamically on hover, we don't need to do this.
+		// var inventorySlotIfPresent = item._stats.slotIndex;
+		// if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
+		// 	var popoverContent = $('<div/>', {
+		// 		style: 'font-size: 16px; width: 250px;',
+		// 		html: this.getItemHtml(item.id()),
+		// 	});
 
-		if (item && item._stats && (inventorySlotIfPresent === 0 || inventorySlotIfPresent)) {
-			var popoverContent = $('<div/>', {
-				style: 'font-size: 16px; width: 250px;',
-				html: this.getItemHtml(item._stats)
-			});
-
-			$(taro.client.getCachedElementById(`slotindex-${inventorySlotIfPresent}`)).attr('data-content', popoverContent[0].outerHTML);
+		// 	$(taro.client.getCachedElementById(`slotindex-${inventorySlotIfPresent}`)).attr(
+		// 		'data-content',
+		// 		popoverContent[0].outerHTML
+		// 	);
+		// }
+	},
+	requirementTypeString: (type) => {
+		switch (type) {
+			case 'atleast':
+				return '';
+			case 'atmost':
+				return 'max. ';
+			default:
+				return `${type} `;
 		}
 	},
 	getItemPopOverContent: function (stats) {
 		var info = '<div>';
+		var ownerPlayer = taro.client.myPlayer;
+		var ownerUnit = ownerPlayer.getSelectedUnit();
 		if (stats.description) {
-			info += `<p class="mb-1"><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
+			info += `<p class="mb-1"><span class="item-description">${stats.description} </span></p>`;
 		}
+
+		if (stats.controls.equipRequirement) {
+			var allRequirements = '';
+			var requirements = '';
+			if (stats.controls.equipRequirement.playerAttributes && ownerUnit) {
+				requirements = '';
+				for (var key in stats.controls.equipRequirement.playerAttributes) {
+					var requirement = stats.controls.equipRequirement.playerAttributes[key];
+					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementMet(requirement, key, ownerPlayer._stats.attributes) ? 'text-success' : 'text-danger';
+					requirements += `<p class='mb-1 ml-2 no-selection ${requirementsSatisfied}'>${this.requirementTypeString(requirement.type)}${requirement.value} ${ownerPlayer._stats.attributes[key].name || ''}</p>`;
+				}
+
+				if (requirements) {
+					allRequirements += `${requirements}`;
+				}
+			}
+
+			if (stats.controls.equipRequirement.unitAttributes && ownerUnit) {
+				requirements = '';
+				for (var key in stats.controls.equipRequirement.unitAttributes) {
+					var requirement = stats.controls.equipRequirement.unitAttributes[key];
+					var requirementsSatisfied = ownerUnit.inventory.isAttributeRequirementMet(requirement, key, ownerUnit._stats.attributes) ? 'text-success' : 'text-danger';
+					requirements += `<p class='mb-1 ml-2 no-selection ${requirementsSatisfied}'>${this.requirementTypeString(requirement.type)}${requirement.value} ${ownerUnit._stats.attributes[key].name || ''}</p>`;
+				}
+
+				if (requirements) {
+					allRequirements += `${requirements}`;
+				}
+			}
+
+			if (allRequirements) {
+				info += `<div class="no-selection"><b>Equip Requirements: </b> <br/> ${allRequirements}</div>`
+			}
+		}
+
 		if (stats && stats.bonus) {
 			if (stats.bonus.consume && Object.keys(stats.bonus.consume).length > 0) {
 				var consumeBonus = '';
@@ -441,8 +595,8 @@ var ItemUiComponent = TaroEntity.extend({
 				var passiveBonus = '';
 				for (var i in stats.bonus.passive.playerAttribute) {
 					var attrName = taro.game.data.attributeTypes[i] ? taro.game.data.attributeTypes[i].name : i;
-					var value = stats.bonus.passive.playerAttribute[i] && stats.bonus.passive.playerAttribute[i].value || 0;
-					var type = stats.bonus.passive.playerAttribute[i] && stats.bonus.passive.playerAttribute[i].type || '';
+					var value = (stats.bonus.passive.playerAttribute[i] && stats.bonus.passive.playerAttribute[i].value) || 0;
+					var type = (stats.bonus.passive.playerAttribute[i] && stats.bonus.passive.playerAttribute[i].type) || '';
 					if (type == 'percentage') {
 						type = '%';
 					} else {
@@ -453,8 +607,8 @@ var ItemUiComponent = TaroEntity.extend({
 
 				for (var i in stats.bonus.passive.unitAttribute) {
 					var attrName = taro.game.data.attributeTypes[i] ? taro.game.data.attributeTypes[i].name : i;
-					var value = stats.bonus.passive.unitAttribute[i] && stats.bonus.passive.unitAttribute[i].value || 0;
-					var type = stats.bonus.passive.unitAttribute[i] && stats.bonus.passive.unitAttribute[i].type || '';
+					var value = (stats.bonus.passive.unitAttribute[i] && stats.bonus.passive.unitAttribute[i].value) || 0;
+					var type = (stats.bonus.passive.unitAttribute[i] && stats.bonus.passive.unitAttribute[i].type) || '';
 					if (type == 'percentage') {
 						type = '%';
 					} else {
@@ -537,18 +691,42 @@ var ItemUiComponent = TaroEntity.extend({
 						}
 					}
 					break;
-				case 'ammoSize': attrStr = `<strong>Magazine size:</strong> ${itemValue}`; break;
-				case 'ammoTotal': attrStr = `<strong>Ammo total:</strong> ${itemValue}`; break;
-				case 'fireRate': attrStr = `<strong>Fire rate:</strong> ${parseFloat(1000 / itemValue).toFixed(2)} round/s`; break;
-				case 'reloadRate': attrStr = `<strong>Reload time:</strong> ${parseFloat(itemValue / 1000).toFixed(2)} s`; break;
-				case 'bulletForce': attrStr = `<strong>Knock-back Force:</strong> ${parseFloat(itemValue).toFixed(0)}`; break;
-				case 'bulletDistance': attrStr = `<strong>Range:</strong> ${parseFloat(itemValue).toFixed(0)}`; break;
-				case 'recoilForce': attrStr = `<strong>Recoil:</strong> ${parseFloat(itemValue).toFixed(0)}`; break;
-				case 'movementSpeed': attrStr = `<strong>Speed bonus:</strong> ${parseFloat(itemValue.toFixed(1))}`; break;
-				case 'immunity': attrStr = `<strong>Immunity bonus:</strong> ${parseFloat(itemValue * 100).toFixed(0)}%`; break;
-				case 'maxStamina': attrStr = `<strong>Stamina bonus:</strong> ${parseFloat(itemValue.toFixed(0))}`; break;
-				case 'stunChance': attrStr = `<strong>Slow target chance:</strong> ${parseFloat(itemValue * 100).toFixed(0)}%`; break;
-				case 'slowChance': attrStr = `<strong>Stun target chance:</strong> ${parseFloat(itemValue * 100).toFixed(0)}%`; break;
+				case 'ammoSize':
+					attrStr = `<strong>Magazine size:</strong> ${itemValue}`;
+					break;
+				case 'ammoTotal':
+					attrStr = `<strong>Ammo total:</strong> ${itemValue}`;
+					break;
+				case 'fireRate':
+					attrStr = `<strong>Fire rate:</strong> ${parseFloat(1000 / itemValue).toFixed(2)} round/s`;
+					break;
+				case 'reloadRate':
+					attrStr = `<strong>Reload time:</strong> ${parseFloat(itemValue / 1000).toFixed(2)} s`;
+					break;
+				case 'bulletForce':
+					attrStr = `<strong>Knock-back Force:</strong> ${parseFloat(itemValue).toFixed(0)}`;
+					break;
+				case 'bulletDistance':
+					attrStr = `<strong>Range:</strong> ${parseFloat(itemValue).toFixed(0)}`;
+					break;
+				case 'recoilForce':
+					attrStr = `<strong>Recoil:</strong> ${parseFloat(itemValue).toFixed(0)}`;
+					break;
+				case 'movementSpeed':
+					attrStr = `<strong>Speed bonus:</strong> ${parseFloat(itemValue.toFixed(1))}`;
+					break;
+				case 'immunity':
+					attrStr = `<strong>Immunity bonus:</strong> ${parseFloat(itemValue * 100).toFixed(0)}%`;
+					break;
+				case 'maxStamina':
+					attrStr = `<strong>Stamina bonus:</strong> ${parseFloat(itemValue.toFixed(0))}`;
+					break;
+				case 'stunChance':
+					attrStr = `<strong>Slow target chance:</strong> ${parseFloat(itemValue * 100).toFixed(0)}%`;
+					break;
+				case 'slowChance':
+					attrStr = `<strong>Stun target chance:</strong> ${parseFloat(itemValue * 100).toFixed(0)}%`;
+					break;
 			}
 
 			return attrStr;
@@ -560,7 +738,7 @@ var ItemUiComponent = TaroEntity.extend({
 		// console.log("getBuffList", itemStats)
 		var buffCount = 0;
 		var buffListHtml = $('<ul/>', {
-			class: 'list-group'
+			class: 'list-group',
 		});
 
 		if (itemStats && itemStats.buffTypes) {
@@ -583,26 +761,52 @@ var ItemUiComponent = TaroEntity.extend({
 
 				if (itemValue != defaultValue && itemValue != 0 && itemValue != undefined && defaultValue != undefined) {
 					switch (buffTypeName) {
-						case 'height': buffTypeName = '<strong>Height bonus:</strong> '; break;
-						case 'ammoSize': buffTypeName = '<strong>Magazine size:</strong> '; break;
-						case 'ammoTotal': buffTypeName = '<strong>Ammo total:</strong> '; break;
-						case 'fireRate': buffTypeName = '<strong>Fire rate:</strong> '; break;
-						case 'reloadRate': buffTypeName = '<strong>Reload time:</strong> '; break;
-						case 'bulletForce': buffTypeName = '<strong>Knock-back force:</strong> '; break;
-						case 'bulletDistance': buffTypeName = '<strong>Range:</strong> '; break;
-						case 'recoilForce': buffTypeName = '<strong>Recoil:</strong> '; break;
-						case 'movementSpeed': buffTypeName = '<strong>Speed bonus:</strong> '; break;
-						case 'immunity': buffTypeName = '<strong>Immunity bonus:</strong> '; break;
-						case 'maxStamina': buffTypeName = '<strong>Stamina bonus:</strong> '; break;
-						case 'stunChance': buffTypeName = '<strong>Slow target chance:</strong> '; break;
-						case 'slowChance': buffTypeName = '<strong>Stun target chance:</strong> '; break;
+						case 'height':
+							buffTypeName = '<strong>Height bonus:</strong> ';
+							break;
+						case 'ammoSize':
+							buffTypeName = '<strong>Magazine size:</strong> ';
+							break;
+						case 'ammoTotal':
+							buffTypeName = '<strong>Ammo total:</strong> ';
+							break;
+						case 'fireRate':
+							buffTypeName = '<strong>Fire rate:</strong> ';
+							break;
+						case 'reloadRate':
+							buffTypeName = '<strong>Reload time:</strong> ';
+							break;
+						case 'bulletForce':
+							buffTypeName = '<strong>Knock-back force:</strong> ';
+							break;
+						case 'bulletDistance':
+							buffTypeName = '<strong>Range:</strong> ';
+							break;
+						case 'recoilForce':
+							buffTypeName = '<strong>Recoil:</strong> ';
+							break;
+						case 'movementSpeed':
+							buffTypeName = '<strong>Speed bonus:</strong> ';
+							break;
+						case 'immunity':
+							buffTypeName = '<strong>Immunity bonus:</strong> ';
+							break;
+						case 'maxStamina':
+							buffTypeName = '<strong>Stamina bonus:</strong> ';
+							break;
+						case 'stunChance':
+							buffTypeName = '<strong>Slow target chance:</strong> ';
+							break;
+						case 'slowChance':
+							buffTypeName = '<strong>Stun target chance:</strong> ';
+							break;
 					}
 
 					if (isPercentageBased) {
 						if (defaultValue == 0) {
 							var itemValueHtml = `${(itemValue * 100).toFixed(0)}%`;
 						} else {
-							var itemValueHtml = `${((itemValue - defaultValue) / defaultValue * 100).toFixed(0)}%`;
+							var itemValueHtml = `${(((itemValue - defaultValue) / defaultValue) * 100).toFixed(0)}%`;
 						}
 					} else {
 						var itemValueHtml = (itemValue - defaultValue).toFixed(1);
@@ -610,7 +814,7 @@ var ItemUiComponent = TaroEntity.extend({
 					buffListHtml.append(
 						$('<li/>', {
 							class: 'list-group-item',
-							html: `${taro.clientSanitizer(buffTypeName)} <span class='badge badge-default' style='margin-left:4px'>${itemValueHtml}</span>`
+							html: `${taro.clientSanitizer(buffTypeName)} <span class='badge badge-default' style='margin-left:4px'>${itemValueHtml}</span>`,
 						})
 					);
 					// console.log("itemStats",itemStats)
@@ -621,32 +825,32 @@ var ItemUiComponent = TaroEntity.extend({
 
 		var data = {
 			name: 'Normal',
-			css: 'badge badge-pill badge-default'
+			css: 'badge badge-pill badge-default',
 		};
 
 		if (buffCount > 4) {
 			data = {
 				name: 'Legendary',
-				css: 'badge badge-pill badge-danger'
+				css: 'badge badge-pill badge-danger',
 			};
 		} else if (buffCount > 2) {
 			data = {
 				name: 'Rare',
-				css: 'badge badge-pill badge-warning'
+				css: 'badge badge-pill badge-warning',
 			};
 		} else if (buffCount > 0) {
 			data = {
 				name: 'Special',
-				css: 'badge badge-pill badge-primary'
+				css: 'badge badge-pill badge-primary',
 			};
 		}
 
 		// data.html = buffListHtml
 
 		return '';
-	}
+	},
 });
 
-if (typeof (module) !== 'undefined' && typeof (module.exports) !== 'undefined') {
+if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
 	module.exports = ItemUiComponent;
 }

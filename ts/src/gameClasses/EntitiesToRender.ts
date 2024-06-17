@@ -60,6 +60,8 @@ class EntitiesToRender {
 					var rotate = entity._rotate.z;
 				}
 
+				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
+
 				// if item is being carried by a unit
 				if (ownerUnit) {
 					// if the ownerUnit is not visible, then hide the item
@@ -87,14 +89,16 @@ class EntitiesToRender {
 					entity.anchoredOffset = entity.getAnchoredOffset(rotate);
 
 					if (entity.anchoredOffset) {
-						x = ownerUnit._translate.x + entity.anchoredOffset.x;
-						y = ownerUnit._translate.y + entity.anchoredOffset.y;
+						x = ownerUnit._translate.x;
+						y = ownerUnit._translate.y;
 						rotate = entity.anchoredOffset.rotate;
+						if (!is3D) {
+							x += entity.anchoredOffset.x;
+							y += entity.anchoredOffset.y;
+						}
 					}
-					//if (entity._stats.name === 'potato gun small') console.log('owner unit translate',ownerUnit._translate.x, ownerUnit._translate.y, '\nphaser unit pos', ownerUnit.phaserEntity.gameObject.x, ownerUnit.phaserEntity.gameObject.y, '\nitem translate', x, y, '\nphaser item pos', entity.phaserEntity.gameObject.x, entity.phaserEntity.gameObject.y)
 				}
 
-				const is3D = taro.game.data.defaultData.defaultRenderer === '3d';
 				if ((!is3D && entity.tween?.isTweening && phaserGameObject?.visible) || (is3D && entity.tween?.isTweening)) {
 					entity.tween.update();
 					x += entity.tween.offset.x;
@@ -109,7 +113,7 @@ class EntitiesToRender {
 					entity._category == 'item'
 				) {
 					// var timeStart = performance.now();
-					entity.transformTexture(x, y, rotate);
+					entity.transformTexture(x, y, rotate); // uses absolute position without anchorOffset for items. That info is later retrieved in the render function
 
 					// entity isn't moving anymore. prevent rendering to conserve cpu
 					if (

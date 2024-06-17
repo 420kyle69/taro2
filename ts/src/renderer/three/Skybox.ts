@@ -1,6 +1,6 @@
 namespace Renderer {
 	export namespace Three {
-		export class Sky extends Node {
+		export class Skybox extends Node {
 			constructor() {
 				super();
 
@@ -10,13 +10,12 @@ namespace Renderer {
 			}
 
 			private createMaterialArray() {
-				const textureRepository = TextureRepository.instance();
-				const left = textureRepository.get('left');
-				const right = textureRepository.get('right');
-				const top = textureRepository.get('top');
-				const bottom = textureRepository.get('bottom');
-				const front = textureRepository.get('front');
-				const back = textureRepository.get('back');
+				const left = gAssetManager.getTextureWithoutPlaceholder('left');
+				const right = gAssetManager.getTextureWithoutPlaceholder('right');
+				const top = gAssetManager.getTextureWithoutPlaceholder('top');
+				const bottom = gAssetManager.getTextureWithoutPlaceholder('bottom');
+				const front = gAssetManager.getTextureWithoutPlaceholder('front');
+				const back = gAssetManager.getTextureWithoutPlaceholder('back');
 
 				if (!(left && right && top && bottom && front && back)) {
 					return [];

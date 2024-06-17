@@ -33,81 +33,6 @@ storage = {
 
 const statsPanels = {}; // will we need this?
 
-const mergeableKeys = {
-	entityTypeVariables: true,
-	shops: true,
-	animationTypes: true,
-	states: true,
-	map: false,
-	buffTypes: true,
-	projectileTypes: true,
-	itemTypes: true,
-	music: true,
-	sound: true,
-	scripts: true,
-	unitTypes: true,
-	abilities: true,
-	variables: true,
-	attributeTypes: true,
-	settings: false,
-	images: true,
-	tilesets: false,
-	factions: true,
-	playerTypes: true,
-	particles: true,
-	particleTypes: true,
-	bodyTypes: true,
-	playerTypeVariables: true,
-	ui: false,
-	folders: false,
-	title: false,
-	isDeveloper: false,
-	releaseId: false,
-	roles: false,
-	defaultData: false,
-};
-
-function mergeGameJson(worldJson, gameJson, mergeableKeys) {
-	Object.keys(mergeableKeys).forEach((mergeableKey) => {
-		if (mergeableKeys[mergeableKey]) {
-			if (worldJson.data[mergeableKey]) {
-
-				// cleanup all isWorld properties from gameJson (ideally there won't be any but just in case)
-				if (typeof gameJson.data[mergeableKey] === 'object') {
-					Object.keys(gameJson.data[mergeableKey]).forEach((key) => {
-						if (gameJson.data[mergeableKey][key]?.isWorld) {
-							delete gameJson.data[mergeableKey][key]?.isWorld;
-						}
-					});
-				}
-
-				if (typeof worldJson.data[mergeableKey] === 'object' && Array.isArray(worldJson.data[mergeableKey])) {
-					// merge/concat all elements of the array
-					gameJson.data[mergeableKey] = worldJson.data[mergeableKey].concat(gameJson.data[mergeableKey] || []);
-				} else if (typeof worldJson.data[mergeableKey] === 'object') {
-					for (let key in worldJson.data[mergeableKey]) {
-						if (worldJson.data[mergeableKey].hasOwnProperty(key) && worldJson.data[mergeableKey][key] && typeof worldJson.data[mergeableKey][key] === 'object') {
-							if (!gameJson.data[mergeableKey]) {
-								gameJson.data[mergeableKey] = {};
-							}
-
-							gameJson.data[mergeableKey][key] = worldJson.data[mergeableKey][key];
-							gameJson.data[mergeableKey][key].isWorld = true;
-						}
-					}
-				} else {
-					// world takes precedence in merging strings/boolean/numbers
-					gameJson.data[mergeableKey] = worldJson.data[mergeableKey];
-				}
-			}
-		}
-	});
-
-
-	return gameJson;
-};
-
-
 const Client = TaroEventingClass.extend({
 	classId: 'Client',
 
@@ -233,12 +158,12 @@ const Client = TaroEventingClass.extend({
 		taro.addComponent(GameComponent);
 		taro.addComponent(ProfilerComponent);
 		taro.addComponent(MenuUiComponent);
+		taro.mergeGameJson = mergeGameJson;
 		// we're going to try and insert the fetch here
 		let promise = new Promise((resolve, reject) => {
 			// if the gameJson is available as a global object, use it instead of sending another ajax request
 			if (window.gameDetails.worldId && window.worldJson) {
-				
-				const gameJson = mergeGameJson(window?.worldJson, window?.gameJson, mergeableKeys);
+				const gameJson = taro.mergeGameJson(window?.worldJson, window?.gameJson);
 
 				resolve(gameJson);
 			} else if (window.gameJson) {
@@ -284,7 +209,6 @@ const Client = TaroEventingClass.extend({
 						window.gameJson = { data: taro.game.data };
 					}
 				}
-
 
 				this.initializeConfigurationFields();
 
@@ -344,7 +268,7 @@ const Client = TaroEventingClass.extend({
 					this.servers = this.getServersArray();
 				}
 				// undefined if our params did not have a serverId
-				this.preSelectedServerId = params.serverId;
+				this.preSelectedServerId = window.preSelectedServerId || params.serverId;
 
 				if (this.preSelectedServerId) {
 					//
@@ -386,12 +310,12 @@ const Client = TaroEventingClass.extend({
 		}
 
 		const skyboxDefaultUrls = {
-			left: "",
-			right: "",
-			bottom: "",
-			top: "",
-			front: "",
-			back: ""
+			left: '',
+			right: '',
+			bottom: '',
+			top: '',
+			front: '',
+			back: '',
 		};
 
 		if (!taro.game.data.settings.skybox) {
@@ -422,7 +346,7 @@ const Client = TaroEventingClass.extend({
 
 		const clientPhysicsEngine = taro.game.data.defaultData.clientPhysicsEngine;
 		const serverPhysicsEngine = taro.game.data.defaultData.physicsEngine;
-		const resolveFunc = this.physicsConfigLoaded.resolve.bind(this)
+		const resolveFunc = this.physicsConfigLoaded.resolve.bind(this);
 		if (clientPhysicsEngine) {
 			taro.addComponent(PhysicsComponent, undefined, resolveFunc).physics.sleep(true);
 		} else {
@@ -501,8 +425,8 @@ const Client = TaroEventingClass.extend({
 
 			let zoom = 1000;
 
-			if (gameData.settings.camera && gameData.settings.camera.zoom && gameData.settings.camera.zoom.default) {
-				zoom = gameData.settings.camera.zoom.default;
+			if (gameData.settings.camera && gameData.settings.camera.zoom) {
+				zoom = gameData.settings.camera.zoom.default ?? zoom;
 				this._trackTranslateSmoothing = gameData.settings.camera.trackingDelay || 15;
 			}
 
@@ -604,7 +528,7 @@ const Client = TaroEventingClass.extend({
 		for (let server of validServers) {
 			const capacity = server.playerCount / server.maxPlayers;
 
-			if (capacity < overloadCriteria && server.playerCount > maxPlayersInUnderLoadedServer) {
+			if (capacity < overloadCriteria && server.playerCount > maxPlayersInUnderLoadedServer && server.acceptingPlayers) {
 				firstChoice = server;
 				maxPlayersInUnderLoadedServer = server.playerCount;
 			}
@@ -655,6 +579,10 @@ const Client = TaroEventingClass.extend({
 
 			$(self.getCachedElementById('loading-container')).addClass('slider-out');
 
+			if (window.STATIC_EXPORT_ENABLED) {
+				window.PokiSDK?.gameplayStart();
+			}
+
 			console.log('connected to ', taro.client.server.url, 'clientId ', taro.network.id()); // idk if this needs to be in production
 
 			taro.client.defineNetworkEvents();
@@ -670,6 +598,7 @@ const Client = TaroEventingClass.extend({
 			// old comment => 'create a listener that will fire whenever an entity is created because of the incoming stream data'
 			taro.network.stream.on('entityCreated', (entity) => {
 				if (entity._category == 'player') {
+					console.log('player created', entity._stats.clientId);
 					// old comment => 'apply skin to all units owned by this player'
 					const player = entity;
 
@@ -755,7 +684,7 @@ const Client = TaroEventingClass.extend({
 	// not much here except definitions
 	defineNetworkEvents: function () {
 		taro.network.define('ping', this._onPing);
-		taro.network.define('movePlayerToMap', this._onMovePlayerToMap);
+		taro.network.define('sendPlayerToMap', this._onSendPlayerToMap);
 
 		taro.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
 		taro.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);
@@ -790,13 +719,12 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('errorLogs', this._onErrorLogs);
 
 		taro.network.define('sound', this._onSound);
-		taro.network.define('particle', this._onParticle);
 		taro.network.define('camera', this._onCamera);
 
 		taro.network.define('gameSuggestion', this._onGameSuggestion);
 
 		taro.network.define('createFloatingText', this._onCreateFloatingText);
-    taro.network.define('createDynamicFloatingText', this._onCreateDynamicFloatingText);
+		taro.network.define('createDynamicFloatingText', this._onCreateDynamicFloatingText);
 
 		taro.network.define('openShop', this._onOpenShop);
 		taro.network.define('openDialogue', this._onOpenDialogue);
@@ -818,6 +746,7 @@ const Client = TaroEventingClass.extend({
 		taro.network.define('updateProjectile', this._onUpdateProjectile);
 		taro.network.define('updateShop', this._onUpdateShop);
 		taro.network.define('updateDialogue', this._onUpdateDialogue);
+		taro.network.define('updateDevelopersData', this._onUpdateDevelopersData);
 
 		taro.network.define('renderSocketLogs', this._onRenderSocketLogs);
 	},
@@ -919,7 +848,7 @@ const Client = TaroEventingClass.extend({
 		};
 
 		// old comment => 'if serverId is present then add it to vars
-		window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, (m, key, value) => {
+		(window.originalUrl || window.location.href).replace(/[?&]+([^=&]+)=([^&]*)/gi, (m, key, value) => {
 			// not sure about this after looking up .replace()
 
 			vars[key] = value;

@@ -148,6 +148,7 @@ var ShopComponent = TaroEntity.extend({
 				// listen for item modal close.
 				$(document).on('hidden.bs.modal', '#modd-item-shop-modal', function () {
 					$('.popover').remove();
+					self.isItemShopOpen = false;
 					taro.client.myPlayer.control.updatePlayerInputStatus();
 				});
 
@@ -175,7 +176,7 @@ var ShopComponent = TaroEntity.extend({
 
 					// if (price <= 0) {
 					// 	promise = $.ajax({
-					// 		url: `/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
+					// 		url: `${window.BASE_URL}/api/user/has-shared/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}`,
 					// 		dataType: 'html',
 					// 		type: 'GET',
 					// 		success: function (data) {
@@ -251,7 +252,7 @@ var ShopComponent = TaroEntity.extend({
 					var button = $(this);
 
 					$.ajax({
-						url: `/api/user/equip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${button.attr('skinId')}`,
+						url: `${window.BASE_URL}/api/user/equip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${button.attr('skinId')}`,
 						dataType: 'html',
 						type: 'POST',
 						success: function (data) {
@@ -282,7 +283,7 @@ var ShopComponent = TaroEntity.extend({
 					var button = $(this);
 					var unEquipedId = button.attr('id');
 					$.ajax({
-						url: `/api/user/unequip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${unEquipedId}`,
+						url: `${window.BASE_URL}/api/user/unequip/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${unEquipedId}`,
 						dataType: 'html',
 						type: 'POST',
 						success: function (data) {
@@ -319,7 +320,7 @@ var ShopComponent = TaroEntity.extend({
 	loadShopItems: function () {
 		let self = this;
 		$.ajax({
-			url: `/api/game/${gameId}/shopCount/`,
+			url: `${window.BASE_URL}/api/game/${gameId}/shopCount/`,
 			type: 'GET',
 			success: function (response) {
 				if (response.status == 'success') {
@@ -374,7 +375,7 @@ var ShopComponent = TaroEntity.extend({
 	loadUserPurchases: function () {
 		let self = this;
 		$.ajax({
-			url: `/api/user/${gameId}/purchases/`,
+			url: `${window.BASE_URL}/api/user/${gameId}/purchases/`,
 			type: 'GET',
 			success: function (response) {
 				if (response.status == 'success') {
@@ -470,10 +471,10 @@ var ShopComponent = TaroEntity.extend({
 		var text = '';
 		switch (type) {
 			case 'requirement':
-				text = `<strong>${itemName} requirements not met.</strong>`;
+				text = `<strong>${taro.clientSanitizer(itemName)} requirements not met.</strong>`;
 				break;
 			case 'price':
-				text = `<strong>Cannot afford ${itemName}.</strong>`;
+				text = `<strong>Cannot afford ${taro.clientSanitizer(itemName)}.</strong>`;
 				break;
 			case 'inventory_full':
 				text = '<strong>No room in inventory.</strong>';
@@ -499,7 +500,7 @@ var ShopComponent = TaroEntity.extend({
 	buySkin: function (itemId, sharedOn = '', token = '') {
 		var self = this;
 		$.ajax({
-			url: `/api/user/purchase/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${itemId}?sharedOn=${sharedOn}`,
+			url: `${window.BASE_URL}/api/user/purchase/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/${itemId}?sharedOn=${sharedOn}`,
 			dataType: 'html',
 			type: 'POST',
 			data: {
@@ -519,13 +520,13 @@ var ShopComponent = TaroEntity.extend({
 
 					let imageUrl = '';
 					let name = '';
-					if (document.getElementsByName(itemId + '_image')[0]) {
-						imageUrl = document.getElementsByName(itemId + '_image')[0].src;
-						name = document.getElementsByName(itemId + '_image')[0].alt;
+					if (document.getElementsByName(`${itemId}_image`)[0]) {
+						imageUrl = document.getElementsByName(`${itemId}_image`)[0].src;
+						name = document.getElementsByName(`${itemId}_image`)[0].alt;
 					} else {
-						let imageElement = document.getElementById(itemId + '_image')?.style?.backgroundImage;
+						let imageElement = document.getElementById(`${itemId}_image`)?.style?.backgroundImage;
 						imageUrl = imageElement?.slice(4, imageUrl.length - 1);
-						name = document.getElementById(itemId + '_image')?.name;
+						name = document.getElementById(`${itemId}_image`)?.name;
 					}
 
 					self.updateModdShop();
@@ -633,7 +634,7 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		$.ajax({
-			url: `/api/game/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/shopCount/`,
+			url: `${window.BASE_URL}/api/game/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/shopCount/`,
 			type: 'GET',
 			success: function (data) {
 				if (data.status === 'success') {
@@ -829,7 +830,7 @@ var ShopComponent = TaroEntity.extend({
 			}
 
 			$.ajax({
-				url: `/api/game/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/shop/`,
+				url: `${window.BASE_URL}/api/game/${taro.game.data.defaultData.parentGame || taro.client.server.gameId}/shop/`,
 				data: {
 					type: self.shopType === 'unitSkins' ? 'unit' : 'item',
 					key: self.shopKey,
@@ -1001,6 +1002,8 @@ var ShopComponent = TaroEntity.extend({
 	},
 	openItemShop: function (type, selectedTab) {
 		var self = this;
+
+		self.isItemShopOpen = true;
 		if (!taro.game.data.shops) return;
 		self.currentType = type || self.currentType;
 		if (!self.currentType) return;
@@ -1060,7 +1063,7 @@ var ShopComponent = TaroEntity.extend({
 		}
 
 		var modalBody = $('<div/>', {
-			class: 'text-center shop-grid-container bottom-radius'
+			class: 'text-center shop-grid-container bottom-radius',
 		});
 
 		var ownerPlayer = taro.client.myPlayer;
@@ -1139,7 +1142,7 @@ var ShopComponent = TaroEntity.extend({
 						var img = $('<div/>').html(`img_index_${imgArray.length}`);
 						imgArray.push({
 							wrapper: img,
-						value: `<img src='${item.inventoryImage || item.cellSheet.url}' class='${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? " " : " lowered-visibility "}' style='width: 75px; height: 75px; background-color : #4B5563; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain; '>`
+							value: `<img src='${item.inventoryImage || item.cellSheet.url}' class='${isItemAffordable && isItemCoinsAffordable && requirementsSatisfied ? ' ' : ' lowered-visibility '}' style='width: 75px; height: 75px; background-color : #4B5563; padding : 8px; margin-top : 6px;  border-radius : 4px; object-fit:contain; '>`,
 						});
 
 						// if (shopItem.price.coins) {
@@ -1162,6 +1165,8 @@ var ShopComponent = TaroEntity.extend({
 						})
 							.append(img)
 							.append(itemName);
+
+						let longPressTimeOut;
 
 						itemImage
 							.popover({
@@ -1187,6 +1192,17 @@ var ShopComponent = TaroEntity.extend({
 										$(this).off('mouseleave');
 									});
 								}
+							})
+							.on('touchstart', function () {
+								longPressTimeOut = setTimeout(() => {
+									$(this).popover('show');
+								}, 500);
+							})
+							.on('touchend', function () {
+								clearTimeout(longPressTimeOut);
+								var _this = this;
+								$(_this).popover('hide');
+								$(this).off('mouseleave');
 							});
 
 						modalBody.append(itemImage.append(combine));
@@ -1410,7 +1426,7 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var modalBody = $('<div/>', {
-			class: 'text-center shop-grid-container'
+			class: 'text-center shop-grid-container',
 		});
 
 		if (items.length <= 0) {
@@ -1422,7 +1438,6 @@ var ShopComponent = TaroEntity.extend({
 				name: 'error-message-skins',
 			});
 
-			
 			let addSkinButton = $('<button>', {
 				class: 'btn',
 				style: 'margin-top: 10px; color: #fff; background-color: #046C4E; padding-left: 25px; padding-right: 25px;',
@@ -1433,7 +1448,7 @@ var ShopComponent = TaroEntity.extend({
 				window.open(`/skin-submission/${window.gameSlug}/?new=true`, '_blank');
 			});
 
-			$('#modd-shop-modal .shop-items').html( [errMsg, addSkinButton] );
+			$('#modd-shop-modal .shop-items').html([errMsg, addSkinButton]);
 			return;
 		}
 
@@ -1548,9 +1563,10 @@ var ShopComponent = TaroEntity.extend({
 					id: item._id,
 					'data-purchasable': item.title || item.name,
 					'data-price': item.price,
-				}).append(
+				})
+					.append(
 						$('<div/>', {
-							style:'height: 100%; display: flex; justify-content: center; align-items: center;'
+							style: 'height: 100%; display: flex; justify-content: center; align-items: center;',
 						}).append(
 							$('<div/>', {
 								id: `${item._id}_image`,
@@ -1574,7 +1590,8 @@ var ShopComponent = TaroEntity.extend({
 								name: items[i].title || items[i].name,
 								skinId: items[i]._id,
 								owner: items[i].owner || '',
-								style: 'position: absolute;  top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #254EDB;color: white; border: none;',
+								style:
+									'position: absolute;  top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #254EDB;color: white; border: none;',
 							}).text('Equip');
 
 							$(this).append(floatingButton);
@@ -1611,28 +1628,17 @@ var ShopComponent = TaroEntity.extend({
 			let image = new Image();
 			let itemId = item._id;
 			image.src = item.image;
+
 			image.onload = function () {
 				let img = document.getElementById(`${itemId}_${selector}`);
-				let originalHeight = `${image.height / itemDetails.cellSheet.rowCount}px`;
-				let originalWidth = `${image.width / itemDetails.cellSheet.columnCount}px`;
 
 				img.name = item.name || item.title;
-				// clipping = "height:" + originalHeight + "px;width:" + originalWidth + "px;background:url('" + item.image + "') 0px 0px no-repeat;";
 
-				img.style = `height:${originalHeight};width:${originalWidth};background:url('${image.src}');src:'';`;
-				// img.style.height = originalHeight;
-				// img.style.width = originalWidth;
-				// img.style.background = `url('${image.src}')`;
-				// img.src = '';
-
-				if (itemDetails.cellSheet.rowCount <= 1 && itemDetails.cellSheet.columnCount <= 1) {
-					img.style.backgroundRepeat = 'no-repeat';
-					img.style.backgroundPosition = 'center center';
-					img.style.backgroundSize = 'contain';
-					img.style.marginBottom = '8px';
-					img.style.height = '64px';
-					img.style.width = '64px';
-				}
+				img.style.height = '100px';
+				img.style.width = '100px';
+				img.style.background = `url('${image.src}')`;
+				img.style.backgroundSize = `${(itemDetails.cellSheet.columnCount || 1) * 100}% ${(itemDetails.cellSheet.rowCount || 1) * 100}%`;
+				img.style.marginBottom = '8px';
 			};
 		}
 	},
@@ -1640,11 +1646,8 @@ var ShopComponent = TaroEntity.extend({
 		var self = this;
 
 		var totalPages = Math.ceil(self.skinItems.length / self.perPageItems);
-	
 
 		if (totalPages == 0) {
-
-
 			$('#mod-shop-pagination').html('');
 			self.renderSkinsButtons([]);
 			return;
@@ -1664,7 +1667,8 @@ var ShopComponent = TaroEntity.extend({
 		for (var i = Math.max(1, currentPage); i < Math.min(totalPages + 1, currentPage + maxPageNumber + 1); i++) {
 			html += `<li class="page-item  skin-pagination ${self.currentPagination == i ? 'active' : ''}" data-text="${i}"><span class="page-link pagination-text"><b>${i}</b></span></li>`;
 		}
-		html += '<li class="page-item  skin-pagination" data-text="next"><span class="page-link pagination-text"><b><i class="fa fa-angle-right fa-xl " aria-hidden="true"></i></b></span></li>';
+		html +=
+			'<li class="page-item  skin-pagination" data-text="next"><span class="page-link pagination-text"><b><i class="fa fa-angle-right fa-xl " aria-hidden="true"></i></b></span></li>';
 		html += '</ul>';
 		html += '</nav>';
 

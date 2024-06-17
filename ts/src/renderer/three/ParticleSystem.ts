@@ -1,11 +1,11 @@
 namespace Renderer {
 	export namespace Three {
-		export class Particles extends Node {
+		export class ParticleSystem extends Node {
 			emitters: Emitter[] = [];
 
 			private particles = [];
 
-			private textures = TextureRepository.instance().getTexturesWithKeyContains('particle');
+			private textures = gAssetManager.getTexturesContaining('particle');
 
 			// NOTE(nick): Use groups/buckets to get around the max 16 textures shader
 			// limit. There are others way to do this but because textures can have a
@@ -85,7 +85,8 @@ namespace Renderer {
 					points.frustumCulled = false;
 					points.matrixAutoUpdate = false;
 					// eslint-disable-next-line @typescript-eslint/no-empty-function
-					points.updateMatrixWorld = function () { };
+					points.updateMatrixWorld = function () {};
+					points.renderOrder = 498; // Higher than entities, lower than HUD
 
 					this.add(points);
 				}
@@ -93,7 +94,7 @@ namespace Renderer {
 
 			createEmitter(config: Particle) {
 				const particleData = taro.game.data.particleTypes[config.particleId];
-				const tex = TextureRepository.instance().get(`particle/${particleData.url}`);
+				const tex = gAssetManager.getTexture(`particle/${particleData.url}`);
 
 				let zPosition = 0;
 				if (particleData['z-index'].layer) zPosition += Utils.getLayerZOffset(particleData['z-index'].layer);
@@ -119,6 +120,8 @@ namespace Renderer {
 				const opacityFrom = 1;
 				const opacityTo = particleData.deathOpacityBase;
 
+				const emitting = false;
+
 				const duration = particleData.duration * 0.001;
 
 				const frequency = particleData.emitFrequency * 0.001;
@@ -134,9 +137,10 @@ namespace Renderer {
 				}
 
 				return {
+					particleTypeId: config.particleId,
 					position: { x: config.position.x, y: zPosition, z: config.position.y },
 					target: undefined,
-					direction: direction,
+					direction,
 					azimuth: { min: angleMin, max: angleMax },
 					elevation: { min: 0, max: 0 },
 					shape: { width: emitWidth, height: 0, depth: emitDepth },
@@ -151,7 +155,8 @@ namespace Renderer {
 					opacity: { start: opacityFrom, end: opacityTo },
 					blend: 1,
 					texture: tex,
-					duration: duration,
+					emitting,
+					duration,
 				};
 			}
 
@@ -174,8 +179,12 @@ namespace Renderer {
 					emitter.elapsed += dt;
 
 					const isTimeUp = emitter.duration > 0 && emitter.elapsed >= emitter.duration;
+					if (isTimeUp) {
+						emitter.emitting = false;
+					}
+
 					const isOrphan = emitter.hasTarget && !emitter.target;
-					if (isTimeUp || isOrphan) {
+					if (isOrphan) {
 						emittersIndicesMarkedForDestroy.push(i);
 						continue;
 					}
@@ -218,7 +227,6 @@ namespace Renderer {
 
 				for (let i = 0; i < this.numTextureGroups; i++) {
 					const texGroup = texGroups[i];
-					if (texGroup.length === 0) continue;
 
 					const offsetAttribute = this.geometries[i].attributes.offset.array;
 					const scaleAttribute = this.geometries[i].attributes.scale.array;
@@ -265,6 +273,8 @@ namespace Renderer {
 			updateEmitters(delta: number) {
 				for (let n = 0; n < this.emitters.length; n++) {
 					const emitter = this.emitters[n] as EmitterInternal;
+
+					if (!emitter.emitting) continue;
 
 					emitter.accumulator += delta;
 
@@ -347,10 +357,21 @@ namespace Renderer {
 
 				const brightness = Utils.lerp(emitter.brightness.min, emitter.brightness.max, Math.random());
 
+				const offset = {
+					x: emitter.shape.width * Math.random() - emitter.shape.width * 0.5,
+					y: emitter.shape.height * Math.random() - emitter.shape.height * 0.5,
+					z: emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5,
+				};
+
+				const targetAngle = -emitter.target.body.rotation.y;
+				const tempX = offset.x;
+				offset.x = offset.x * Math.cos(targetAngle) - offset.z * Math.sin(targetAngle);
+				offset.z = tempX * Math.sin(targetAngle) + offset.z * Math.cos(targetAngle);
+
 				const position = {
-					x: emitter.position.x + (emitter.shape.width * Math.random() - emitter.shape.width * 0.5),
-					y: emitter.position.y + (emitter.shape.height * Math.random() - emitter.shape.height * 0.5),
-					z: emitter.position.z + (emitter.shape.depth * Math.random() - emitter.shape.depth * 0.5),
+					x: emitter.position.x + offset.x,
+					y: emitter.position.y + offset.y,
+					z: emitter.position.z + offset.z,
 				};
 
 				const lifetime = Utils.lerp(emitter.lifetime.min, emitter.lifetime.max, Math.random());
@@ -381,6 +402,21 @@ namespace Renderer {
 					opacity_from: emitter.opacity.start,
 					opacity_to: emitter.opacity.end,
 				});
+			}
+
+			startEmitter(emitter: Emitter) {
+				const e = emitter as EmitterInternal;
+				if (e) {
+					e.emitting = true;
+					e.elapsed = 0;
+				}
+			}
+
+			stopEmitter(emitter: Emitter) {
+				const e = emitter as EmitterInternal;
+				if (e) {
+					e.emitting = false;
+				}
 			}
 
 			destroyEmittersWithTarget(target: Unit) {
@@ -458,8 +494,7 @@ namespace Renderer {
     else if (vTexture == 15.0) gl_FragColor = texture2D(textures[15], vUv) * vColor;
 
     gl_FragColor.rgb *= gl_FragColor.a;
-	if (gl_FragColor.a < 0.5) discard;
-	gl_FragColor.a *= vBlend;
+		gl_FragColor.a *= vBlend;
 
     #include <tonemapping_fragment>
     #include <colorspace_fragment>
@@ -467,6 +502,7 @@ namespace Renderer {
 `;
 
 		export type Emitter = {
+			particleTypeId: string;
 			position: { x: number; y: number; z: number };
 			target: Unit | undefined;
 			direction: { x: number; y: number; z: number };
@@ -484,6 +520,7 @@ namespace Renderer {
 			opacity: { start: number; end: number };
 			blend: number;
 			texture: THREE.Texture;
+			emitting: boolean;
 			duration: number;
 		};
 
