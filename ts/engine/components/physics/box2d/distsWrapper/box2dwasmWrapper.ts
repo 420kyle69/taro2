@@ -170,13 +170,13 @@ const box2dwasmWrapper: PhysicsDistProps = {
 		if (preSolve !== undefined) {
 			contactListener.PreSolve = preSolve;
 		} else {
-			contactListener.PreSolve = () => { };
+			contactListener.PreSolve = () => {};
 		}
 
 		if (postSolve !== undefined) {
 			contactListener.PostSolve = postSolve;
 		} else {
-			contactListener.PostSolve = () => { };
+			contactListener.PostSolve = () => {};
 		}
 		self._world.SetContactListener(contactListener);
 
@@ -197,12 +197,10 @@ const box2dwasmWrapper: PhysicsDistProps = {
 			if (!entityA || !entityB) {
 				return;
 			}
-			if (entityA.variables?.floor === undefined || entityB.variables?.floor === undefined) {
-				return true;
-			}
-			return entityA.variables.floor.value === entityB.variables?.floor.value;
+
+			return entityA._category !== 'sensor' && entityB._category !== 'sensor';
 		};
-		self._world.SetContactFilter(contactFilter);
+		// self._world.SetContactFilter(contactFilter);
 	},
 
 	getmxfp: function (body: Box2D.b2Body, self: any) {
