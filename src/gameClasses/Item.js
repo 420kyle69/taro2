@@ -229,7 +229,6 @@ var Item = TaroEntityPhysics.extend({
 					delete oldOwner.ownedItems[this.id()];
 					if (!persistData) {
 						const triggerParams = { itemId: this.id(), unitId: oldOwner.id() };
-						//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
 						this.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
 						oldOwner.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
 						taro.script.trigger('unitDroppedAnItem', triggerParams); // unit dropped item
@@ -276,7 +275,6 @@ var Item = TaroEntityPhysics.extend({
 					delete oldOwner.ownedItems[this.id()];
 					if (!persistData) {
 						const triggerParams = { itemId: this.id(), unitId: oldOwner.id() };
-						//we cant use queueTrigger here because it will be called after entity scripts and item or unit probably no longer exists
 						this.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
 						oldOwner.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
 						taro.script.trigger('unitDroppedAnItem', triggerParams); // unit dropped item
