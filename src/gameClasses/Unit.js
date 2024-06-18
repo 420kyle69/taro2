@@ -1340,11 +1340,7 @@ var Unit = TaroEntityPhysics.extend({
 					slotIndex = !isNaN(parseFloat(slotIndex)) ? slotIndex : availableSlot - 1;
 
 					// Item
-					if (persistedItem) {
-						item.streamUpdateData([{ ownerUnitId: { id: self.id(), persistedItem: true } }]);
-					} else {
-						item.streamUpdateData([{ ownerUnitId: self.id() }]);
-					}
+					item.streamUpdateData([{ ownerUnitId: self.id() }]);
 					item.changeSlotIndex(slotIndex);
 					// { slotIndex: slotIndex }, // slotIndex must come before quantity (next line), otherwise, quantity won't update properly as itemUiComponent won't know which slot to apply quantity to
 					item.streamUpdateData([{ quantity: itemData.quantity }]);
