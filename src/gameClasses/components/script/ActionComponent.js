@@ -2085,7 +2085,11 @@ var ActionComponent = TaroEntity.extend({
 						var text = self._script.param.getValue(action.text, vars);
 						var color = self._script.param.getValue(action.color, vars);
 
-						if (unit && unit._category === 'unit' && text !== undefined) {
+						if (text == undefined) {
+							text = 'undefined';
+						}
+
+						if (unit && unit._category === 'unit') {
 							unit.streamUpdateData([{ setFadingText: `${text}|-|${color}` }]);
 						}
 
