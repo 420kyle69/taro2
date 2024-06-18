@@ -268,7 +268,7 @@ const Client = TaroEventingClass.extend({
 					this.servers = this.getServersArray();
 				}
 				// undefined if our params did not have a serverId
-				this.preSelectedServerId = params.serverId;
+				this.preSelectedServerId = window.preSelectedServerId || params.serverId;
 
 				if (this.preSelectedServerId) {
 					//
@@ -578,6 +578,10 @@ const Client = TaroEventingClass.extend({
 			}
 
 			$(self.getCachedElementById('loading-container')).addClass('slider-out');
+
+			if (window.STATIC_EXPORT_ENABLED) {
+				window.PokiSDK?.gameplayStart();
+			}
 
 			console.log('connected to ', taro.client.server.url, 'clientId ', taro.network.id()); // idk if this needs to be in production
 

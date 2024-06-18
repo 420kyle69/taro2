@@ -64,6 +64,8 @@ declare class TaroEngine extends TaroClass {
 	engineStep(currentTime: number, ctx: number): void;
 
 	physics: {
+		b2Fixture: Box2D.b2Fixture;
+		wrapPointer(fixtureA: number, type: any): number | Box2D.b2Fixture;
 		_box2dDebug: any;
 		staticsFromMap(walls: any): unknown;
 		destroyWalls(): unknown;

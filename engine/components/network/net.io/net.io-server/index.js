@@ -811,7 +811,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		const token = searchParams.get('token');
 		
 		if (taro.workerComponent && !taro.workerComponent.acceptingPlayers) {
-			socket.close('Server not accepting players, please try again later.');
+			socket.close('Server not accepting players, refresh to join another server.');
 			console.log('Server not accepting players', token);
 			return;
 		}
@@ -917,10 +917,11 @@ NetIo.Server = NetIo.EventingClass.extend({
 			try {
 				const cookies = self.parseCookie(request.headers?.cookie);
 				const guestUserToken = cookies?.modd_guest_token;
-				const decodedGuestUserToken = taro.workerComponent && guestUserToken ? await taro.workerComponent.verifyToken(guestUserToken) : {};
+				const decodedGuestUserToken = taro.workerComponent && guestUserToken ? await taro.workerComponent.verifyToken(guestUserToken, 'guestUserToken') : {};
 				guestUserId = decodedGuestUserToken?.guestUserId;
+				console.log('decodedGuestUserToken', guestUserToken, decodedGuestUserToken);
 			} catch (e) {
-				console.log('Error getting guestUserId', e);
+				console.log('Error getting guestUserId', request?.headers?.cookie, e.message);
 			}
 			
 			console.log('guestUser joining', guestUserId);
