@@ -1146,12 +1146,12 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'ownerUnitId':
-						if (newValue.persistData) {
+						if (newValue.persistedItem) {
 							this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
 							this._stats[attrName] = newValue.id;
 							if (taro.isClient) {
 								var newOwner = taro.$(newValue.id);
-								self.setOwnerUnit(newOwner, newValue.persistData);
+								self.setOwnerUnit(newOwner, newValue.persistedItem);
 							}
 						} else {
 							this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
