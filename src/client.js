@@ -421,6 +421,11 @@ const Client = TaroEventingClass.extend({
 				0
 			);
 
+			taro.client.emit('camera-instant-move', [
+				(taro.map.data.width * tileWidth) / 2,
+				(taro.map.data.height * tileHeight) / 2,
+			]);
+
 			taro.addComponent(AdComponent);
 
 			let zoom = 1000;
@@ -528,7 +533,11 @@ const Client = TaroEventingClass.extend({
 		for (let server of validServers) {
 			const capacity = server.playerCount / server.maxPlayers;
 
-			if (capacity < overloadCriteria && server.playerCount > maxPlayersInUnderLoadedServer && server.acceptingPlayers) {
+			if (
+				capacity < overloadCriteria &&
+				server.playerCount > maxPlayersInUnderLoadedServer &&
+				server.acceptingPlayers
+			) {
 				firstChoice = server;
 				maxPlayersInUnderLoadedServer = server.playerCount;
 			}
