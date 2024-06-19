@@ -120,9 +120,6 @@ namespace Renderer {
 					}
 				});
 
-				// TODO: add undo/redo
-				renderer.domElement.addEventListener('keydown', (k: KeyboardEvent) => {});
-
 				let rightClickPos: { x: number; y: number } = undefined;
 
 				let lastTime = 0;
@@ -312,8 +309,37 @@ namespace Renderer {
 													function: 'getVariable',
 												};
 											}
-											this.createInitEntity(action);
-											taro.network.send<any>('editInitEntity', action);
+											const nowAction = JSON.stringify(action);
+											this.voxelEditor.commandController.addCommand(
+												{
+													func: () => {
+														const nowCommandCount = this.voxelEditor.commandController.nowInsertIndex;
+														const nowActionObj = JSON.parse(nowAction);
+														const newId = taro.newIdHex();
+														nowActionObj.actionId = newId;
+														this.createInitEntity(nowActionObj);
+														taro.network.send<any>('editInitEntity', nowActionObj);
+														setTimeout(() => {
+															this.voxelEditor.commandController.commands[
+																nowCommandCount - this.voxelEditor.commandController.offset
+															].cache = newId;
+														}, 0);
+													},
+													undo: () => {
+														const nowCommandCount = this.voxelEditor.commandController.nowInsertIndex;
+														this.entityManager.initEntities
+															.find(
+																(v) =>
+																	v.action.actionId ===
+																	this.voxelEditor.commandController.commands[
+																		nowCommandCount - this.voxelEditor.commandController.offset
+																	].cache
+															)
+															?.delete();
+													},
+												},
+												true
+											);
 										}
 									}
 								}

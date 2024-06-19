@@ -12,8 +12,6 @@ namespace Renderer {
 
 			generateEditedAction() {
 				const renderer = Three.instance();
-				const currentCamera = (this.currentCamera = renderer.camera.instance);
-				const orbit = renderer.camera.controls;
 				const control = this.control;
 				const editedEntity = control.object;
 				let editedAction = {};

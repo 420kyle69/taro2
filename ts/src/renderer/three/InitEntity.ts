@@ -249,9 +249,44 @@ namespace Renderer {
 
 			delete(): void {
 				let editedAction: ActionData = { actionId: this.action.actionId, wasDeleted: true };
-				this.edit(editedAction);
+				const nowDeleteAction = JSON.stringify(editedAction);
+				const nowAction = JSON.stringify(this.action);
 				const renderer = Renderer.Three.instance();
-				renderer.entityManager.destroyInitEntity(this);
+
+				renderer.voxelEditor.commandController.addCommand(
+					{
+						func: () => {
+							const nowCommandCount = renderer.voxelEditor.commandController.nowInsertIndex;
+							renderer.entityManager.destroyInitEntity(this);
+							const action = JSON.parse(nowDeleteAction);
+							if (
+								renderer.voxelEditor.commandController.commands[
+									nowCommandCount - renderer.voxelEditor.commandController.offset
+								].cache
+							) {
+								action.actionId =
+									renderer.voxelEditor.commandController.commands[
+										nowCommandCount - renderer.voxelEditor.commandController.offset
+									].cache;
+							}
+							this.edit(action);
+						},
+						undo: () => {
+							const newId = taro.newIdHex();
+							const nowCommandCount = renderer.voxelEditor.commandController.nowInsertIndex;
+							const nowActionObj = JSON.parse(nowAction);
+							nowActionObj.actionId = newId;
+							renderer.createInitEntity(nowActionObj);
+							taro.network.send<any>('editInitEntity', nowActionObj);
+							setTimeout(() => {
+								renderer.voxelEditor.commandController.commands[
+									nowCommandCount - renderer.voxelEditor.commandController.offset
+								].cache = newId;
+							}, 0);
+						},
+					},
+					true
+				);
 			}
 		}
 	}
