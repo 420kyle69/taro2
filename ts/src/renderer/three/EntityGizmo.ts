@@ -12,8 +12,6 @@ namespace Renderer {
 
 			generateEditedAction() {
 				const renderer = Three.instance();
-				const currentCamera = (this.currentCamera = renderer.camera.instance);
-				const orbit = renderer.camera.controls;
 				const control = this.control;
 				const editedEntity = control.object;
 				let editedAction = {};
@@ -141,12 +139,12 @@ namespace Renderer {
 								Renderer.Three.instance().voxelEditor.commandController.addCommand(
 									{
 										func: () => {
-											inGameEditor.updateRegionInReact &&
-												inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
+											inGameEditor.updateRegionInReact && !window.isStandalone;
+											inGameEditor.updateRegionInReact(editedAction as RegionData, 'threejs');
 										},
 										undo: () => {
-											inGameEditor.updateRegionInReact &&
-												inGameEditor.updateRegionInReact(nowUndoAction as RegionData, 'threejs');
+											inGameEditor.updateRegionInReact && !window.isStandalone;
+											inGameEditor.updateRegionInReact(nowUndoAction as RegionData, 'threejs');
 										},
 									},
 									true,

@@ -741,7 +741,7 @@ class DeveloperMode {
 				});
 		}
 
-		inGameEditor.updateRegionInReact && inGameEditor.updateRegionInReact(data);
+		inGameEditor.updateRegionInReact && !window.isStandalone && inGameEditor.updateRegionInReact(data);
 	}
 
 	editVariable(data: Record<string, VariableData>, clientId: string): void {
