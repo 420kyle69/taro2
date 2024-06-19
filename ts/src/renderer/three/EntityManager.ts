@@ -36,8 +36,24 @@ namespace Renderer {
 						break;
 					}
 					case 'region': {
-						entity = new Region(taroEntity._id, taroEntity._stats.ownerId, taroEntity);
-						this.regions.push(entity);
+						const renderer = Renderer.Three.instance();
+						renderer.voxelEditor.commandController.addCommand(
+							{
+								func: () => {
+									entity = new Region(taroEntity._id, taroEntity._stats.ownerId, taroEntity);
+									this.regions.push(entity);
+								},
+								undo: () => {
+									const data = {
+										name: taroEntity._stats.id,
+										delete: true,
+									};
+									inGameEditor.updateRegionInReact && !window.isStandalone && inGameEditor.updateRegionInReact(data, 'threejs');
+								},
+							},
+							true
+						);
+
 						break;
 					}
 				}

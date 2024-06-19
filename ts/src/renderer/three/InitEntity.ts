@@ -247,7 +247,7 @@ namespace Renderer {
 				this.visible = false;
 			}
 
-			delete(): void {
+			delete(history = true): void {
 				let editedAction: ActionData = { actionId: this.action.actionId, wasDeleted: true };
 				const nowDeleteAction = JSON.stringify(editedAction);
 				const nowAction = JSON.stringify(this.action);
@@ -285,7 +285,7 @@ namespace Renderer {
 							}, 0);
 						},
 					},
-					true
+					history
 				);
 			}
 		}

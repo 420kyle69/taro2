@@ -5,8 +5,9 @@ namespace Renderer {
 			preview: Renderer.Three.AnimatedSprite | Renderer.Three.Model;
 			gizmo: EntityGizmo;
 
-			activeEntity: { id: string; player: string; entityType: string };
+			activeEntity: { id: string; player: string; entityType: string, action?: ActionData, is3DObject?: boolean };
 			selectedEntity: InitEntity | Region;
+			copiedEntity: InitEntity;
 			constructor() {
 				this.preview = undefined;
 				const renderer = Renderer.Three.instance();
@@ -76,6 +77,26 @@ namespace Renderer {
 					if (event.key === 'Delete' || event.key === 'Backspace') {
 						this.deleteEntity();
 					}
+					if (event.key === 'c' && event.ctrlKey && this.selectedEntity && this.selectedEntity instanceof InitEntity) {
+						const action = this.selectedEntity.action;
+						const is3DObject = this.selectedEntity.isObject3D;
+						taro.developerMode.activeButton = 'add-entities'
+						this.selectEntity(null);
+						this.activatePlacement(true);
+
+						setTimeout(() => {
+							this.activeEntity = {
+								id: action.entity,
+								player: action.player.variableName,
+								entityType: action.entityType,
+								action: action,
+								is3DObject
+							}
+
+							this.updatePreview();
+						}, 0)
+
+					}
 				});
 			}
 
@@ -141,12 +162,24 @@ namespace Renderer {
 						return;
 					}
 				}
+				if (entityData.action && entityData.action.scale) {
+					height *= entityData.action.scale.z;
+					width *= entityData.action.scale.x;
+					depth *= entityData.action.scale.y;
+				}
 				const cols = entity.cellSheet.columnCount || 1;
 				const rows = entity.cellSheet.rowCount || 1;
 				if (entity.is3DObject) {
 					this.preview = new Renderer.Three.Model(key);
 					this.preview.setSize(Utils.pixelToWorld(width), Utils.pixelToWorld(depth), Utils.pixelToWorld(height));
 					this.preview.setOpacity(0.5);
+					if (entityData.action && entityData.action.rotation) {
+						this.preview.rotation.set(
+							THREE.MathUtils.degToRad(entityData.action.rotation.x),
+							THREE.MathUtils.degToRad(entityData.action.rotation.y),
+							THREE.MathUtils.degToRad(entityData.action.rotation.z)
+						);
+					}
 					renderer.initEntityLayer.add(this.preview);
 				} else {
 					const tex = gAssetManager.getTexture(key).clone();
@@ -197,7 +230,30 @@ namespace Renderer {
 						name: this.selectedEntity.taroEntity._stats.id,
 						delete: true,
 					};
-					inGameEditor.updateRegionInReact && !window.isStandalone && inGameEditor.updateRegionInReact(data, 'threejs');
+					const nowData = JSON.stringify(data)
+					const nowTransformData = JSON.stringify(this.selectedEntity.stats)
+					const renderer = Renderer.Three.instance();
+
+					renderer.voxelEditor.commandController.addCommand({
+						func: () => {
+							const data = JSON.parse(nowData)
+							inGameEditor.updateRegionInReact && !window.isStandalone && inGameEditor.updateRegionInReact(data, 'threejs');
+						},
+						undo: () => {
+							const data = JSON.parse(nowData)
+							const transformData = JSON.parse(nowTransformData);
+							// TODO: no need to show the modal here
+							inGameEditor.addNewRegion &&
+								inGameEditor.addNewRegion({
+									name: '',
+									x: transformData.x,
+									y: transformData.y,
+									width: transformData.width,
+									height: transformData.height,
+									create: true,
+								});
+						}
+					}, true)
 				}
 				this.selectEntity(null);
 			}

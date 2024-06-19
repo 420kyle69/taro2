@@ -303,6 +303,14 @@ namespace Renderer {
 												actionId: taro.newIdHex(),
 												wasCreated: true,
 											};
+											if(entityData.action ) {
+												if(entityData.action.rotation) {
+													action.rotation = entityData.action.rotation
+												}
+												if (entityData.action.scale) {
+													action.scale = entityData.action.scale
+												}
+											}
 											if (entityData.entityType === 'unitTypes') {
 												action.player = {
 													variableName: entityData.player,
@@ -335,7 +343,7 @@ namespace Renderer {
 																		nowCommandCount - this.voxelEditor.commandController.offset
 																	].cache
 															)
-															?.delete();
+															?.delete(false);
 													},
 												},
 												true
