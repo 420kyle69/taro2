@@ -262,7 +262,7 @@ namespace Renderer {
 							if (
 								renderer.voxelEditor.commandController.commands[
 									nowCommandCount - renderer.voxelEditor.commandController.offset
-								].cache
+								]?.cache
 							) {
 								action.actionId =
 									renderer.voxelEditor.commandController.commands[
