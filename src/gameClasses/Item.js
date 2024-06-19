@@ -219,7 +219,7 @@ var Item = TaroEntityPhysics.extend({
 		return this._stats.ownerUnitId ? taro.$(this._stats.ownerUnitId) : undefined;
 	},
 
-	setOwnerUnit: function (newOwner, persistData = false) {
+	setOwnerUnit: function (newOwner, persistedItem = false) {
 		var oldOwner = taro.$(this._stats.oldOwnerUnitId);
 
 		if (newOwner == oldOwner) return;
@@ -227,7 +227,7 @@ var Item = TaroEntityPhysics.extend({
 			if (taro.isClient) {
 				if (oldOwner) {
 					delete oldOwner.ownedItems[this.id()];
-					if (!persistData) {
+					if (!persistedItem) {
 						const triggerParams = { itemId: this.id(), unitId: oldOwner.id() };
 						this.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
 						oldOwner.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
@@ -235,7 +235,7 @@ var Item = TaroEntityPhysics.extend({
 					}
 				}
 				newOwner.ownedItems[this.id()] = this;
-				if (!persistData) {
+				if (!persistedItem) {
 					const triggerParams = {
 						unitId: newOwner.id(),
 						itemId: this.id(),
@@ -273,7 +273,7 @@ var Item = TaroEntityPhysics.extend({
 			if (taro.isClient) {
 				if (oldOwner) {
 					delete oldOwner.ownedItems[this.id()];
-					if (!persistData) {
+					if (!persistedItem) {
 						const triggerParams = { itemId: this.id(), unitId: oldOwner.id() };
 						this.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
 						oldOwner.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
