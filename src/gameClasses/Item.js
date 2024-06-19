@@ -219,7 +219,7 @@ var Item = TaroEntityPhysics.extend({
 		return this._stats.ownerUnitId ? taro.$(this._stats.ownerUnitId) : undefined;
 	},
 
-	setOwnerUnit: function (newOwner) {
+	setOwnerUnit: function (newOwner, persistData = false) {
 		var oldOwner = taro.$(this._stats.oldOwnerUnitId);
 
 		if (newOwner == oldOwner) return;
@@ -227,8 +227,23 @@ var Item = TaroEntityPhysics.extend({
 			if (taro.isClient) {
 				if (oldOwner) {
 					delete oldOwner.ownedItems[this.id()];
+					if (!persistData) {
+						const triggerParams = { itemId: this.id(), unitId: oldOwner.id() };
+						this.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
+						oldOwner.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
+						taro.script.trigger('unitDroppedAnItem', triggerParams); // unit dropped item
+					}
 				}
 				newOwner.ownedItems[this.id()] = this;
+				if (!persistData) {
+					const triggerParams = {
+						unitId: newOwner.id(),
+						itemId: this.id(),
+					};
+					newOwner.script.trigger('thisUnitPicksUpItem', triggerParams); // this entity (unit)
+					taro.script.trigger('unitPicksUpItem', triggerParams); // unit picked item
+					this.script.trigger('thisItemIsPickedUp', triggerParams); // this entity (item)
+				}
 				if (newOwner == taro.client.selectedUnit) {
 					if (newOwner._stats.currentItemIndex !== this._stats.slotIndex) {
 						this.setState('unselected');
@@ -258,6 +273,12 @@ var Item = TaroEntityPhysics.extend({
 			if (taro.isClient) {
 				if (oldOwner) {
 					delete oldOwner.ownedItems[this.id()];
+					if (!persistData) {
+						const triggerParams = { itemId: this.id(), unitId: oldOwner.id() };
+						this.script.trigger('thisItemIsDropped', triggerParams); // this entity (item)
+						oldOwner.script.trigger('thisUnitDroppedAnItem', triggerParams); // this entity (unit)
+						taro.script.trigger('unitDroppedAnItem', triggerParams); // unit dropped item
+					}
 				}
 			}
 
@@ -1125,12 +1146,22 @@ var Item = TaroEntityPhysics.extend({
 						break;
 
 					case 'ownerUnitId':
-						this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
-						this._stats[attrName] = newValue;
-						if (taro.isClient) {
-							var newOwner = taro.$(newValue);
-							self.setOwnerUnit(newOwner);
+						if (newValue.persistData) {
+							this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
+							this._stats[attrName] = newValue.id;
+							if (taro.isClient) {
+								var newOwner = taro.$(newValue.id);
+								self.setOwnerUnit(newOwner, newValue.persistData);
+							}
+						} else {
+							this._stats.oldOwnerUnitId = this._stats.ownerUnitId;
+							this._stats[attrName] = newValue;
+							if (taro.isClient) {
+								var newOwner = taro.$(newValue);
+								self.setOwnerUnit(newOwner);
+							}
 						}
+
 						break;
 
 					case 'scale':
