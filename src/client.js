@@ -155,6 +155,7 @@ const Client = TaroEventingClass.extend({
 		});
 
 		//go fetch
+		taro.addComponent(GameTextComponent);
 		taro.addComponent(GameComponent);
 		taro.addComponent(ProfilerComponent);
 		taro.addComponent(MenuUiComponent);
