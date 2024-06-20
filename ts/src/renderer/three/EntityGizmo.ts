@@ -74,8 +74,8 @@ namespace Renderer {
 							} else if (control.object.body instanceof Model) {
 								editedAction['scale'] = {
 									x: Utils.worldToPixel(control.object.body.getSize().x / control.object.defaultWidth),
-									y: Utils.worldToPixel(control.object.body.getSize().z / control.object.defaultDepth),
-									z: Utils.worldToPixel(control.object.body.getSize().y / control.object.defaultHeight),
+									y: Utils.worldToPixel(control.object.body.getSize().y / control.object.defaultHeight),
+									z: Utils.worldToPixel(control.object.body.getSize().z / control.object.defaultDepth),
 									function: 'vector3',
 								};
 							}

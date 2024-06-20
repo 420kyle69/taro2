@@ -71,9 +71,9 @@ namespace Renderer {
 							);
 						} else if (body instanceof Model) {
 							this.setSize(
-								Utils.pixelToWorld(defaultWidth * action.scale.x),
-								Utils.pixelToWorld(defaultDepth * action.scale.z),
-								Utils.pixelToWorld(defaultHeight * action.scale.y)
+								Utils.pixelToWorld(this.defaultWidth * action.scale.x),
+								Utils.pixelToWorld(this.defaultHeight * action.scale.y),
+								Utils.pixelToWorld(this.defaultDepth * action.scale.z)
 							);
 						}
 					} else if (!isNaN(action.width) && !isNaN(action.height)) {
@@ -204,7 +204,11 @@ namespace Renderer {
 						if (isNaN(this.action.scale.z)) {
 							this.action.scale.z = 0;
 						}
-						this.setSize(this.action.scale.x, this.action.scale.z, this.action.scale.y);
+						this.setSize(
+							Utils.pixelToWorld(this.defaultWidth * action.scale.x),
+							Utils.pixelToWorld(this.defaultHeight * action.scale.y),
+							Utils.pixelToWorld(this.defaultDepth * action.scale.z)
+						);
 					}
 					if (!isNaN(this.action.width) && !isNaN(action.width)) {
 						this.action.width = action.width;
