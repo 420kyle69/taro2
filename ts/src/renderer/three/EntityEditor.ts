@@ -80,11 +80,11 @@ namespace Renderer {
 					if (event.key === 'c' && event.ctrlKey && this.selectedEntity && this.selectedEntity instanceof InitEntity) {
 						const action = this.selectedEntity.action;
 						const is3DObject = this.selectedEntity.isObject3D;
-						taro.developerMode.activeButton = 'add-entities'
+
 						this.selectEntity(null);
 						this.activatePlacement(true);
-
 						setTimeout(() => {
+							(window as any).selectTool('add-entities');
 							this.activeEntity = {
 								id: action.entity,
 								player: action.player.variableName,
