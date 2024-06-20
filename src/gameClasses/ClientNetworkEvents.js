@@ -209,56 +209,11 @@ var ClientNetworkEvents = {
 	},
 
 	_onUpdateUiTextForTime: function (data) {
-		$(`.ui-text-${data.target}`).show();
-		$(`.ui-text-${data.target}`).html(taro.clientSanitizer(data.value));
-
-		if (!this.textTimerData) {
-			this.textTimerData = {};
-		}
-
-		// stop the timeout and remove old textTimerData
-		if (this.textTimerData[data.target]?.textTimer) {
-			clearTimeout(this.textTimerData[data.target].textTimer);
-			delete this.textTimerData[data.target];
-		}
-
-		if (data.time && data.time > 0) {
-			this.textTimerData[data.target] = {
-				target: data.target,
-				textTimer: setTimeout(() => {
-					$(`.ui-text-${this.textTimerData[data.target].target}`).hide();
-					delete this.textTimerData[data.target];
-				}, data.time),
-			};
-		}
+		taro.gameText.updateUiTextForTime(data);
 	},
 
 	_onUpdateUiText: function (data) {
-		const runAction = functionalTryCatch(() => {
-			if (!data.target) {
-				return;
-			}
-			const key = `ui-text-${data.target}-id`;
-
-			if (!taro.uiTextElementsObj[key]) {
-				taro.uiTextElementsObj[key] = document.getElementById(key);
-			}
-			if (!taro.uiTextElementsObj[key]) {
-				return;
-			}
-
-			if (data.action == 'show') {
-				// $(`.ui-text-${data.target}`).show();
-				taro.uiTextElementsObj[key].style.display = 'block';
-			} else if (data.action == 'hide') {
-				taro.uiTextElementsObj[key].style.display = 'none';
-			} else {
-				taro.uiTextElementsObj[key].innerHTML = data.value;
-			}
-		});
-		if (runAction[0] !== null) {
-			// console.error(runAction[0]);
-		}
+		taro.gameText.updateUiText(data);
 	},
 
 	_onUpdateUIRealtimeCSS: function (data) {
@@ -388,17 +343,19 @@ var ClientNetworkEvents = {
 	},
 
 	// when client receives a ping response back from the server
-	_onPing: function(data) {
+	_onPing: function (data) {
 		const self = this;
 		const now = taro._currentTime;
 		const latency = now - data.sentAt;
-		
+
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
-		
+
 		// start reconciliation based on discrepancy between
 		// where my unit when ping was sent and where unit is when ping is received
-		if (taro.client.selectedUnit?.posHistory &&
-			taro.client.myUnitStreamedPosition && !taro.client.selectedUnit.isTeleporting
+		if (
+			taro.client.selectedUnit?.posHistory &&
+			taro.client.myUnitStreamedPosition &&
+			!taro.client.selectedUnit.isTeleporting
 		) {
 			let history = taro.client.selectedUnit.posHistory;
 			while (history.length > 0) {
@@ -408,20 +365,19 @@ var ClientNetworkEvents = {
 					// console.log("found it!")
 					taro.client.myUnitPositionWhenPingSent = {
 						x: historyFrame[1][0],
-						y: historyFrame[1][1]
+						y: historyFrame[1][1],
 					};
 
 					taro.client.selectedUnit.reconRemaining = {
 						x: taro.client.myUnitStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
-						y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y
-					}
+						y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y,
+					};
 
 					// console.log(latency, taro.client.myUnitPositionWhenPingSent.y, taro.client.myUnitStreamedPosition.y, taro.client.selectedUnit.reconRemaining.y);
 
-					taro.client.selectedUnit.posHistory = []
+					taro.client.selectedUnit.posHistory = [];
 
 					if (taro.env === 'local' || taro.debugCSP) {
-
 						taro.client.selectedUnit.emit('transform-debug', {
 							debug: 'red-square',
 							x: taro.client.myUnitPositionWhenPingSent?.x,
@@ -440,17 +396,15 @@ var ClientNetworkEvents = {
 
 					taro.client.sendNextPingAt = taro.now + 100;
 					break;
-
 				}
 			}
 		}
-		
+
 		taro.pingElement = taro.pingElement || document.getElementById('updateping');
 		taro.pingElement.innerHTML = Math.floor(latency);
 		taro.pingLatency = taro.pingLatency || [];
 		taro.pingLatency.push(Math.floor(latency));
 	},
-
 
 	_onPlayAd: function (data) {
 		const runAction = functionalTryCatch(() => {
