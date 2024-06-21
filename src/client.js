@@ -685,6 +685,7 @@ const Client = TaroEventingClass.extend({
 	defineNetworkEvents: function () {
 		taro.network.define('ping', this._onPing);
 		taro.network.define('sendPlayerToMap', this._onSendPlayerToMap);
+		taro.network.define('sendPlayerToGame', this._onSendPlayerToGame);
 
 		taro.network.define('makePlayerSelectUnit', this._onMakePlayerSelectUnit);
 		taro.network.define('makePlayerCameraTrackUnit', this._onMakePlayerCameraTrackUnit);

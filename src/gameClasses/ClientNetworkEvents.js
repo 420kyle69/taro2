@@ -388,13 +388,13 @@ var ClientNetworkEvents = {
 	},
 
 	// when client receives a ping response back from the server
-	_onPing: function(data) {
+	_onPing: function (data) {
 		const self = this;
 		const now = taro._currentTime;
 		const latency = now - data.sentAt;
-		
+
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
-		
+
 		// start reconciliation based on discrepancy between
 		// where my unit when ping was sent and where unit is when ping is received
 		if (taro.client.selectedUnit?.posHistory &&
@@ -444,7 +444,7 @@ var ClientNetworkEvents = {
 				}
 			}
 		}
-		
+
 		taro.pingElement = taro.pingElement || document.getElementById('updateping');
 		taro.pingElement.innerHTML = Math.floor(latency);
 		taro.pingLatency = taro.pingLatency || [];
@@ -849,20 +849,36 @@ var ClientNetworkEvents = {
 		console.warn(data);
 	},
 
+	_handlePokiSwitch: function (data) {
+		window.sessionStorage.setItem('redirectToGameData', JSON.stringify(data));
+		if (window.STATIC_EXPORT_ENABLED) {
+			window.PokiSDK?.gameplayStop();
+		}
+		window.location.reload();
+	},	
+
 	_onSendPlayerToMap: function (data) {
 		if (data && data.type == 'sendPlayerToMap') {
 			if (window.STATIC_EXPORT_ENABLED) {
-				window.sessionStorage.setItem('redirectToGameData', JSON.stringify(data));
-				if (window.STATIC_EXPORT_ENABLED) {
-					window.PokiSDK?.gameplayStop();
-				}
-				window.location.reload();
+				this._handlePokiSwitch(data);
 			} else {
 				const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&autoJoinToken=${data.autoJoinToken}${data.serverId ? '&serverId=' + data.serverId : ''}`;
 				window.location.href = mapUrl;
 			}
 		}
 	},
+
+	_onSendPlayerToGame: function (data) {
+		if (data && data.type == 'sendPlayerToGame') {
+			if (window.STATIC_EXPORT_ENABLED) {
+				this._handlePokiSwitch(data);
+			} else {
+				const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&${data.serverId ? '&serverId=' + data.serverId : ''}`;
+				window.location.href = mapUrl;
+			}
+		}
+	},
+
 };
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {
