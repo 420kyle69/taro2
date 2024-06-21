@@ -146,9 +146,10 @@ var Player = TaroEntity.extend({
 					self.streamUpdateData(playerJoinStreamData);
 				}
 			}
-			
+
 			if (self._stats.userId || self._stats.guestUserId) {
-				taro.workerComponent && taro.workerComponent.playerJoined(clientId, self._stats.userId, self._stats.guestUserId);
+				taro.workerComponent &&
+					taro.workerComponent.playerJoined(clientId, self._stats.userId, self._stats.guestUserId);
 			}
 		} else {
 			console.log(`player joined again (menu closed?) ${self._stats.clientId} (${self._stats.name})`);
@@ -163,7 +164,7 @@ var Player = TaroEntity.extend({
 			var data = Object.assign(data, {
 				clientId: self._stats.clientId,
 				name: self._stats.name,
-				playerId: self.id()
+				playerId: self.id(),
 			});
 
 			var unit = new Unit(data);
@@ -722,6 +723,8 @@ var Player = TaroEntity.extend({
 
 								window.joinGameSent.end = Date.now();
 								window.joinGameSent.completed = window.joinGameSent.end - window.joinGameSent.start;
+
+								taro.script.trigger('playerJoinsGame', { playerId: self.id() });
 
 								console.log(
 									`JoinGame took ${window.joinGameSent.completed}ms to join player` +
