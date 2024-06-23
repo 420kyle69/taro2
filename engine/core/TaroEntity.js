@@ -5109,6 +5109,7 @@ var TaroEntity = TaroObject.extend({
 						data.isUserVerified = this._stats.isUserVerified;
 						data.isUserAdmin = this._stats.isUserAdmin;
 						data.isUserMod = this._stats.isUserMod;
+						data.isMobile = this._stats.isMobile;
 					}
 
 					break;
