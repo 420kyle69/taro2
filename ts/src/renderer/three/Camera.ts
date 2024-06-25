@@ -8,6 +8,7 @@ namespace Renderer {
 			lastAuthoritativeZoom = 1;
 			zoomHeight = 700;
 			isPerspective = false;
+			useBounds = false;
 
 			orthographicState: { target: THREE.Vector3; position: THREE.Vector3 };
 			perspectiveState: { target: THREE.Vector3; position: THREE.Vector3; zoom: number };
@@ -41,6 +42,8 @@ namespace Renderer {
 			private euler = new THREE.Euler(0, 0, 0, 'YXZ');
 
 			private isLocked = false;
+
+			private bounds = { x: 0, y: 0, width: 0, height: 0 };
 
 			constructor(
 				private viewportWidth: number,
@@ -180,6 +183,13 @@ namespace Renderer {
 				}
 			}
 
+			setBounds(x: number, y: number, width: number, height: number) {
+				this.bounds.x = x;
+				this.bounds.y = y;
+				this.bounds.width = width;
+				this.bounds.height = height;
+			}
+
 			setPointerLock(lock: boolean) {
 				lock ? this.lock() : this.unlock();
 			}
@@ -312,6 +322,26 @@ namespace Renderer {
 
 				if (!this.isLocked) {
 					this.controls.update();
+				}
+
+				if (this.useBounds) {
+					const viewHalfWidth = this.orthographicCamera.right / this.lastAuthoritativeZoom;
+					const viewHalfHeight = this.orthographicCamera.top / this.lastAuthoritativeZoom;
+
+					const left = this.bounds.x + viewHalfWidth;
+					const right = this.bounds.x + this.bounds.width - viewHalfWidth;
+					const top = this.bounds.y + viewHalfHeight;
+					const bottom = this.bounds.y + this.bounds.height - viewHalfHeight;
+
+					let x = this.controls.target.x;
+					if (x < left) x = left;
+					else if (x > right) x = right;
+
+					let z = this.controls.target.z;
+					if (z < top) z = top;
+					else if (z > bottom) z = bottom;
+
+					this.setPosition(x, this.controls.target.y, z);
 				}
 			}
 
