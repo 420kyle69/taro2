@@ -303,12 +303,12 @@ namespace Renderer {
 												actionId: taro.newIdHex(),
 												wasCreated: true,
 											};
-											if(entityData.action ) {
-												if(entityData.action.rotation) {
-													action.rotation = entityData.action.rotation
+											if (entityData.action) {
+												if (entityData.action.rotation) {
+													action.rotation = entityData.action.rotation;
 												}
 												if (entityData.action.scale) {
-													action.scale = entityData.action.scale
+													action.scale = entityData.action.scale;
 												}
 											}
 											if (entityData.entityType === 'unitTypes') {
@@ -844,6 +844,16 @@ namespace Renderer {
 					const dynamicText = DynamicFloatingText.create(config, zOffset);
 					this.entitiesLayer.add(dynamicText);
 				});
+
+				if (taro?.game?.data?.settings?.camera?.useBounds) {
+					const resize = !taro.game.data.defaultData.dontResize;
+					const tileWidth = resize ? 64 : taro.game.data.map.tilewidth;
+					const tileHeight = resize ? 64 : taro.game.data.map.tileheight;
+					const width = Utils.pixelToWorld(taro.game.data.map.width * tileWidth);
+					const height = Utils.pixelToWorld(taro.game.data.map.height * tileHeight);
+					this.camera.setBounds(0, 0, width, height);
+					this.camera.useBounds = true;
+				}
 			}
 
 			private render() {
