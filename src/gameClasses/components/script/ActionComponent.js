@@ -171,6 +171,29 @@ var ActionComponent = TaroEntity.extend({
 
 						break;
 
+					case 'sendPlayerToGame':
+						if (taro.isServer) {
+							var player = self._script.param.getValue(action.player, vars);
+							var gameId = self._script.param.getValue(action.gameId, vars);
+
+							if (player && player._stats && player._stats.clientId) {
+								taro.workerComponent.sendPlayerToGame(gameId).then((res) => {
+									if (res && res.gameSlug) {
+										// ask client to reload game
+										taro.network.send(
+											'sendPlayerToGame',
+											{
+												type: 'sendPlayerToGame',
+												gameSlug: res.gameSlug,
+												gameId: res.gameId,
+											},
+											player._stats.clientId
+										);
+									}
+								});
+							}
+						}
+
 					case 'sendPlayerGroupToMap':
 						if (taro.isServer) {
 							var gameId = self._script.param.getValue(action.gameId, vars);
