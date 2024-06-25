@@ -498,7 +498,7 @@ namespace Renderer {
 					this.controls.enablePan = false;
 					this.controls.enableRotate = false;
 					this.controls.enableZoom = false;
-				} else if (!this.isLocked && (this.target as Unit)?.cameraConfig?.pointerLock) {
+				} else if (!this.isEditorMode && !this.isLocked && (this.target as Unit)?.cameraConfig?.pointerLock) {
 					this.lock();
 				}
 			}
