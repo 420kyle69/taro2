@@ -65,7 +65,7 @@ var TaroEntity = TaroObject.extend({
 
 		this._keyFrames = [];
 		this.nextKeyFrame = [taro._currentTime + 50, [this._translate.x, this._translate.y, this._rotate.z]];
-
+		this.clientStreamedKeyFrame = this.nextKeyFrame;
 		this._isTransforming = true;
 		this.lastTransformedAt = 0;
 		this.latestTimeStamp = 0;
@@ -3245,8 +3245,10 @@ var TaroEntity = TaroObject.extend({
 				this.translateColliderTo(x, y);
 			}
 		} else if (taro.isClient) {
-			if (this === taro.client.selectedUnit && taro.physics && this._stats.controls?.clientPredictedMovement) {
-				taro.client.myUnitStreamedPosition = {
+			// client-side prediction is enabled (cspMode either 1 or 2)
+			let myUnit = taro.client.selectedUnit;
+			if (this === myUnit && taro.physics && this._stats.controls?.cspMode) {
+				myUnit.serverStreamedPosition = {
 					x: x,
 					y: y,
 					rotation: rotate,
@@ -4353,11 +4355,6 @@ var TaroEntity = TaroObject.extend({
 											!(ownerPlayer?._stats?.clientId == taro.network.id() && variableData.streamMode == 4)
 										) {
 											this.variable.update(variableId, data.variables[variableId]);
-
-											if (variableData.dataType === 'particleEmitter' && !data.variables[variableId].function) {
-												this._stats.particleEmitters[variableId] = data.variables[variableId];
-												this.createParticleEmitter(data.variables[variableId]);
-											}
 										}
 										// update attribute if entity has such attribute
 									}
@@ -5093,7 +5090,7 @@ var TaroEntity = TaroObject.extend({
 						'profilePicture',
 						'roleIds',
 						'isHidden',
-						'isMobile'
+						'isMobile',
 					];
 					data = {
 						attributes: {},

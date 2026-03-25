@@ -132,7 +132,7 @@ namespace Renderer {
 					const key = taroEntity._stats.cellSheet.url;
 					const cols = taroEntity._stats.cellSheet.columnCount || 1;
 					const rows = taroEntity._stats.cellSheet.rowCount || 1;
-					const tex = gAssetManager.getTexture(key);
+					const tex = gAssetManager.getTextureWithoutPlaceholder(key);
 
 					const replaceTexture = (spriteSheet: TextureSheet) => {
 						(entity.body as AnimatedSprite).setTextureSheet(spriteSheet);
@@ -148,6 +148,7 @@ namespace Renderer {
 					} else {
 						const animationMgr = AnimationManager.instance();
 						gAssetManager.load([{ name: key, type: 'texture', src: Utils.patchAssetUrl(key) }], null, () => {
+							const tex = gAssetManager.getTexture(key);
 							animationMgr.createAnimationsFromTaroData(key, taroEntity._stats as unknown as EntityData);
 							const frameWidth = tex.image.width / cols;
 							const frameHeight = tex.image.height / rows;

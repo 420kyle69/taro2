@@ -18,7 +18,7 @@ var Unit = TaroEntityPhysics.extend({
 		self.isMoving = false;
 		self.angleToTarget = undefined;
 		self.angleToTargetRelative = 0;
-
+		self.isTabInactive = true;
 		// merge various data into one _stats variable
 		var unitData = {};
 		if (!data.hasOwnProperty('equipmentAllowed')) {
@@ -152,6 +152,10 @@ var Unit = TaroEntityPhysics.extend({
 		self.playEffect('create');
 		self.addBehaviour('unitBehaviour', self._behaviour);
 		self.scaleDimensions(self._stats.width, self._stats.height);
+
+		if (taro.isClient) {
+			this.script.trigger('entityCreated');
+		}
 	},
 
 	shouldRenderAttribute: function (attribute) {
@@ -1612,15 +1616,18 @@ var Unit = TaroEntityPhysics.extend({
 				taro.game.lastAttackingItemId = damageData.sourceItemId;
 				this.lastAttackedBy = damageData.sourceUnitId;
 
-				if (taro.isClient) {
-					return true;
-				}
-				this.playEffect('attacked', { attackerId: damageData.sourceUnitId });
-
 				var triggeredBy = {
 					unitId: taro.game.lastAttackingUnitId,
 					itemId: taro.game.lastAttackingItemId,
 				};
+
+				if (taro.isClient) {
+					this.playEffect('attacked', { attackerId: damageData.sourceUnitId });
+					taro.script.trigger('unitAttacksUnit', triggeredBy);
+					this.script.trigger('entityGetsAttacked', triggeredBy);
+					return true;
+				}
+				this.playEffect('attacked', { attackerId: damageData.sourceUnitId });
 
 				taro.script.trigger('unitAttacksUnit', triggeredBy);
 				this.script.trigger('entityGetsAttacked', triggeredBy);
@@ -2307,10 +2314,7 @@ var Unit = TaroEntityPhysics.extend({
 		// if entity (unit/item/player/projectile) has attribute, run regenerate
 		if (
 			taro.isServer ||
-			(taro.physics &&
-				taro.isClient &&
-				taro.client.selectedUnit == this &&
-				this._stats.controls?.clientPredictedMovement)
+			(taro.physics && taro.isClient && taro.client.selectedUnit == this && this._stats.controls?.cspMode) // client-side prediction is enabled (cspMode either 1 or 2)
 		) {
 			if (this._stats.buffs && this._stats.buffs.length > 0) {
 				for (let i = 0; i < this._stats.buffs.length; i++) {

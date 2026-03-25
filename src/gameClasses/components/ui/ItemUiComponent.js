@@ -333,6 +333,7 @@ var ItemUiComponent = TaroEntity.extend({
 					containment: 'window',
 					appendTo: 'body',
 					tolerance: 'touch',
+					distance:20,
 					start: function (event, ui) {
 						// when being dragged, disable popover. it doesn't need to be enabled later, because updateInventory overwrites popover div
 						$(this).popover('hide');
@@ -347,6 +348,7 @@ var ItemUiComponent = TaroEntity.extend({
 					},
 					drag: function (event, ui) {
 						const correction = 30;
+						
 						ui.position.left = ui.position.left - ((event.target.clientWidth * self.DRAG_SCALE) - (event.clientX - ui.offset.left)) + correction;
 						ui.position.top = ui.position.top - ((event.target.clientHeight * self.DRAG_SCALE) - (event.clientY - ui.offset.top)) + correction;
 						// console.log("ui.position", ui.position, "clientX: ", event.clientX, "clientY: ", event.clientY, "offset: ", ui.offset);

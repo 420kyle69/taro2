@@ -107,7 +107,8 @@ var AIComponent = TaroEntity.extend({
 				ownerPlayer &&
 				ownerPlayer.isHostileTo(ownerPlayerOfTargetUnit) &&
 				ownerPlayer != ownerPlayerOfTargetUnit &&
-				unit._stats.isUnTargetable != true
+				unit._stats.isUnTargetable != true &&
+				unit._stats.isHidden != true
 			) {
 				// if I already have a target, re-target if new target unit is closer
 				var targetUnit = this.getTargetUnit();
@@ -308,6 +309,8 @@ var AIComponent = TaroEntity.extend({
 				unit.ai.unitsTargetingMe.push(this._entity.id());
 			}
 			this.targetUnitId = unit.id();
+		} else {
+			this.targetUnitId = undefined;
 		}
 
 		if (this.pathFindingMethod == 'a*') {
@@ -328,6 +331,9 @@ var AIComponent = TaroEntity.extend({
 		const tileWidth = taro.scaleMapDetails.tileWidth; // both pathfinding method need it to check
 
 		var targetUnit = this.getTargetUnit();
+		if (targetUnit?._stats.isHidden) {
+			self.setTargetUnit(undefined);
+		}
 
 		// update unit's direction toward its target
 		var targetPosition = self.getTargetPosition();

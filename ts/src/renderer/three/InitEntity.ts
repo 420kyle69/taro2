@@ -29,9 +29,18 @@ namespace Renderer {
 						rows = entityTypeData.cellSheet.rowCount || 1;
 					}
 				}
-				const defaultWidth = (this.defaultWidth = entityTypeData.bodies?.default?.width);
-				const defaultHeight = (this.defaultHeight = entityTypeData.bodies?.default?.height);
-				const defaultDepth = (this.defaultDepth = entityTypeData.bodies?.default?.depth);
+				let defaultWidth;
+				let defaultHeight;
+				let defaultDepth;
+				if (action.entityType === 'itemTypes') {
+					defaultWidth = this.defaultWidth = entityTypeData.bodies?.dropped?.width;
+					defaultHeight = this.defaultHeight = entityTypeData.bodies?.dropped?.height;
+					defaultDepth = this.defaultDepth = entityTypeData.bodies?.dropped?.depth;
+				} else {
+					defaultWidth = this.defaultWidth = entityTypeData.bodies?.default?.width;
+					defaultHeight = this.defaultHeight = entityTypeData.bodies?.default?.height;
+					defaultDepth = this.defaultDepth = entityTypeData.bodies?.default?.depth;
+				}
 				this.isBillboard = entityTypeData?.isBillboard ?? false;
 				const renderer = Renderer.Three.instance();
 				let body: (Renderer.Three.AnimatedSprite | Renderer.Three.Model) & { entity: InitEntity };
@@ -72,8 +81,8 @@ namespace Renderer {
 						} else if (body instanceof Model) {
 							this.setSize(
 								Utils.pixelToWorld(this.defaultWidth * action.scale.x),
-								Utils.pixelToWorld(this.defaultHeight * action.scale.y),
-								Utils.pixelToWorld(this.defaultDepth * action.scale.z)
+								Utils.pixelToWorld(this.defaultDepth * action.scale.z),
+								Utils.pixelToWorld(this.defaultHeight * action.scale.y)
 							);
 						}
 					} else if (!isNaN(action.width) && !isNaN(action.height)) {
@@ -136,6 +145,9 @@ namespace Renderer {
 				if (inGameEditor && inGameEditor.updateAction && !window.isStandalone) {
 					inGameEditor.updateAction(action);
 				}
+				if (action.wasCreated) {
+					return;
+				}
 				if (action.wasEdited) this.action.wasEdited = true;
 				if (
 					this.action.position &&
@@ -181,16 +193,16 @@ namespace Renderer {
 						!isNaN(action.scale?.z) &&
 						(this.action.scale === undefined ||
 							(!isNaN(this.action.scale?.x) && !isNaN(this.action.scale?.y) && !isNaN(this.action.scale?.z)) ||
-							(!isNaN(this.action.width) && !isNaN(action.width)) ||
-							(!isNaN(this.action.height) && !isNaN(action.height)))
+							!isNaN(this.action.width) ||
+							!isNaN(this.action.height))
 					) {
 						if (!isNaN(action.width)) {
 							this.action.width = action.width;
-							this.action.scale.x = action.width;
+							this.action.scale.x = action.width / this.defaultWidth;
 						}
 						if (!isNaN(action.height)) {
 							this.action.height = action.height;
-							this.action.scale.z = action.height;
+							this.action.scale.z = action.height / this.defaultHeight;
 						}
 						if (action.scale) {
 							this.action.scale = action.scale;
@@ -206,15 +218,15 @@ namespace Renderer {
 						}
 						this.setSize(
 							Utils.pixelToWorld(this.defaultWidth * action.scale.x),
-							Utils.pixelToWorld(this.defaultHeight * action.scale.y),
-							Utils.pixelToWorld(this.defaultDepth * action.scale.z)
+							Utils.pixelToWorld(this.defaultDepth * action.scale.z),
+							Utils.pixelToWorld(this.defaultHeight * action.scale.y)
 						);
 					}
 					if (!isNaN(this.action.width) && !isNaN(action.width)) {
 						this.action.width = action.width;
 						this.setSize(
 							Utils.pixelToWorld(action.width),
-							Utils.pixelToWorld(this.defaultDepth),
+							Utils.pixelToWorld(this.defaultDepth * action.scale?.z ? action.scale.z : 1),
 							Utils.pixelToWorld(this.action.height)
 						);
 					}
@@ -222,7 +234,7 @@ namespace Renderer {
 						this.action.height = action.height;
 						this.setSize(
 							Utils.pixelToWorld(this.action.width),
-							Utils.pixelToWorld(this.defaultDepth),
+							Utils.pixelToWorld(this.defaultDepth * action.scale?.z ? action.scale.z : 1),
 							Utils.pixelToWorld(action.height)
 						);
 					}
@@ -271,7 +283,7 @@ namespace Renderer {
 								action.actionId =
 									renderer.voxelEditor.commandController.commands[
 										nowCommandCount - renderer.voxelEditor.commandController.offset
-									].cache;
+									].cache.newId;
 							}
 							this.edit(action);
 						},
@@ -279,13 +291,14 @@ namespace Renderer {
 							const newId = taro.newIdHex();
 							const nowCommandCount = renderer.voxelEditor.commandController.nowInsertIndex;
 							const nowActionObj = JSON.parse(nowAction);
+							const oldId = nowActionObj.actionId;
 							nowActionObj.actionId = newId;
 							renderer.createInitEntity(nowActionObj);
 							taro.network.send<any>('editInitEntity', nowActionObj);
 							setTimeout(() => {
 								renderer.voxelEditor.commandController.commands[
 									nowCommandCount - renderer.voxelEditor.commandController.offset
-								].cache = newId;
+								].cache = { newId, oldId };
 							}, 0);
 						},
 					},

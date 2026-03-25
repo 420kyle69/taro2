@@ -87,6 +87,13 @@ var PlayerUiComponent = TaroEntity.extend({
 			taro.client.myPlayer.lastHtmlUiClickData = { id: $(this).attr('id') };
 			taro.script.trigger('htmlUiClick', { playerId: taro.client.myPlayer.id() });
 		});
+
+		$(document).on('pointerdown', '.trigger', function () {
+			taro.network.send('htmlUiClick', { id: $(this).attr('id') });
+			// Support for local htmlUiClick trigger
+			taro.client.myPlayer.lastHtmlUiClickData = { id: $(this).attr('id') };
+			taro.script.trigger('htmlUiClick', { playerId: taro.client.myPlayer.id() });
+		});
 	},
 
 	updatePlayerAttributesDiv: function (attributes) {
@@ -189,7 +196,7 @@ var PlayerUiComponent = TaroEntity.extend({
 			this.updatePlayerAttributesDiv(attributes);
 		} else if (taro.shop.isItemShopOpen) {
 			taro.shop.openItemShop();
-		};
+		}
 	},
 
 	shouldRenderAttribute: function (attribute) {

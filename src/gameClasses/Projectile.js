@@ -108,6 +108,10 @@ var Projectile = TaroEntityPhysics.extend({
 		// add behaviour also have isClient block so we will have to execute this in both client and server
 		this.addBehaviour('projectileBehaviour', this._behaviour);
 		this.scaleDimensions(this._stats.width, this._stats.height);
+
+		if (taro.isClient) {
+			this.script.trigger('entityCreated');
+		}
 	},
 
 	hide: function () {

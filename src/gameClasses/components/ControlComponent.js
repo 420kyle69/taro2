@@ -175,8 +175,8 @@ var ControlComponent = TaroEntity.extend({
 						unit._stats.controls.movementControlScheme
 					);
 					const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
-					const left = (canMoveHorizontal && this.input.key.a) || this.input.key.left;
-					const right = (canMoveHorizontal && this.input.key.d) || this.input.key.right;
+					const left = canMoveHorizontal && (this.input.key.a || this.input.key.left);
+					const right = canMoveHorizontal && (this.input.key.d || this.input.key.right);
 					const up = canMoveVertical && (this.input.key.w || this.input.key.up);
 					const down = canMoveVertical && (this.input.key.s || this.input.key.down);
 					unit.ability.move(left, right, up, down);
@@ -281,8 +281,8 @@ var ControlComponent = TaroEntity.extend({
 				unit._stats.controls.movementControlScheme
 			);
 			const canMoveVertical = ['wasd', 'wasdRelativeToUnit'].includes(unit._stats.controls.movementControlScheme);
-			const left = (canMoveHorizontal && this.input.key.a) || this.input.key.left;
-			const right = (canMoveHorizontal && this.input.key.d) || this.input.key.right;
+			const left = canMoveHorizontal && (this.input.key.a || this.input.key.left);
+			const right = canMoveHorizontal && (this.input.key.d || this.input.key.right);
 			const up = canMoveVertical && (this.input.key.w || this.input.key.up);
 			const down = canMoveVertical && (this.input.key.s || this.input.key.down);
 			unit.ability.move(left, right, up, down);
@@ -360,11 +360,21 @@ var ControlComponent = TaroEntity.extend({
 		if (taro.isClient) {
 			if (unit) {
 				var now = Date.now();
+
 				// check if sending player input is due (every 100ms)
 				if (now - self.lastInputSent > 100) {
 					self.sendMobileInput = true;
 					self.sendMouseMovement = true;
 					self.lastInputSent = now;
+
+					// if my unit has cspMode == 2 (client-authoritative), send its position to the server every 100ms
+					if (unit._stats.controls?.cspMode == 2) {
+						// if the current tab just became active, wait at least 3 seconds before sending my unit's position to the server
+						if (now - self.tabBecameActiveAt < 3000) {
+							return;
+						}
+						taro.network.send('playerUnitMoved', [unit._translate.x, unit._translate.y, unit._rotate.z]);
+					}
 				}
 
 				for (device in self.input) {
@@ -438,6 +448,7 @@ var ControlComponent = TaroEntity.extend({
 							taro.client.myPlayer.control.input.mouse.y = self.newMouseState[1];
 						}
 					}
+
 					if (self.sendMouseMovement) {
 						taro.network.send('playerMouseMoved', self.newMouseState);
 

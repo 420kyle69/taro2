@@ -344,17 +344,16 @@ var ClientNetworkEvents = {
 
 	// when client receives a ping response back from the server
 	_onPing: function (data) {
-		const self = this;
 		const now = taro._currentTime;
 		const latency = now - data.sentAt;
 
 		// console.log("onPing", taro._currentTime, data.sentAt, latency);
-
+		let myUnit = taro.client.selectedUnit;
 		// start reconciliation based on discrepancy between
 		// where my unit when ping was sent and where unit is when ping is received
 		if (
 			taro.client.selectedUnit?.posHistory &&
-			taro.client.myUnitStreamedPosition &&
+			myUnit.serverStreamedPosition &&
 			!taro.client.selectedUnit.isTeleporting
 		) {
 			let history = taro.client.selectedUnit.posHistory;
@@ -369,11 +368,11 @@ var ClientNetworkEvents = {
 					};
 
 					taro.client.selectedUnit.reconRemaining = {
-						x: taro.client.myUnitStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
-						y: taro.client.myUnitStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y,
+						x: myUnit.serverStreamedPosition.x - taro.client.myUnitPositionWhenPingSent.x,
+						y: myUnit.serverStreamedPosition.y - taro.client.myUnitPositionWhenPingSent.y,
 					};
 
-					// console.log(latency, taro.client.myUnitPositionWhenPingSent.y, taro.client.myUnitStreamedPosition.y, taro.client.selectedUnit.reconRemaining.y);
+					// console.log(latency, taro.client.myUnitPositionWhenPingSent.y, myUnit.serverStreamedPosition.y, taro.client.selectedUnit.reconRemaining.y);
 
 					taro.client.selectedUnit.posHistory = [];
 
@@ -388,8 +387,8 @@ var ClientNetworkEvents = {
 						// console.log("reconRemaining", taro.client.selectedUnit.reconRemaining);
 						taro.client.selectedUnit.emit('transform-debug', {
 							debug: 'blue-square',
-							x: taro.client.myUnitStreamedPosition.x,
-							y: taro.client.myUnitStreamedPosition.y,
+							x: myUnit.serverStreamedPosition.x,
+							y: myUnit.serverStreamedPosition.y,
 							rotation: 0,
 						});
 					}
@@ -710,57 +709,7 @@ var ClientNetworkEvents = {
 	},
 
 	_onSound: function (data) {
-		const runAction = functionalTryCatch(() => {
-			switch (data.cmd) {
-				case 'playMusic':
-					var music = taro.game.data.music[data.id];
-					if (music) {
-						taro.sound.playMusic(music, undefined, undefined, data.id);
-					}
-					break;
-				case 'stopMusicForPlayer':
-				case 'stopMusic':
-					taro.sound.stopMusic();
-					break;
-				case 'playMusicForPlayer':
-					var music = taro.game.data.music[data.music];
-					if (music) {
-						taro.sound.playMusic(music, undefined, undefined, data.music);
-					}
-					break;
-				case 'playMusicForPlayerAtTime':
-					var music = taro.game.data.music[data.music];
-					var time = data.time;
-
-					if (music && time) {
-						taro.sound.playMusic(music, time, undefined, data.music);
-					}
-					break;
-				case 'playMusicForPlayerRepeatedly':
-					var music = taro.game.data.music[data.music];
-
-					if (music) {
-						taro.sound.playMusic(music, undefined, true, data.music);
-					}
-					break;
-				case 'playSoundForPlayer':
-					var sound = taro.game.data.sound[data.sound];
-					if (sound) {
-						var unit = taro.client.myPlayer && taro.client.myPlayer.getSelectedUnit();
-						taro.sound.playSound(sound, (unit && unit._translate) || null, data.sound);
-					}
-					break;
-				case 'stopSoundForPlayer':
-					taro.sound.stopSound(sound, data.sound);
-					break;
-				default:
-					var soundData = taro.game.data.sound[data.id];
-					taro.sound.playSound(soundData, data.position, data.id);
-			}
-		});
-		if (runAction[0] !== null) {
-			// console.error(runAction[0]);
-		}
+		taro.sound.run(data);
 	},
 
 	_onCamera: function (data) {
@@ -804,17 +753,16 @@ var ClientNetworkEvents = {
 	},
 
 	_handlePokiSwitch: function (data) {
-		window.sessionStorage.setItem('redirectToGameData', JSON.stringify(data));
-		if (window.STATIC_EXPORT_ENABLED) {
-			window.PokiSDK?.gameplayStop();
+		window.PokiSDK?.gameplayStop();
+		if (window.switchGameWrapper) {
+			window.switchGameWrapper(data);
 		}
-		window.location.reload();
-	},	
+	},
 
 	_onSendPlayerToMap: function (data) {
 		if (data && data.type == 'sendPlayerToMap') {
 			if (window.STATIC_EXPORT_ENABLED) {
-				this._handlePokiSwitch(data);
+				taro.client._handlePokiSwitch(data);
 			} else {
 				const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&autoJoinToken=${data.autoJoinToken}${data.serverId ? '&serverId=' + data.serverId : ''}`;
 				window.location.href = mapUrl;
@@ -825,14 +773,13 @@ var ClientNetworkEvents = {
 	_onSendPlayerToGame: function (data) {
 		if (data && data.type == 'sendPlayerToGame') {
 			if (window.STATIC_EXPORT_ENABLED) {
-				this._handlePokiSwitch(data);
+				taro.client._handlePokiSwitch(data);
 			} else {
 				const mapUrl = `${window.location.origin}/play/${data.gameSlug}?autojoin=true&${data.serverId ? '&serverId=' + data.serverId : ''}`;
 				window.location.href = mapUrl;
 			}
 		}
 	},
-
 };
 
 if (typeof module !== 'undefined' && typeof module.exports !== 'undefined') {

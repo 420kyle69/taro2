@@ -7,7 +7,7 @@ var Game = TaroClass.extend({
 
 		console.log('taro initialized', taro.isClient, taro.isServer);
 		if (taro.isClient) {
-			taro.client = new App();
+			taro.client = new App(options);
 		}
 
 		if (taro.isServer) {

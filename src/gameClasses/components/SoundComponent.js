@@ -138,6 +138,60 @@ var SoundComponent = TaroEntity.extend({
 		}
 	},
 
+	run: function (data) {
+		const runAction = functionalTryCatch(() => {
+			switch (data.cmd) {
+				case 'playMusic':
+					var music = taro.game.data.music[data.id];
+					if (music) {
+						this.playMusic(music, undefined, undefined, data.id);
+					}
+					break;
+				case 'stopMusicForPlayer':
+				case 'stopMusic':
+					this.stopMusic();
+					break;
+				case 'playMusicForPlayer':
+					var music = taro.game.data.music[data.music];
+					if (music) {
+						this.playMusic(music, undefined, undefined, data.music);
+					}
+					break;
+				case 'playMusicForPlayerAtTime':
+					var music = taro.game.data.music[data.music];
+					var time = data.time;
+
+					if (music && time) {
+						this.playMusic(music, time, undefined, data.music);
+					}
+					break;
+				case 'playMusicForPlayerRepeatedly':
+					var music = taro.game.data.music[data.music];
+
+					if (music) {
+						this.playMusic(music, undefined, true, data.music);
+					}
+					break;
+				case 'playSoundForPlayer':
+					var sound = taro.game.data.sound[data.sound];
+					if (sound) {
+						var unit = taro.client.myPlayer && taro.client.myPlayer.getSelectedUnit();
+						this.playSound(sound, (unit && unit._translate) || null, data.sound);
+					}
+					break;
+				case 'stopSoundForPlayer':
+					this.stopSound(sound, data.sound);
+					break;
+				default:
+					var soundData = taro.game.data.sound[data.id];
+					this.playSound(soundData, data.position, data.id);
+			}
+		});
+		if (runAction[0] !== null) {
+			// console.error(runAction[0]);
+		}
+	},
+
 	playSound: function (sound, position, key, shouldRepeat = false) {
 		var self = this;
 		if (taro.isClient) {

@@ -66,16 +66,17 @@ namespace Renderer {
 						if (taro.is3D()) {
 							if (control.object.body instanceof AnimatedSprite) {
 								editedAction['scale'] = {
-									x: control.object.scale.x,
-									y: control.object.scale.z,
+									x: Utils.worldToPixel(control.object.scale.x) / control.object.defaultWidth,
+									y: Utils.worldToPixel(control.object.scale.z) / control.object.defaultHeight,
 									z: 0,
 									function: 'vector3',
 								};
 							} else if (control.object.body instanceof Model) {
+								console.log(control.object.body.getSize())
 								editedAction['scale'] = {
 									x: Utils.worldToPixel(control.object.body.getSize().x / control.object.defaultWidth),
-									y: Utils.worldToPixel(control.object.body.getSize().y / control.object.defaultHeight),
-									z: Utils.worldToPixel(control.object.body.getSize().z / control.object.defaultDepth),
+									y: Utils.worldToPixel(control.object.body.getSize().z / control.object.defaultHeight),
+									z: Utils.worldToPixel(control.object.body.getSize().y / control.object.defaultDepth),
 									function: 'vector3',
 								};
 							}
@@ -119,15 +120,34 @@ namespace Renderer {
 							// drag ended
 							const editedAction = this.generateEditedAction();
 							if (editedAction && renderer.entityEditor.selectedEntity instanceof InitEntity) {
-								const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
+								const nowAction = JSON.stringify(editedAction);
+								const nowUndoAction = JSON.stringify(this.undoAction);
 								const nowEntity = renderer.entityEditor.selectedEntity;
-								Renderer.Three.instance().voxelEditor.commandController.addCommand(
+								renderer.voxelEditor.commandController.addCommand(
 									{
 										func: () => {
-											(nowEntity as InitEntity).edit(editedAction);
+											const action = JSON.parse(nowAction);
+											let nowId = action.actionId;
+											for (let i = 0; i <= renderer.voxelEditor.commandController.nowInsertIndex + 1; i++) {
+												let command = renderer.voxelEditor.commandController.commands[i];
+												if (command && command.cache?.oldId === nowId) {
+													nowId = command.cache?.newId;
+												}
+											}
+											action.actionId = nowId;
+											(nowEntity as InitEntity).edit(action);
 										},
 										undo: () => {
-											(nowEntity as InitEntity).edit(nowUndoAction);
+											const action = JSON.parse(nowUndoAction);
+											let nowId = action.actionId;
+											for (let i = 0; i <= renderer.voxelEditor.commandController.nowInsertIndex + 1; i++) {
+												let command = renderer.voxelEditor.commandController.commands[i];
+												if (command && command.cache?.oldId === nowId) {
+													nowId = command.cache?.newId;
+												}
+											}
+											action.actionId = nowId;
+											(nowEntity as InitEntity).edit(action);
 										},
 									},
 									true,
@@ -136,7 +156,7 @@ namespace Renderer {
 								this.undoAction = {};
 							} else if (editedAction && renderer.entityEditor.selectedEntity instanceof Region) {
 								const nowUndoAction = JSON.parse(JSON.stringify(this.undoAction));
-								Renderer.Three.instance().voxelEditor.commandController.addCommand(
+								renderer.voxelEditor.commandController.addCommand(
 									{
 										func: () => {
 											inGameEditor.updateRegionInReact && !window.isStandalone;

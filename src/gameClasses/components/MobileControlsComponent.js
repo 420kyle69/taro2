@@ -102,6 +102,8 @@ var MobileControlsComponent = TaroEntity.extend({
 
 		this.clearControls();
 
+		let joysticks = [];
+
 		Object.keys(keybindings).forEach(function (key) {
 			var keybinding = keybindings[key];
 
@@ -112,8 +114,19 @@ var MobileControlsComponent = TaroEntity.extend({
 				var y = keybinding.mobilePosition.y * 2;
 
 				self.addControl(key, x, y, keybinding, abilities);
+
+				if (key === 'movementWheel' || key == 'lookWheel' || key == 'lookAndFireWheel') {
+					joysticks.push(key);
+				}
 			}
 		});
+
+		// if only one joystick, cover entire screen
+		// we currently only support max 2 joysticks
+		if (joysticks.length == 1) {
+			let joystickZone = document.getElementById(joysticks[0] + '_joystick');
+			joystickZone.style.width = '100vw';
+		}
 	},
 
 	// add a button or stick to the virtual controller
@@ -249,7 +262,8 @@ var MobileControlsComponent = TaroEntity.extend({
 		let joystickZone = document.createElement('div');
 		joystickZone.id = type + '_joystick';
 		joystickZone.style.width = '50vw';
-		joystickZone.style.height = '50vw';
+		joystickZone.style.height = '100vh';
+		joystickZone.classList.add('joystick-zone');
 		joystickZone.style.position = 'fixed';
 
 		// placing joystick in the correct zone

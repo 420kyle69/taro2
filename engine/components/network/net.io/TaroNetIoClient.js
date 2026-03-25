@@ -499,7 +499,7 @@ var TaroNetIoClient = {
 								} else if (
 									entity == taro.client.selectedUnit &&
 									taro.physics &&
-									entity._stats.controls?.clientPredictedMovement
+									entity._stats.controls?.cspMode // client-side prediction enabled (cspMode either 1 or 2)
 								) {
 									if (taro.env === 'local' || taro.debugCSP) {
 										// emit position for entity debug image
@@ -510,13 +510,14 @@ var TaroNetIoClient = {
 											rotation: rotate,
 										});
 									}
-
-									taro.client.myUnitStreamedPosition = {
+									let myUnit = taro.client.selectedUnit;
+									myUnit.serverStreamedPosition = {
 										x: x,
 										y: y,
 										rotation: rotate,
 									};
 								} else {
+									// client-side prediction disabled
 									// console.log(entity._category, newPosition)
 									// extra 20ms of buffer removes jitter
 									if (newSnapshotTimestamp > this.lastSnapshotTimestamp) {

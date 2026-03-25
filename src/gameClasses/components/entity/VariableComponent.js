@@ -69,6 +69,13 @@ var VariableComponent = TaroEntity.extend({
 					}
 
 					self._entity.variables[variableId].value = newValue;
+
+					//Client Particle Emitters
+					if (taro.isClient && variableObj.dataType === 'particleEmitter') {
+						this._entity._stats.particleEmitters[variableId] = newValue;
+						this._entity.createParticleEmitter(newValue);
+					}
+
 					// console.log('VariableComponent.update', variableObj.dataType, variableId, value, newValue, self._entity.variables[variableId])
 					if (taro.isServer) {
 						if (

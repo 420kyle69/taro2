@@ -48,6 +48,11 @@ var TaroEntityPhysics = TaroEntity.extend({
 			this.isOutOfBounds = false;
 		}
 
+		// Trigger global entity created event when an entity of category 'unit', 'item', or 'projectile' is created
+		if (['unit', 'item', 'projectile'].includes(this._category)) {
+			taro.script.trigger('entityCreatedGlobal', { entityId: this.id() });
+		}
+
 		this._actionQueue = [];
 		this.posHistory = [];
 	},

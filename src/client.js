@@ -36,7 +36,7 @@ const statsPanels = {}; // will we need this?
 const Client = TaroEventingClass.extend({
 	classId: 'Client',
 
-	init: function () {
+	init: function (options) {
 		var self = this;
 		this.data = [];
 		this.host = window.isStandalone ? 'https://www.modd.io' : '';
@@ -105,6 +105,7 @@ const Client = TaroEventingClass.extend({
 		this.scaleMode = 0; //old comment => 'none'
 		this.renderBuffer = 66; // this is later updated again in gameComponent.js
 		this.isActiveTab = true;
+		this.tabBecameActiveAt = Date.now();
 		this.sendNextPingAt = 0;
 
 		this.isZooming = false;
@@ -149,9 +150,11 @@ const Client = TaroEventingClass.extend({
 			//old comment => 'apply entities' merged stats saved during inactive tab
 			if (!document.hidden) {
 				// this.applyInactiveTabEntityStream();
+				self.tabBecameActiveAt = Date.now();
+				console.log('tab became active at', self.tabBecameActiveAt);
 			}
 
-			this.isActiveTab = !document.hidden;
+			self.isActiveTab = !document.hidden;
 		});
 
 		//go fetch
@@ -218,13 +221,17 @@ const Client = TaroEventingClass.extend({
 
 				taro.entitiesToRender = new EntitiesToRender();
 
+				taro.developerMode = new DeveloperMode();
+
 				if (taro.game.data.defaultData.defaultRenderer === '3d') {
-					taro.renderer = Renderer.Three.instance();
+					if (options?.resetRenderer) {
+						taro.renderer = Renderer.Three.reset(); // reset renderer
+					} else {
+						taro.renderer = Renderer.Three.instance();
+					}
 				} else {
 					taro.renderer = new PhaserRenderer();
 				}
-
-				taro.developerMode = new DeveloperMode();
 
 				if (!window.isStandalone) {
 					this.servers = this.getServersArray();

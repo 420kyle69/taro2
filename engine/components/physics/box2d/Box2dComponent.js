@@ -578,6 +578,9 @@ var PhysicsComponent = TaroEventingClass.extend({
 	},
 
 	update: function (timeElapsedSinceLastStep) {
+		if (timeElapsedSinceLastStep > 100) {
+			return;
+		}
 		var self = this;
 		var tempBod;
 		var entity;
@@ -732,42 +735,75 @@ var PhysicsComponent = TaroEventingClass.extend({
 									// 				x, entity.lastX, taro._currentTime, taro._currentTime - timeElapsedSinceLastStep)
 									// }
 
-									entity.lastX = x;
+									// entity.lastX = x;
+
+									// if client-authoritative csp mode is enabled, and the client msg was received within 100ms,
+									// then use the client's msg to update this unit's position
+									if (entity._stats.controls?.cspMode == 2) {
+										let clientStreamReceivedAt = entity.clientStreamedKeyFrame[0];
+										let player = entity.getOwner();
+
+										// player stopped sending msg. probably browsing something else. set as inactive.
+										if (player && now - clientStreamReceivedAt > 1000 && player.isTabActive) {
+											player.isTabActive = false;
+										}
+
+										// client msg was received within 200ms,
+										// also ignore client msg if client just recently became active again (<2s)
+										// as the client's position isn't as reliable. for the next 3s, the client's position will be dictated by the server stream
+										if (now - clientStreamReceivedAt < 200 && now - player.tabBecameActiveAt > 2000) {
+											let clientStreamedPosition = entity.clientStreamedKeyFrame[1];
+											x += (clientStreamedPosition[0] - x) / 2;
+											y += (clientStreamedPosition[1] - y) / 2;
+											angle = clientStreamedPosition[2];
+										}
+									}
 								} else if (taro.isClient) {
-									// if CSP is enabled, client-side physics will dictate:
+									// client-side prediction is enabled (cspMode either 1 or 2)
 									// my unit's position and projectiles that are NOT server-streamed.
 									// this does NOT run for items
 									if (
-										(entity == taro.client.selectedUnit && entity._stats.controls?.clientPredictedMovement) ||
+										(entity == taro.client.selectedUnit && entity._stats.controls?.cspMode) ||
 										(entity._category == 'projectile' && !entity._stats.streamMode)
 									) {
-										// CSP reconciliation
-										if (
-											entity == taro.client.selectedUnit &&
-											!entity.isTeleporting &&
-											entity.reconRemaining &&
-											!isNaN(entity.reconRemaining.x) &&
-											!isNaN(entity.reconRemaining.y)
-										) {
-											// if the current reconcilie distance is greater than my unit's body dimention,
+										// if client-authoritative mode is enabled, and tab became active within the last 3 seconds let server dictate my unit's position
+										let myUnit = taro.client.selectedUnit;
 
-											// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
+										// If cspMode is client-authoritative and the client had inactive tab, then the unit's position should be dictated by the server
+										if (entity == myUnit) {
 											if (
-												Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 ||
-												Math.abs(entity.reconRemaining.y) > entity._stats.currentBody.height * 1.5
+												entity._stats.controls?.cspMode == 2 &&
+												now - taro.client.tabBecameActiveAt < 2000 // it hasn't passed 4 sec since the tab became active
 											) {
-												x = taro.client.myUnitStreamedPosition.x;
-												y = taro.client.myUnitStreamedPosition.y;
+												x = myUnit.serverStreamedPosition.x;
+												y = myUnit.serverStreamedPosition.y;
+											} else if (
+												// Server-authoritative CSP reconciliation
+												entity._stats.controls?.cspMode == 1 &&
+												!entity.isTeleporting &&
+												entity.reconRemaining &&
+												!isNaN(entity.reconRemaining.x) &&
+												!isNaN(entity.reconRemaining.y)
+											) {
+												// if the current reconcilie distance is greater than my unit's body dimention,
+												// instantly move unit (teleport) to the last streamed position. Otherwise, gradually reconcile
+												if (
+													Math.abs(entity.reconRemaining.x) > entity._stats.currentBody.width * 1.5 ||
+													Math.abs(entity.reconRemaining.y) > entity._stats.currentBody.height * 1.5
+												) {
+													x = myUnit.serverStreamedPosition.x;
+													y = myUnit.serverStreamedPosition.y;
 
-												// x += xRemaining;
-												// y += yRemaining;
-												entity.reconRemaining = undefined;
-											} else {
-												entity.reconRemaining.x /= 5;
-												entity.reconRemaining.y /= 5;
+													// x += xRemaining;
+													// y += yRemaining;
+													entity.reconRemaining = undefined;
+												} else {
+													entity.reconRemaining.x /= 5;
+													entity.reconRemaining.y /= 5;
 
-												x += entity.reconRemaining.x;
-												y += entity.reconRemaining.y;
+													x += entity.reconRemaining.x;
+													y += entity.reconRemaining.y;
+												}
 											}
 										}
 
@@ -787,7 +823,6 @@ var PhysicsComponent = TaroEventingClass.extend({
 										x = entity.nextKeyFrame[1][0];
 										y = entity.nextKeyFrame[1][1];
 										angle = entity.nextKeyFrame[1][2];
-
 									}
 
 									if (
